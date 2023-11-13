@@ -1,13 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="097ca328-4d30-4ec1-8d3e-e5d4e9f601e1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/defold-illumination.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/materials/model.fp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/materials/model.material" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/materials/model.vp" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/illumination/assets/materials/matrix_utils.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/illumination/assets/materials/shadow/no_shadow_fp.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/illumination/assets/materials/shadow/shadow.fp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/illumination/assets/materials/shadow/shadow.material" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/illumination/assets/materials/shadow/shadow.vp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/illumination/assets/materials/shadow/shadow_fp.glsl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/illumination/assets/materials/shadow/shadow_vp.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/static_1_tiny_element_5.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/static_1_tiny_element_5.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.fp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.fp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.material" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.material" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.vp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.vp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/illumination.go" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,6 +36,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2Y7bmZiEY25hf0VO2Cm4XZVrxNM" />
   <component name="ProjectViewState">
@@ -26,8 +49,24 @@
   "keyToString": {
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "C:/Users/user/defold/defold-illumination"
+    "last_opened_file_path": "C:/Users/user/defold/defold-illumination/illumination/assets/materials"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\user\defold\defold-illumination\illumination\assets\materials" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
 </project>

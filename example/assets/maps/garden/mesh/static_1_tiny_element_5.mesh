@@ -1,4 +1,4 @@
-material: "/illumination/materials/model.material"
+material: "/illumination/assets/materials/model.material"
 vertices: "/example/assets/maps/garden/buffer/static_1_tiny_element_5.buffer"
 textures: "/example/assets/textures/tiny/element_5.png"
 textures: "/illumination/textures/data.png"

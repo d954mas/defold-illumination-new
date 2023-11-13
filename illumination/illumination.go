@@ -32,7 +32,7 @@ embedded_components {
   id: "data"
   type: "model"
   data: "mesh: \"/builtins/assets/meshes/quad.dae\"\n"
-  "material: \"/illumination/materials/model.material\"\n"
+  "material: \"/illumination/assets/materials/old/model.material\"\n"
   "textures: \"/illumination/textures/empty.png\"\n"
   "textures: \"/illumination/textures/data.png\"\n"
   "textures: \"/illumination/textures/empty.png\"\n"

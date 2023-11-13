@@ -1,0 +1,12 @@
+attribute highp vec4 position;
+uniform highp mat4 mtx_world;
+uniform highp mat4 mtx_view;
+uniform highp mat4 mtx_proj;
+
+
+void main(){
+    vec4 world_position = mtx_world * vec4(position.xyz, 1.0);
+    vec4 view_position = mtx_view * world_position;
+    gl_Position = mtx_proj * view_position;
+}
+

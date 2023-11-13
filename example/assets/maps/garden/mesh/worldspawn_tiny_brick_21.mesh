@@ -1,4 +1,4 @@
-material: "/illumination/materials/model.material"
+material: "/illumination/assets/materials/model.material"
 vertices: "/example/assets/maps/garden/buffer/worldspawn_tiny_brick_21.buffer"
 textures: "/example/assets/textures/tiny/brick_21.png"
 textures: "/illumination/textures/data.png"
