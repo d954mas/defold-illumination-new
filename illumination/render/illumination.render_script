@@ -49,6 +49,7 @@ function update(self)
 
 	render.set_viewport(0, 0, width, height)
 
+	ILLUMINATION:draw_begin()
 	-- scene
 	render.set_view(self.scene.view)
 	render.set_projection(self.scene.projection)
@@ -58,7 +59,10 @@ function update(self)
 	render.enable_state(render.STATE_DEPTH_TEST)
 	render.set_depth_mask(true)
 	render.draw(self.scene.predicate, self.draw_opts)
+	ILLUMINATION:draw_finish()
+
 	ILLUMINATION:draw_debug()
+
 
 	-- debug
 	render.disable_state(render.STATE_DEPTH_TEST)

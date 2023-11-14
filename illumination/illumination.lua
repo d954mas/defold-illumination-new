@@ -37,6 +37,18 @@ function Lights:draw_debug()
 	end
 end
 
+function Lights:draw_begin()
+	if (self.shadow.rt) then
+		render.enable_texture(1,self.shadow.rt, render.BUFFER_COLOR_BIT) -- created in light_and_shadows.init
+	end
+end
+
+function Lights:draw_finish()
+	if (self.shadow.rt) then
+		render.disable_texture(1)
+	end
+end
+
 function Lights:initialize()
 	self.constants = {}
 	self.ambient_color = vmath.vector4()
