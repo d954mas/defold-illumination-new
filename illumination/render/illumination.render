@@ -1,0 +1,5 @@
+script: "/illumination/render/illumination.render_script"
+materials {
+  name: "shadow"
+  material: "/illumination/assets/materials/shadow/shadow.material"
+}

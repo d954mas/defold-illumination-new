@@ -1,5 +1,5 @@
 name: "illumination-debug"
-tags: "model"
+tags: "illumination_debug"
 vertex_program: "/illumination/assets/materials/debug.vp"
 fragment_program: "/illumination/assets/materials/debug.fp"
 vertex_space: VERTEX_SPACE_LOCAL
@@ -13,4 +13,6 @@ samplers {
   wrap_v: WRAP_MODE_REPEAT
   filter_min: FILTER_MODE_MIN_LINEAR
   filter_mag: FILTER_MODE_MAG_LINEAR
+  max_anisotropy: 1.0
 }
+max_page_count: 0

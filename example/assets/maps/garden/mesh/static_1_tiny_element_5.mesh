@@ -1,10 +1,7 @@
 material: "/illumination/assets/materials/model.material"
 vertices: "/example/assets/maps/garden/buffer/static_1_tiny_element_5.buffer"
 textures: "/example/assets/textures/tiny/element_5.png"
-textures: "/illumination/textures/data.png"
-textures: "/example/assets/textures/maps/element_5_light.png"
-textures: "/illumination/textures/empty.png"
-textures: "/example/assets/textures/maps/element_5_normal.png"
+textures: "/illumination/textures/shadow.png"
 primitive_type: PRIMITIVE_TRIANGLES
 position_stream: "position"
 normal_stream: "normal"

@@ -1,10 +1,7 @@
 material: "/illumination/assets/materials/model.material"
 vertices: "/example/assets/maps/garden/buffer/worldspawn_tiny_grass_6.buffer"
 textures: "/example/assets/textures/tiny/grass_6.png"
-textures: "/illumination/textures/data.png"
-textures: "/illumination/textures/empty.png"
-textures: "/example/assets/textures/maps/grass_6_specular.png"
-textures: "/example/assets/textures/maps/grass_6_normal.png"
+textures: "/illumination/textures/shadow.png"
 primitive_type: PRIMITIVE_TRIANGLES
 position_stream: "position"
 normal_stream: "normal"

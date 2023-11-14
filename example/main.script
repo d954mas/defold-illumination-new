@@ -15,7 +15,7 @@ local function run_daycycle(self, daycycle, index)
   local duration = index and target.duration or 0
   local index = index or 1
 
-  go.animate(self.urls.illumination_go, hash 'euler', go.PLAYBACK_ONCE_FORWARD, target.sunlight_direction, go.EASING_LINEAR, duration, 0, function()
+--[[  go.animate(self.urls.illumination_go, hash 'euler', go.PLAYBACK_ONCE_FORWARD, target.sunlight_direction, go.EASING_LINEAR, duration, 0, function()
     run_daycycle(self, daycycle, index == #daycycle and 1 or (index + 1))
   end)
 
@@ -25,7 +25,7 @@ local function run_daycycle(self, daycycle, index)
   go.animate(self.urls.illumination, 'sunlight_brightness', go.PLAYBACK_ONCE_FORWARD, target.sunlight_brightness, go.EASING_LINEAR, duration)
   go.animate(self.urls.illumination, 'ambient_color', go.PLAYBACK_ONCE_FORWARD, target.ambient_color, go.EASING_LINEAR, duration)
   go.animate(self.urls.illumination, 'ambient_level', go.PLAYBACK_ONCE_FORWARD, target.ambient_level, go.EASING_LINEAR, duration)
-  go.animate(self.urls.illumination, 'fog_color', go.PLAYBACK_ONCE_FORWARD, target.fog_color, go.EASING_LINEAR, duration)
+  go.animate(self.urls.illumination, 'fog_color', go.PLAYBACK_ONCE_FORWARD, target.fog_color, go.EASING_LINEAR, duration)--]]
 end
 
 --
@@ -90,7 +90,7 @@ function init(self)
   go.animate(self.urls.fireplace, 'brightness', go.PLAYBACK_LOOP_PINGPONG, 0.8, go.EASING_INOUTQUAD, 1, 0)
   go.animate(self.urls.firefly, 'position', go.PLAYBACK_LOOP_PINGPONG, vmath.vector3(-6, 1, -4), go.EASING_INOUTQUAD, 25, 0)
 
-  illumination.set_debug(true)
+  illumination:set_debug(true)
 
   self.is_profiler_enabled = false
   self.is_gui_enabled = true

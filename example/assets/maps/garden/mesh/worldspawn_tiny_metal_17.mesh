@@ -1,10 +1,7 @@
 material: "/illumination/assets/materials/model.material"
 vertices: "/example/assets/maps/garden/buffer/worldspawn_tiny_metal_17.buffer"
 textures: "/example/assets/textures/tiny/metal_17.png"
-textures: "/illumination/textures/data.png"
-textures: "/illumination/textures/empty.png"
-textures: "/example/assets/textures/maps/metal_17_specular.png"
-textures: "/example/assets/textures/maps/metal_17_normal.png"
+textures: "/illumination/textures/shadow.png"
 primitive_type: PRIMITIVE_TRIANGLES
 position_stream: "position"
 normal_stream: "normal"

@@ -1,318 +1,289 @@
---[[
-  illumination.lua
-  github.com/astrochili/defold-illumination
-  Copyright (c) 2022 Roman Silin
-  MIT license. See LICENSE for details.
---]]
+local V4 = vmath.vector4()
+local VIEW_DIRECTION = vmath.vector3()
+local VIEW_RIGHT = vmath.vector3()
+local VIEW_UP = vmath.vector3()
 
-local utils = require 'illumination.utils'
+local V_UP = vmath.vector3(0, 1, 0)
 
-local illumination = { }
+local Lights = {}
 
---
--- Structure
+local function create_depth_buffer(w, h)
+	local color_params = {
+		-- format     = render.FORMAT_RGBA,
+		format = render.FORMAT_RGBA,
+		width = w,
+		height = h,
+		min_filter = render.FILTER_NEAREST,
+		mag_filter = render.FILTER_NEAREST,
+		u_wrap = render.WRAP_CLAMP_TO_EDGE,
+		v_wrap = render.WRAP_CLAMP_TO_EDGE }
 
---[[
-  -- Meta
-  1 - lights_count, fog_type, fog_min, fog_max
-  2 - ambient color: r, g, b, a
-  3 - sunlight color: r, g, b, a
-  4 - sunlight direction: x, y, z, specular
-  5 - fog color: r, g, b, a
+	local depth_params = {
+		format = render.FORMAT_DEPTH,
+		width = w,
+		height = h,
+		min_filter = render.FILTER_NEAREST,
+		mag_filter = render.FILTER_NEAREST,
+		u_wrap = render.WRAP_CLAMP_TO_EDGE,
+		v_wrap = render.WRAP_CLAMP_TO_EDGE }
 
-  -- Light
-  1 - r, g, b, a
-  2 - radius, smoothness, specular, x1
-  3 - x2, x3, y1, y2
-  4 - y3, z1, z2, z3
-  5 - cutoff, direction: x, y, z
---]]
-
---
--- Public Enum
-
-illumination.FOG_TYPE_NONE = 0
-illumination.FOG_TYPE_LINEAR = 1
-illumination.FOG_TYPE_RADIAL = 2
-
---
--- Local Properties
-
-local HASH_RGBA = hash 'rgba'
-local TEXTURE_DATA = hash 'texture1'
-
-local position_axis_bound = 2048 -- the same is in the fragment shader
-local data_texture_size = 32 -- the same is in the fragment shader
-
-local data_buffer_size = data_texture_size ^ 2
-local data_pixel_length = 4
-local data_meta_length = 20
-local data_light_length = 5 * data_pixel_length
-local data_buffer
-local data_stream
-
-local data_texture_path
-local data_texture_header = {
-  width = data_texture_size,
-  height = data_texture_size,
-  type = resource.TEXTURE_TYPE_2D,
-  format = resource.TEXTURE_FORMAT_RGBA,
-  num_mip_maps = 0
-}
-
-local light_index_by_url = { }
-local lights = { }
-
-local script_url
-local is_debug = false
-
---
--- Local Functions
-
-local function update_meta()
-  data_stream[1] = 1 + #lights
+	return render.render_target("shadow_buffer", { [render.BUFFER_COLOR_BIT] = color_params, [render.BUFFER_DEPTH_BIT] = depth_params })
 end
 
-local function update_environment(environment)
-  if environment.fog_type then
-    data_stream[2] = environment.fog_type
-  end
 
-  if environment.ambient_color then
-    local color = environment.ambient_color * 255
-
-    data_stream[5] = color.x
-    data_stream[6] = color.y
-    data_stream[7] = color.z
-    data_stream[8] = color.w
-  end
-
-  if environment.sunlight_color then
-    local color = environment.sunlight_color * 255
-
-    data_stream[9] = color.x
-    data_stream[10] = color.y
-    data_stream[11] = color.z
-    data_stream[12] = color.w
-  end
-
-  if environment.sunlight_direction then
-    local direction = environment.sunlight_direction
-
-    if direction ~= vmath.vector3(0) then
-      direction = vmath.normalize(direction)
-      direction = (direction + vmath.vector3(1)) * 255 / 2
-    end
-
-    data_stream[13] = direction.x
-    data_stream[14] = direction.y
-    data_stream[15] = direction.z
-  end
-
-  if environment.sunlight_specular then
-    data_stream[16] = environment.sunlight_specular * 255
-  end
-
-  if data_stream[2] ~= illumination.FOG_TYPE_NONE then
-    if environment.fog_min then
-      data_stream[3] = math.max(0, environment.fog_min)
-    end
-
-    if environment.fog_max then
-      data_stream[4] = math.max(environment.fog_min or data_stream[3], environment.fog_max)
-    end
-
-    if environment.fog_color then
-      msg.post('@render:', hash 'clear_color', { color = environment.fog_color } )
-
-      local fog_color = environment.fog_color * 255
-
-      data_stream[17] = fog_color.x
-      data_stream[18] = fog_color.y
-      data_stream[19] = fog_color.z
-      data_stream[20] = fog_color.w
-    end
-  end
-
-  illumination.should_post_update_texture = next(environment) ~= nil
+function Lights:draw_debug()
+	render.draw(self.debug_predicate)
 end
 
-local function update_light(light, index)
-  local byte = data_meta_length + 1 + data_light_length * (index - 1)
-  local color = light.color * 255
+function Lights:initialize()
+	self.constants = {}
+	self.ambient_color = vmath.vector4()
+	self.sunlight_color = vmath.vector4()
+	self.shadow_color = vmath.vector4()
+	self.fog = vmath.vector4()
+	self.fog_color = vmath.vector4()
 
-  if color.w == 0 then
-    data_stream[byte + 3] = 0
-    return
-  end
+	self.debug = false
 
-  data_stream[byte] = color.x
-  data_stream[byte + 1] = color.y
-  data_stream[byte + 2] = color.z
-  data_stream[byte + 3] = color.w
+	self.shadow = {
+		-- Size of shadow map. Select value from: 1024/2048/4096. More is better quality.
+		BUFFER_RESOLUTION = 2048,
+		-- Projection resolution of shadow map to the game world. Smaller size is better shadow quality,
+		-- but shadows will cast only around the screen center (or a point that camera looks at).
+		-- This value also depends on camera zoom. Feel free to adjust it.
+		PROJECTION_X1= -50,
+		PROJECTION_X2= 50,
+		PROJECTION_Y1 = -50,
+		PROJECTION_Y2 = 50,
+		NEAR = -50,
+		FAR = 150,
 
-  local radius = light.radius or 0
+		pred = nil,
+		light_projection = nil,
+		bias_matrix = vmath.matrix4(),
+		light_matrix = vmath.matrix4(),
+		constants = render.constant_buffer(),
+		sun_position = vmath.vector3(-10, 0, 0), --delta to root position
+		root_position = vmath.vector3(0), --player position
+		light_position = vmath.vector3(0), --root_position + sun_position
+		light_transform = vmath.matrix4(),
+		rt = nil,
+		draw_shadow_opts = { frustum = vmath.matrix4(), frustum_planes = render.FRUSTUM_PLANES_ALL  },
+		draw_transient = { transient = { render.BUFFER_DEPTH_BIT } },
+		draw_clear = { [render.BUFFER_COLOR_BIT] = vmath.vector4(1, 1, 1, 1), [render.BUFFER_DEPTH_BIT] = 1 }
 
-  if radius <= 0 then
-    data_stream[byte + 4] = 0
-    return
-  end
+	}
 
-  local smoothness =  math.max(0, math.min(light.smoothness or 1, 1))
-  local specular = math.max(0, math.min(light.specular or 1, 1))
-  local x1, x2, x3, y1, y2, y3, z1, z2, z3 = utils.vector3_to_9_uint8(light.position, position_axis_bound)
+	self.lights = {
+		all = {},
+		visible = {}
+	}
 
-  data_stream[byte + 4] = math.min(math.ceil(radius), 255)
-  data_stream[byte + 5] = smoothness * 255
-  data_stream[byte + 6] = specular * 255
-  data_stream[byte + 7] = x1
-
-  data_stream[byte + 8] = x2
-  data_stream[byte + 9] = x3
-  data_stream[byte + 10] = y1
-  data_stream[byte + 11] = y2
-
-  data_stream[byte + 12] = y3
-  data_stream[byte + 13] = z1
-  data_stream[byte + 14] = z2
-  data_stream[byte + 15] = z3
-
-  local cutoff = math.max(0, math.min(light.cutoff or 1, 1))
-  local direction = light.direction
-
-  if cutoff < 1 and direction and direction ~= vmath.vector3(0) then
-    direction = vmath.normalize(direction)
-    direction = (direction + vmath.vector3(1)) * 255 / 2
-  else
-    data_stream[byte + 16] = 255
-    return
-  end
-
-  data_stream[byte + 16] = (math.cos(cutoff * math.pi) + 1) * 255 / 2
-  data_stream[byte + 17] = direction.x
-  data_stream[byte + 18] = direction.y
-  data_stream[byte + 19] = direction.z
+	self.illumination = {
+		light_idx_by_entity = {},
+		lights_list = {}
+	}
 end
 
-local function add_light(light, url)
-  local index = #lights + 1
-  lights[index] = light
-  light_index_by_url[url] = index
-
-  update_light(light, index)
-  update_meta()
-
-  illumination.should_post_update_texture = true
-  msg.post(url, hash 'debug', { is_enabled = is_debug })
+function Lights:set_debug(debug)
+	self.debug = debug
 end
 
-local function replace_light(light, url)
-  local index = light_index_by_url[url]
-  lights[index] = light
+function Lights:create_light()
 
-  update_light(light, index)
-
-  illumination.should_post_update_texture = true
 end
 
-local function delete_light(url)
-  local removed_index = light_index_by_url[url]
-  table.remove(lights, removed_index)
-  light_index_by_url[url] = nil
-
-  for url, index in pairs(light_index_by_url) do
-    if index > removed_index then
-      light_index_by_url[url] = index - 1
-    end
-  end
-
-  -- Clear the light data
-  local starting_byte = data_meta_length + 1 + data_light_length * (removed_index - 1)
-  local ending_byte = starting_byte + data_light_length - 1
-  for byte = starting_byte, ending_byte do
-    data_stream[byte] = 0
-  end
-
-  -- Shift all the next pixels after index backward
-  for index = removed_index + 1, #lights + 1 do
-    starting_byte = data_meta_length + 1 + data_light_length * (index - 1)
-    ending_byte = starting_byte + data_light_length - 1
-
-    for byte = starting_byte, ending_byte do
-      data_stream[byte] = data_stream[byte + data_light_length]
-    end
-  end
-
-  update_meta()
-
-  illumination.should_post_update_texture = true
-  msg.post(url, hash 'debug', { is_enabled = false })
+function Lights:add_constants(constant)
+	table.insert(self.constants, constant)
+	constant.sunlight_color = self.ambient_color
+	constant.shadow_color = self.shadow_color
+	constant.ambient_color = self.ambient_color
+	constant.fog = self.fog
+	constant.fog_color = self.fog_color
 end
 
---
--- Public Functions
+---@param render Render
+function Lights:set_render(render_obj)
+	self.render = assert(render_obj)
 
-function illumination.set_debug(is_enabled)
-  is_debug = is_enabled
+	-- all objects that have to cast shadows
+	self.shadow.pred = render.predicate({ "shadow" })
 
-  for url, _ in pairs(light_index_by_url) do
-    msg.post(url, hash 'debug', { is_enabled = is_debug })
-  end
+	self.shadow.light_projection = vmath.matrix4_orthographic(self.shadow.PROJECTION_X1, self.shadow.PROJECTION_X2,
+			self.shadow.PROJECTION_Y1, self.shadow.PROJECTION_Y2, self.shadow.NEAR, self.shadow.FAR)
 
-  if script_url then
-    msg.post(script_url, hash 'debug', { is_enabled = is_debug })
-  end
+
+	self.shadow.bias_matrix.c0 = vmath.vector4(0.5, 0.0, 0.0, 0.0)
+	self.shadow.bias_matrix.c1 = vmath.vector4(0.0, 0.5, 0.0, 0.0)
+	self.shadow.bias_matrix.c2 = vmath.vector4(0.0, 0.0, 0.5, 0.0)
+	self.shadow.bias_matrix.c3 = vmath.vector4(0.5, 0.5, 0.5, 1.0)
+
+
+	self.debug_predicate = render.predicate({"illumination_debug"})
+
+
+	self:reset()
 end
 
-function illumination.is_debug()
-  return is_debug
+
+function Lights:reset()
+	if (not self.render) then return end
+	self:set_sunlight_color(1, 1, 1)
+	self:set_sunlight_color_intensity(0.4)
+	self:set_shadow_color(0.5, 0.5, 0.5)
+	self:set_shadow_color_intensity(1)
+
+	self:set_ambient_color(1, 1, 1)
+	self:set_ambient_color_intensity(0.6)
+
+	self:set_sun_position(-4, 10, 0)
 end
 
-function illumination.set_environment(environment)
-  update_environment(environment)
+function Lights:set_ambient_color(r, g, b)
+	self.ambient_color.x, self.ambient_color.y, self.ambient_color.z = r, g, b
+	for _, constant in ipairs(self.constants) do
+		constant.ambient_color = self.ambient_color
+	end
 end
 
-function illumination.set_light(light, url)
-  assert(url, 'Can\'t set a light without an url')
-
-  local light_is_on = light and light.color.w > 0 and light.radius > 0 and light.cutoff > 0
-
-  if light_index_by_url[url] then
-    if light_is_on then
-      replace_light(light, url)
-    else
-      delete_light(url)
-    end
-  elseif light_is_on then
-    add_light(light, url)
-  end
+function Lights:set_ambient_color_intensity(intensity)
+	self.ambient_color.w = intensity
+	for _, constant in ipairs(self.constants) do
+		constant.ambient_color = self.ambient_color
+	end
 end
 
---
--- Internal functions
-
-function illumination.init(data_url, sender)
-  local buffer_declaration = {
-    name = HASH_RGBA,
-    type = buffer.VALUE_TYPE_UINT8,
-    count = data_pixel_length
-  }
-
-  script_url = sender
-  msg.post(script_url, hash 'debug', { is_enabled = is_debug })
-
-  data_buffer = buffer.create(data_buffer_size, { buffer_declaration })
-  data_stream = buffer.get_stream(data_buffer, HASH_RGBA)
-
-  update_meta()
-
-  data_texture_path = go.get(data_url, TEXTURE_DATA)
-  resource.set_texture(data_texture_path, data_texture_header, data_buffer)
+function Lights:set_sunlight_color(r, g, b)
+	self.sunlight_color.x, self.sunlight_color.y, self.sunlight_color.z = r, g, b
+	for _, constant in ipairs(self.constants) do
+		constant.sunlight_color = self.sunlight_color
+	end
 end
 
-function illumination.post_update_data_texture()
-  resource.set_texture(data_texture_path, data_texture_header, data_buffer)
-  illumination.should_post_update_texture = false
+function Lights:set_sunlight_color_intensity(intensity)
+	self.sunlight_color.w = intensity
+	for _, constant in ipairs(self.constants) do
+		constant.sunlight_color = self.sunlight_color
+	end
 end
 
-return illumination
+function Lights:set_shadow_color(r, g, b)
+	self.shadow_color.x, self.shadow_color.y, self.shadow_color.z = 1 - r, 1 - g, 1 - b
+	for _, constant in ipairs(self.constants) do
+		constant.shadow_color = self.shadow_color
+	end
+end
+
+function Lights:set_shadow_color_intensity(intensity)
+	self.shadow_color.w = intensity
+	for _, constant in ipairs(self.constants) do
+		constant.shadow_color = self.shadow_color
+	end
+end
+
+function Lights:set_fog(min, max, intensity)
+	self.fog.x, self.fog.y, self.fog.w = min, max, intensity
+	for _, constant in ipairs(self.constants) do
+		constant.fog = self.fog
+	end
+end
+
+function Lights:set_fog_color(r, g, b)
+	self.fog_color.x, self.fog_color.y, self.fog_color.z = r, g, b
+	for _, constant in ipairs(self.constants) do
+		constant.fog_color = self.fog_color
+	end
+end
+
+
+function Lights:set_sun_position(x, y, z)
+	self.shadow.sun_position.x = x
+	self.shadow.sun_position.y = y
+	self.shadow.sun_position.z = z
+
+	xmath.add(self.shadow.light_position,self.shadow.root_position,self.shadow.sun_position)
+
+	V4.x = self.shadow.sun_position.x
+	V4.y = self.shadow.sun_position.y
+	V4.z = self.shadow.sun_position.z
+	V4.w = 0
+	for _, constant in ipairs(self.constants) do
+		constant.sun_position = V4
+	end
+end
+
+function Lights:set_camera(position)
+	local dx = math.abs(self.shadow.root_position.x- position.x)
+	local dy = math.abs(self.shadow.root_position.y- position.y)
+	local dz = math.abs(self.shadow.root_position.z- position.z)
+
+	local current_projection = self.shadow.light_projection
+
+
+	--fixed some shadow jittering when move
+	if(dx<1 and dy<1 and dz<1 and self.current_projection == current_projection)then return end
+
+	self.current_projection = current_projection
+
+
+	self.shadow.root_position.x = position.x
+	self.shadow.root_position.y = position.y
+	self.shadow.root_position.z = position.z
+
+	xmath.add(self.shadow.light_position, self.shadow.root_position, self.shadow.sun_position)
+
+	xmath.sub(VIEW_DIRECTION, self.shadow.root_position, self.shadow.light_position)
+	xmath.normalize(VIEW_DIRECTION, VIEW_DIRECTION)
+	xmath.cross(VIEW_RIGHT, VIEW_DIRECTION, V_UP)
+	xmath.normalize(VIEW_RIGHT, VIEW_RIGHT)
+	xmath.cross(VIEW_UP, VIEW_RIGHT, VIEW_DIRECTION)
+	xmath.normalize(VIEW_UP, VIEW_UP)
+
+	xmath.matrix_look_at(self.shadow.light_transform, self.shadow.light_position, self.shadow.root_position, VIEW_UP)
+	local light_projection = COMMON.RENDER.screen_size.aspect>=1 and self.shadow.light_projection or self.shadow.light_projection_v
+	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.bias_matrix, light_projection)
+	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, self.shadow.light_transform)
+	--local mtx_light = self.shadow.bias_matrix * self.shadow.light_projection * self.shadow.light_transform
+	for _, constant in ipairs(self.constants) do
+		constant.mtx_light = self.shadow.light_matrix
+	end
+end
+
+function Lights:render_shadows()
+	local draw_shadows = self.world.storage.options:draw_shadows_get()
+	if (draw_shadows and not self.shadow.rt) then
+		self.shadow.rt = create_depth_buffer(self.shadow.BUFFER_RESOLUTION, self.shadow.BUFFER_RESOLUTION)
+	end
+	if (not draw_shadows and self.shadow.rt) then
+		render.delete_render_target(self.shadow.rt)
+		self.shadow.rt = nil
+	end
+	if (not draw_shadows) then return end
+
+	local light_projection = self.shadow.light_projection
+	render.set_projection(light_projection)
+	render.set_view(self.shadow.light_transform)
+	render.set_viewport(0, 0, self.shadow.BUFFER_RESOLUTION, self.shadow.BUFFER_RESOLUTION)
+
+	render.set_depth_mask(true)
+	render.set_depth_func(render.COMPARE_FUNC_LEQUAL)
+	render.enable_state(render.STATE_DEPTH_TEST)
+	render.enable_state(render.STATE_CULL_FACE)
+	render.disable_state(render.STATE_BLEND)
+	render.disable_state(render.STATE_STENCIL_TEST)
+
+	render.set_render_target(self.shadow.rt, self.shadow.draw_transient)
+	render.clear(self.shadow.draw_clear)
+	xmath.matrix_mul(self.shadow.draw_shadow_opts.frustum, light_projection, self.shadow.light_transform)
+	render.enable_material("shadow")
+	render.draw(self.shadow.pred, self.shadow.draw_shadow_opts)
+	render.disable_material()
+	render.set_render_target(render.RENDER_TARGET_DEFAULT)
+end
+
+
+function Lights:set_light()
+
+end
+
+return Lights

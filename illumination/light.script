@@ -1,15 +1,7 @@
---[[
-  light.script
-  github.com/astrochili/defold-illumination
-  Copyright (c) 2022 Roman Silin
-  MIT license. See LICENSE for details.
---]]
-
 local illumination = require 'illumination.illumination'
 
 --
 -- Properties
-
 go.property('color', vmath.vector3(1.0))
 go.property('brightness', 1.0)
 go.property('radius', 5.0)
