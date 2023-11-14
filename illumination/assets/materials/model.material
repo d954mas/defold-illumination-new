@@ -1,7 +1,7 @@
 name: "model"
 tags: "model"
 tags: "shadow"
-vertex_program: "/builtins/materials/model.vp"
+vertex_program: "/illumination/assets/materials/model.vp"
 fragment_program: "/illumination/assets/materials/model.fp"
 vertex_space: VERTEX_SPACE_LOCAL
 vertex_constants {
