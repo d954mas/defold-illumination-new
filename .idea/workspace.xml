@@ -5,34 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7a06ae90-40d6-4dd9-ab2d-5d282f282782" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/defold_api.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xmath/ext.manifest" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/xmath/src/xMath.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/defold-illumination.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/defold-illumination.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/static_1_tiny_element_5.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/static_1_tiny_element_5.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/main.collection" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.collection" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/main.script" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.script" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/render/example.render" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/render/example.render_script" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/game.project" beforeDir="false" afterPath="$PROJECT_DIR$/game.project" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/debug.material" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/debug.material" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/illumination.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/illumination.script" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/light.script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/light.script" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/textures/data.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/textures/empty.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/textures/white.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/render/illumination.render_script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/render/illumination.render_script" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,6 +59,7 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="VcsManagerConfiguration">
     <MESSAGE value="remove .idea" />
-    <option name="LAST_COMMIT_MESSAGE" value="remove .idea" />
+    <MESSAGE value="wip" />
+    <option name="LAST_COMMIT_MESSAGE" value="wip" />
   </component>
 </project>

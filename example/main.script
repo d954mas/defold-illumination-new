@@ -109,6 +109,6 @@ function on_input(self, action_id, action)
     self.is_profiler_enabled = not self.is_profiler_enabled
     profiler.enable_ui(self.is_profiler_enabled)
   elseif action_id == hash 'key_l' and action.released then
-    illumination.set_debug(not illumination.is_debug())
+    illumination:set_debug(not illumination.debug)
   end
 end

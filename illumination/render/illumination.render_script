@@ -1,8 +1,6 @@
 local ILLUMINATION = require "illumination.illumination"
 
 function init(self)
-	self.clear_color = vmath.vector4()
-
 	self.scene = {
 		predicate = render.predicate({ 'model' }),
 		view = vmath.matrix4(),
@@ -18,11 +16,7 @@ function init(self)
 		predicate = render.predicate({ 'text' })
 	}
 
-	self.clear_options = {
-		[render.BUFFER_COLOR_BIT] = self.clear_color,
-		[render.BUFFER_DEPTH_BIT] = 1,
-		[render.BUFFER_STENCIL_BIT] = 0
-	}
+
 
 	self.draw_opts = {
 		constants = render.constant_buffer(),
@@ -33,6 +27,13 @@ function init(self)
 	ILLUMINATION:initialize()
 	ILLUMINATION:set_render(self)
 	ILLUMINATION:add_constants(self.draw_opts.constants)
+
+	self.clear_options = {
+		[render.BUFFER_COLOR_BIT] = ILLUMINATION.fog_color,
+		[render.BUFFER_DEPTH_BIT] = 1,
+		[render.BUFFER_STENCIL_BIT] = 0
+	}
+
 end
 
 function update(self)
@@ -40,8 +41,12 @@ function update(self)
 	local height = render.get_window_height()
 
 
-
+	render.set_viewport(0, 0, width, height)
 	render.clear(self.clear_options)
+
+
+	ILLUMINATION:render_shadows()
+
 	render.set_viewport(0, 0, width, height)
 
 	-- scene

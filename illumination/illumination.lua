@@ -32,7 +32,9 @@ end
 
 
 function Lights:draw_debug()
-	render.draw(self.debug_predicate)
+	if self.debug then
+		render.draw(self.debug_predicate)
+	end
 end
 
 function Lights:initialize()
@@ -136,7 +138,8 @@ function Lights:reset()
 	self:set_ambient_color(1, 1, 1)
 	self:set_ambient_color_intensity(0.6)
 
-	self:set_sun_position(-4, 10, 0)
+	self:set_sun_position(-5, 10, 0)
+	self:set_camera(0,0,0)
 end
 
 function Lights:set_ambient_color(r, g, b)
@@ -212,10 +215,10 @@ function Lights:set_sun_position(x, y, z)
 	end
 end
 
-function Lights:set_camera(position)
-	local dx = math.abs(self.shadow.root_position.x- position.x)
-	local dy = math.abs(self.shadow.root_position.y- position.y)
-	local dz = math.abs(self.shadow.root_position.z- position.z)
+function Lights:set_camera(x,y,z)
+	local dx = math.abs(self.shadow.root_position.x- x)
+	local dy = math.abs(self.shadow.root_position.y- y)
+	local dz = math.abs(self.shadow.root_position.z- z)
 
 	local current_projection = self.shadow.light_projection
 
@@ -226,9 +229,9 @@ function Lights:set_camera(position)
 	self.current_projection = current_projection
 
 
-	self.shadow.root_position.x = position.x
-	self.shadow.root_position.y = position.y
-	self.shadow.root_position.z = position.z
+	self.shadow.root_position.x = x
+	self.shadow.root_position.y = y
+	self.shadow.root_position.z = z
 
 	xmath.add(self.shadow.light_position, self.shadow.root_position, self.shadow.sun_position)
 
@@ -240,7 +243,7 @@ function Lights:set_camera(position)
 	xmath.normalize(VIEW_UP, VIEW_UP)
 
 	xmath.matrix_look_at(self.shadow.light_transform, self.shadow.light_position, self.shadow.root_position, VIEW_UP)
-	local light_projection = COMMON.RENDER.screen_size.aspect>=1 and self.shadow.light_projection or self.shadow.light_projection_v
+	local light_projection = self.shadow.light_projection 
 	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.bias_matrix, light_projection)
 	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, self.shadow.light_transform)
 	--local mtx_light = self.shadow.bias_matrix * self.shadow.light_projection * self.shadow.light_transform
@@ -250,7 +253,7 @@ function Lights:set_camera(position)
 end
 
 function Lights:render_shadows()
-	local draw_shadows = self.world.storage.options:draw_shadows_get()
+	local draw_shadows = true
 	if (draw_shadows and not self.shadow.rt) then
 		self.shadow.rt = create_depth_buffer(self.shadow.BUFFER_RESOLUTION, self.shadow.BUFFER_RESOLUTION)
 	end
