@@ -80,7 +80,7 @@ samplers {
   name: "DIFFUSE_TEXTURE"
   wrap_u: WRAP_MODE_REPEAT
   wrap_v: WRAP_MODE_REPEAT
-  filter_min: FILTER_MODE_MIN_NEAREST
+  filter_min: FILTER_MODE_MIN_LINEAR_MIPMAP_LINEAR
   filter_mag: FILTER_MODE_MAG_NEAREST
   max_anisotropy: 1.0
 }

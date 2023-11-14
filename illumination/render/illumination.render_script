@@ -41,11 +41,13 @@ function update(self)
 	local height = render.get_window_height()
 
 
+	ILLUMINATION:render_shadows()
+
 	render.set_viewport(0, 0, width, height)
 	render.clear(self.clear_options)
 
 
-	ILLUMINATION:render_shadows()
+
 
 	render.set_viewport(0, 0, width, height)
 
@@ -83,5 +85,8 @@ function on_message(self, message_id, message)
 	elseif message_id == hash 'set_view_projection' then
 		self.scene.view = message.view
 		self.scene.projection = message.projection
+
+		local x,y,z = message.view.m03,message.view.m13,message.view.m23
+		ILLUMINATION:set_camera(x,y,z)
 	end
 end
