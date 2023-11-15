@@ -30,16 +30,24 @@ local function create_depth_buffer(w, h)
 	return render.render_target("shadow_buffer", { [render.BUFFER_COLOR_BIT] = color_params, [render.BUFFER_DEPTH_BIT] = depth_params })
 end
 
-
 function Lights:draw_debug()
 	if self.debug then
 		render.draw(self.debug_predicate)
 	end
 end
 
+function Lights:draw_shadow_debug()
+	if self.shadow.rt then
+		render.enable_texture(0, self.shadow.rt, render.BUFFER_COLOR_BIT)
+		render.draw(self.debug_shadow_predicate)
+		render.disable_texture(0)
+	end
+
+end
+
 function Lights:draw_begin()
 	if (self.shadow.rt) then
-		render.enable_texture(1,self.shadow.rt, render.BUFFER_COLOR_BIT) -- created in light_and_shadows.init
+		render.enable_texture(1, self.shadow.rt, render.BUFFER_COLOR_BIT) -- created in light_and_shadows.init
 	end
 end
 
@@ -65,10 +73,10 @@ function Lights:initialize()
 		-- Projection resolution of shadow map to the game world. Smaller size is better shadow quality,
 		-- but shadows will cast only around the screen center (or a point that camera looks at).
 		-- This value also depends on camera zoom. Feel free to adjust it.
-		PROJECTION_X1= -50,
-		PROJECTION_X2= 50,
-		PROJECTION_Y1 = -50,
-		PROJECTION_Y2 = 50,
+		PROJECTION_X1 = -15,
+		PROJECTION_X2 = 15,
+		PROJECTION_Y1 = -15,
+		PROJECTION_Y2 = 15,
 		NEAR = -50,
 		FAR = 150,
 
@@ -82,7 +90,7 @@ function Lights:initialize()
 		light_position = vmath.vector3(0), --root_position + sun_position
 		light_transform = vmath.matrix4(),
 		rt = nil,
-		draw_shadow_opts = { frustum = vmath.matrix4(), frustum_planes = render.FRUSTUM_PLANES_ALL  },
+		draw_shadow_opts = { frustum = vmath.matrix4(), frustum_planes = render.FRUSTUM_PLANES_ALL },
 		draw_transient = { transient = { render.BUFFER_DEPTH_BIT } },
 		draw_clear = { [render.BUFFER_COLOR_BIT] = vmath.vector4(1, 1, 1, 1), [render.BUFFER_DEPTH_BIT] = 1 }
 
@@ -126,22 +134,21 @@ function Lights:set_render(render_obj)
 	self.shadow.light_projection = vmath.matrix4_orthographic(self.shadow.PROJECTION_X1, self.shadow.PROJECTION_X2,
 			self.shadow.PROJECTION_Y1, self.shadow.PROJECTION_Y2, self.shadow.NEAR, self.shadow.FAR)
 
-
 	self.shadow.bias_matrix.c0 = vmath.vector4(0.5, 0.0, 0.0, 0.0)
 	self.shadow.bias_matrix.c1 = vmath.vector4(0.0, 0.5, 0.0, 0.0)
 	self.shadow.bias_matrix.c2 = vmath.vector4(0.0, 0.0, 0.5, 0.0)
 	self.shadow.bias_matrix.c3 = vmath.vector4(0.5, 0.5, 0.5, 1.0)
 
-
-	self.debug_predicate = render.predicate({"illumination_debug"})
-
+	self.debug_predicate = render.predicate({ "illumination_debug" })
+	self.debug_shadow_predicate = render.predicate({ "shadow_debug" })
 
 	self:reset()
 end
 
-
 function Lights:reset()
-	if (not self.render) then return end
+	if (not self.render) then
+		return
+	end
 	self:set_sunlight_color(1, 1, 1)
 	self:set_sunlight_color_intensity(0.4)
 	self:set_shadow_color(0.5, 0.5, 0.5)
@@ -151,7 +158,7 @@ function Lights:reset()
 	self:set_ambient_color_intensity(0.6)
 
 	self:set_sun_position(-5, 10, 0)
-	self:set_camera(0,0,0)
+	self:set_camera(0, 0, 0)
 end
 
 function Lights:set_ambient_color(r, g, b)
@@ -210,13 +217,12 @@ function Lights:set_fog_color(r, g, b)
 	end
 end
 
-
 function Lights:set_sun_position(x, y, z)
 	self.shadow.sun_position.x = x
 	self.shadow.sun_position.y = y
 	self.shadow.sun_position.z = z
 
-	xmath.add(self.shadow.light_position,self.shadow.root_position,self.shadow.sun_position)
+	xmath.add(self.shadow.light_position, self.shadow.root_position, self.shadow.sun_position)
 
 	V4.x = self.shadow.sun_position.x
 	V4.y = self.shadow.sun_position.y
@@ -227,19 +233,20 @@ function Lights:set_sun_position(x, y, z)
 	end
 end
 
-function Lights:set_camera(x,y,z)
-	local dx = math.abs(self.shadow.root_position.x- x)
-	local dy = math.abs(self.shadow.root_position.y- y)
-	local dz = math.abs(self.shadow.root_position.z- z)
+function Lights:set_camera(x, y, z)
+	local dx = math.abs(self.shadow.root_position.x - x)
+	local dy = math.abs(self.shadow.root_position.y - y)
+	local dz = math.abs(self.shadow.root_position.z - z)
 
 	local current_projection = self.shadow.light_projection
 
 
 	--fixed some shadow jittering when move
-	if(dx<1 and dy<1 and dz<1 and self.current_projection == current_projection)then return end
+	if (dx < 1 and dy < 1 and dz < 1 and self.current_projection == current_projection) then
+		return
+	end
 
 	self.current_projection = current_projection
-
 
 	self.shadow.root_position.x = x
 	self.shadow.root_position.y = y
@@ -255,7 +262,7 @@ function Lights:set_camera(x,y,z)
 	xmath.normalize(VIEW_UP, VIEW_UP)
 
 	xmath.matrix_look_at(self.shadow.light_transform, self.shadow.light_position, self.shadow.root_position, VIEW_UP)
-	local light_projection = self.shadow.light_projection 
+	local light_projection = self.shadow.light_projection
 	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.bias_matrix, light_projection)
 	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, self.shadow.light_transform)
 	--local mtx_light = self.shadow.bias_matrix * self.shadow.light_projection * self.shadow.light_transform
@@ -273,7 +280,8 @@ function Lights:render_shadows()
 		render.delete_render_target(self.shadow.rt)
 		self.shadow.rt = nil
 	end
-	if (not draw_shadows) then return end
+	if (not draw_shadows) then
+		return end
 
 	local light_projection = self.shadow.light_projection
 	render.set_projection(light_projection)
@@ -295,7 +303,6 @@ function Lights:render_shadows()
 	render.disable_material()
 	render.set_render_target(render.RENDER_TARGET_DEFAULT)
 end
-
 
 function Lights:set_light()
 

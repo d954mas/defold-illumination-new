@@ -77,6 +77,8 @@ function update(self)
 	render.enable_state(render.STATE_STENCIL_TEST)
 	render.draw(self.gui.predicate)
 	render.draw(self.text.predicate)
+
+	ILLUMINATION:draw_shadow_debug()
 end
 
 function on_message(self, message_id, message)
