@@ -58,7 +58,7 @@ float shadow_calculation(vec4 depth_data){
 
 // SUN! DIRECT LIGHT
 vec3 direct_light(vec3 light_color, vec3 light_position, vec3 position, vec3 vnormal, vec3 shadow_color){
-    vec3 dist = light_position;
+    vec3 dist = vec3(-5,10,0);
     vec3 direction = normalize(dist);
     float n = max(dot(vnormal, direction), 0.0);
     vec3 diffuse = (light_color - shadow_color) * n;

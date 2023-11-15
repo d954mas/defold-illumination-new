@@ -59,6 +59,7 @@ end
 
 function Lights:initialize()
 	self.constants = {}
+	self.shadow_params = vmath.vector4()
 	self.ambient_color = vmath.vector4()
 	self.sunlight_color = vmath.vector4()
 	self.shadow_color = vmath.vector4()
@@ -93,8 +94,10 @@ function Lights:initialize()
 		draw_shadow_opts = { frustum = vmath.matrix4(), frustum_planes = render.FRUSTUM_PLANES_ALL },
 		draw_transient = { transient = { render.BUFFER_DEPTH_BIT } },
 		draw_clear = { [render.BUFFER_COLOR_BIT] = vmath.vector4(1, 1, 1, 1), [render.BUFFER_DEPTH_BIT] = 1 }
-
 	}
+
+	self.shadow_params.x = self.shadow.BUFFER_RESOLUTION
+	self.shadow_params.y = 0.0008
 
 	self.lights = {
 		all = {},
@@ -117,11 +120,20 @@ end
 
 function Lights:add_constants(constant)
 	table.insert(self.constants, constant)
-	constant.sunlight_color = self.ambient_color
+	constant.sunlight_color = self.sunlight_color
 	constant.shadow_color = self.shadow_color
 	constant.ambient_color = self.ambient_color
+
 	constant.fog = self.fog
 	constant.fog_color = self.fog_color
+	constant.shadow_params = self.shadow_params
+
+	V4.x = self.shadow.sun_position.x
+	V4.y = self.shadow.sun_position.y
+	V4.z = self.shadow.sun_position.z
+	V4.w = 0
+	print(V4)
+	constant.sun_position = V4
 end
 
 ---@param render Render
@@ -149,6 +161,7 @@ function Lights:reset()
 	if (not self.render) then
 		return
 	end
+
 	self:set_sunlight_color(1, 1, 1)
 	self:set_sunlight_color_intensity(0.4)
 	self:set_shadow_color(0.5, 0.5, 0.5)
@@ -157,7 +170,7 @@ function Lights:reset()
 	self:set_ambient_color(1, 1, 1)
 	self:set_ambient_color_intensity(0.6)
 
-	self:set_sun_position(-5, 10, 0)
+	self:set_sun_position(-4, 10, -4)
 	self:set_camera(0, 0, 0)
 end
 
@@ -268,6 +281,7 @@ function Lights:set_camera(x, y, z)
 	--local mtx_light = self.shadow.bias_matrix * self.shadow.light_projection * self.shadow.light_transform
 	for _, constant in ipairs(self.constants) do
 		constant.mtx_light = self.shadow.light_matrix
+		print(constant.sun_position)
 	end
 end
 
