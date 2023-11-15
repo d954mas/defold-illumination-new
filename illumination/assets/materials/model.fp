@@ -34,7 +34,7 @@ void main() {
 
     vec3 diff_light = vec3(0);
     diff_light += max(direct_light(sunlight_color.rgb, sun_position.xyz, var_world_position.xyz, var_world_normal, shadow_color)*sunlight_color.w,0.0);
-   // diff_light += vec3(illuminance_color.xyz);
+    diff_light += vec3(illuminance_color.xyz);
 
     color.rgb = color.rgb * (min(diff_light, 1.0));
 
