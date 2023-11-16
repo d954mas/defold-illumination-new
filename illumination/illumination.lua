@@ -1,3 +1,5 @@
+local CLASS = require "illumination.middleclass"
+
 local V4 = vmath.vector4()
 local VIEW_DIRECTION = vmath.vector3()
 local VIEW_RIGHT = vmath.vector3()
@@ -5,7 +7,37 @@ local VIEW_UP = vmath.vector3()
 
 local V_UP = vmath.vector3(0, 1, 0)
 
-local Lights = {}
+local Light = CLASS("Light")
+local LIGHT_IDX = 0
+
+---@param lights LightsData
+function Light:initialize(lights)
+	self.lights = assert(lights)
+
+	LIGHT_IDX = LIGHT_IDX + 1;
+	self.light_idx = LIGHT_IDX
+
+	self.enabled = false
+
+	self.direction = vmath.vector3(0, 0, -1)
+	self.position = vmath.vector3(0, 0, 0)
+	self.color = vmath.vector4(1) --r,g,b brightness
+
+	self.radius = 5
+	self.smoothness = 1
+	self.specular = 0.5
+	self.cutoff = 1
+end
+
+function Light:set_enabled(enabled)
+	if self.enabled ~= enabled then
+		self.enabled = enabled
+		self.lights.need_update_lists = true
+	end
+end
+
+---@class Lights
+local Lights = CLASS("lights")
 
 local function create_depth_buffer(w, h)
 	local color_params = {
@@ -99,14 +131,16 @@ function Lights:initialize()
 	self.shadow_params.x = self.shadow.BUFFER_RESOLUTION
 	self.shadow_params.y = 0.0008
 
+	---@class LightsData
 	self.lights = {
 		all = {},
-		visible = {}
-	}
 
-	self.illumination = {
-		light_idx_by_entity = {},
-		lights_list = {}
+		--if true some lights changed enable/disable
+		need_update_lists = false,
+
+		enabled_list = {},
+
+		active_list = {},
 	}
 end
 
@@ -114,7 +148,18 @@ function Lights:set_debug(debug)
 	self.debug = debug
 end
 
-function Lights:create_light()
+
+function Lights:update_lights(dt)
+	if self.lights.need_update_lists then
+		self.lights.enabled_list = {}
+		for i = 1, #self.lights.all do
+			local l = self.lights.all[i]
+			if l.enabled then
+				table.insert(self.lights.enabled_list, l)
+			end
+		end
+		print("Lights. Enabled:" .. #self.lights.enabled_list .. " Disabled:" .. #self.lights.all - #self.lights.enabled_list)
+	end
 
 end
 
@@ -132,7 +177,6 @@ function Lights:add_constants(constant)
 	V4.y = self.shadow.sun_position.y
 	V4.z = self.shadow.sun_position.z
 	V4.w = 0
-	print(V4)
 	constant.sun_position = V4
 end
 
@@ -158,10 +202,7 @@ function Lights:set_render(render_obj)
 end
 
 function Lights:reset()
-	if (not self.render) then
-		return
-	end
-
+	if (not self.render) then return end
 	self:set_sunlight_color(1, 1, 1)
 	self:set_sunlight_color_intensity(0.4)
 	self:set_shadow_color(0.5, 0.5, 0.5)
@@ -170,8 +211,7 @@ function Lights:reset()
 	self:set_ambient_color(1, 1, 1)
 	self:set_ambient_color_intensity(0.6)
 
-	self:set_sun_position(-4, 10, -4)
-	self:set_camera(0, 0, 0)
+	self:set_sun_position(-4, 10, 0)
 end
 
 function Lights:set_ambient_color(r, g, b)
@@ -281,7 +321,6 @@ function Lights:set_camera(x, y, z)
 	--local mtx_light = self.shadow.bias_matrix * self.shadow.light_projection * self.shadow.light_transform
 	for _, constant in ipairs(self.constants) do
 		constant.mtx_light = self.shadow.light_matrix
-		print(constant.sun_position)
 	end
 end
 
@@ -318,8 +357,9 @@ function Lights:render_shadows()
 	render.set_render_target(render.RENDER_TARGET_DEFAULT)
 end
 
-function Lights:set_light()
-
+function Lights:create_light()
+	local l = Light(self)
+	table.insert(self.lights.all, l)
 end
 
 return Lights

@@ -42,7 +42,7 @@ function update(self, dt)
   end
 
   if is_updated then
-    illumination.set_light(light, self.url)
+    --illumination.set_light(light, self.url)
     self.light = light
   end
 end
@@ -54,5 +54,5 @@ function on_message(self, message_id, message, sender)
 end
 
 function final(self)
-  illumination.set_light(nil, self.url)
+ -- illumination.set_light(nil, self.url)
 end
