@@ -70,7 +70,6 @@ local function create_lights_data_texture()
 	}
 
 	local tbuffer = buffer.create(tparams.width * tparams.height, { { name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4 } })
-	local stream = buffer.get_stream(tbuffer, "rgba")
 
 	local status, error = pcall(resource.create_texture, path, tparams, tbuffer)
 	if status then
