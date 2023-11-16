@@ -24,7 +24,6 @@ function init(self)
 		frustum_planes = render.FRUSTUM_PLANES_ALL
 	}
 
-	ILLUMINATION:initialize()
 	ILLUMINATION:set_render(self)
 	ILLUMINATION:add_constants(self.draw_opts.constants)
 
@@ -79,6 +78,7 @@ function update(self)
 	render.draw(self.text.predicate)
 
 	ILLUMINATION:draw_shadow_debug()
+	ILLUMINATION:draw_data_lights_debug()
 end
 
 function on_message(self, message_id, message)

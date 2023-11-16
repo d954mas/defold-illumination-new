@@ -1,0 +1,9 @@
+local ILLUMINATION = require "illumination.illumination"
+
+function init(self)
+	local data_url = msg.url("#data")
+	msg.post(data_url, hash("disable"))
+
+	ILLUMINATION:init_lights_data(data_url)
+end
+

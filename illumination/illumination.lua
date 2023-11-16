@@ -36,9 +36,6 @@ function Light:set_enabled(enabled)
 	end
 end
 
----@class Lights
-local Lights = CLASS("lights")
-
 local function create_depth_buffer(w, h)
 	local color_params = {
 		-- format     = render.FORMAT_RGBA,
@@ -62,32 +59,34 @@ local function create_depth_buffer(w, h)
 	return render.render_target("shadow_buffer", { [render.BUFFER_COLOR_BIT] = color_params, [render.BUFFER_DEPTH_BIT] = depth_params })
 end
 
-function Lights:draw_debug()
-	if self.debug then
-		render.draw(self.debug_predicate)
+local function create_lights_data_texture()
+	local path = "/__lights_data.texturec"
+	local tparams = {
+		width = 1024,
+		height = 1024,
+		type = resource.TEXTURE_TYPE_2D,
+		format = resource.TEXTURE_FORMAT_RGBA,
+		num_mip_maps = 0
+	}
+
+	local tbuffer = buffer.create(tparams.width * tparams.height, { { name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4 } })
+	local stream = buffer.get_stream(tbuffer, "rgba")
+
+	local status, error = pcall(resource.create_texture, path, tparams, tbuffer)
+	if status then
+		return {
+			params = tparams,
+			texture_id = error,
+			max_idx = tparams.width * tparams.height,
+			buffer = tbuffer
+		}
+	else
+		print("can't create texture:" .. tostring(error))
 	end
 end
 
-function Lights:draw_shadow_debug()
-	if self.shadow.rt then
-		render.enable_texture(0, self.shadow.rt, render.BUFFER_COLOR_BIT)
-		render.draw(self.debug_shadow_predicate)
-		render.disable_texture(0)
-	end
-
-end
-
-function Lights:draw_begin()
-	if (self.shadow.rt) then
-		render.enable_texture(1, self.shadow.rt, render.BUFFER_COLOR_BIT) -- created in light_and_shadows.init
-	end
-end
-
-function Lights:draw_finish()
-	if (self.shadow.rt) then
-		render.disable_texture(1)
-	end
-end
+---@class Lights
+local Lights = CLASS("lights")
 
 function Lights:initialize()
 	self.constants = {}
@@ -139,15 +138,51 @@ function Lights:initialize()
 		need_update_lists = false,
 
 		enabled_list = {},
-
 		active_list = {},
+
+		texture = nil
 	}
+end
+
+function Lights:init_lights_data(data_url)
+	self.lights.texture = create_lights_data_texture()
+	self.lights.texture.path = go.get(data_url, "texture0")
+	resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
+end
+
+function Lights:draw_debug()
+	if self.debug then
+		render.draw(self.debug_predicate)
+	end
+end
+
+function Lights:draw_shadow_debug()
+	if self.shadow.rt then
+		render.enable_texture(0, self.shadow.rt, render.BUFFER_COLOR_BIT)
+		render.draw(self.debug_shadow_predicate)
+		render.disable_texture(0)
+	end
+
+end
+function Lights:draw_data_lights_debug()
+	render.draw(self.debug_data_lights_predicate)
+end
+
+function Lights:draw_begin()
+	if (self.shadow.rt) then
+		render.enable_texture(1, self.shadow.rt, render.BUFFER_COLOR_BIT) -- created in light_and_shadows.init
+	end
+end
+
+function Lights:draw_finish()
+	if (self.shadow.rt) then
+		render.disable_texture(1)
+	end
 end
 
 function Lights:set_debug(debug)
 	self.debug = debug
 end
-
 
 function Lights:update_lights(dt)
 	if self.lights.need_update_lists then
@@ -197,6 +232,7 @@ function Lights:set_render(render_obj)
 
 	self.debug_predicate = render.predicate({ "illumination_debug" })
 	self.debug_shadow_predicate = render.predicate({ "shadow_debug" })
+	self.debug_data_lights_predicate = render.predicate({ "data_lights_debug" })
 
 	self:reset()
 end
@@ -365,4 +401,4 @@ function Lights:create_light()
 	table.insert(self.lights.all, l)
 end
 
-return Lights
+return Lights()

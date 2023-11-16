@@ -1,4 +1,24 @@
 name: "main"
+instances {
+  id: "illumination"
+  prototype: "/illumination/illumination.go"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
 collection_instances {
   id: "player"
   collection: "/example/player.collection"
@@ -159,6 +179,47 @@ embedded_instances {
   position {
     x: 690.0
     y: 15.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 256.0
+    y: 256.0
+    z: 1.0
+  }
+}
+embedded_instances {
+  id: "debug_data_lights_mesh"
+  data: "embedded_components {\n"
+  "  id: \"mesh\"\n"
+  "  type: \"mesh\"\n"
+  "  data: \"material: \\\"/illumination/assets/materials/data_lights_debug.material\\\"\\n"
+  "vertices: \\\"/illumination/shadow_debug.buffer\\\"\\n"
+  "textures: \\\"/illumination/textures/data.png\\\"\\n"
+  "primitive_type: PRIMITIVE_TRIANGLES\\n"
+  "position_stream: \\\"position\\\"\\n"
+  "\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    x: 690.0
+    y: 301.0
     z: 0.0
   }
   rotation {
