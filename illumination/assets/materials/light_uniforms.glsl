@@ -3,6 +3,8 @@
 
 uniform lowp vec4 ambient_color;
 uniform lowp vec4 sunlight_color;
+uniform lowp vec4 fog_color;
+uniform lowp vec4 fog;
 
 
 #endif

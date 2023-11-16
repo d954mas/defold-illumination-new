@@ -211,6 +211,9 @@ function Lights:reset()
 	self:set_ambient_color(1, 1, 1)
 	self:set_ambient_color_intensity(0.6)
 
+	self:set_fog(5, 15, 0.9)
+	self:set_fog_color(0.85, 0.8, 0.9)
+
 	self:set_sun_position(-4, 10, 0)
 end
 

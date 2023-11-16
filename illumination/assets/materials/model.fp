@@ -8,6 +8,7 @@ uniform lowp sampler2D DIFFUSE_TEXTURE;
 varying mediump vec2 var_texcoord0;
 varying mediump vec3 var_world_position;
 varying mediump vec3 var_world_normal;
+varying highp vec4 var_view_position;
 
 
 void main() {
@@ -37,6 +38,14 @@ void main() {
     diff_light += vec3(illuminance_color.xyz);
 
     color.rgb = color.rgb * (min(diff_light, 1.0));
+
+    // Fog
+    float dist = abs(var_view_position.z);
+    float fog_max = fog.y;
+    float fog_min = fog.x;
+    float fog_factor = clamp((fog_max - dist) / (fog_max - fog_min) + fog_color.a, 0.0, 1.0 );
+    color = mix(fog_color.rgb, color, fog_factor);
+
 
     gl_FragColor = vec4(color, texture_color.a);
 }
