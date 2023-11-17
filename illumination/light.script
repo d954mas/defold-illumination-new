@@ -1,4 +1,4 @@
-local illumination = require 'illumination.illumination'
+local ILLUMINATION = require 'illumination.illumination'
 
 --
 -- Properties
@@ -18,41 +18,22 @@ local VECTOR_FORWARD = vmath.vector3(0, 0, 1)
 -- Lifecycle
 
 function init(self)
-  self.url = msg.url('#')
-  self.light = { }
+	self.light = ILLUMINATION:create_light()
+	self.light:set_color(self.color.x, self.color.y, self.color.z, self.brightness)
+	self.light:set_radius(self.radius)
+	self.light:set_specular(self.specular)
+	self.light:set_smoothness(self.smoothness)
+	self.light:set_cutoff(self.cutoff)
 end
 
 function update(self, dt)
-  local old_light = self.light
-  local is_updated = false
-  local color = self.color
+	local position = go.get_world_position()
+	local direction = vmath.rotate(go.get_world_rotation(), VECTOR_FORWARD)
 
-  local light = {
-    position = go.get_world_position(),
-    direction = vmath.rotate(go.get_world_rotation(), VECTOR_FORWARD),
-    color = vmath.vector4(color.x, color.y, color.z, self.brightness),
-    radius = self.radius,
-    specular = self.specular,
-    smoothness = self.smoothness,
-    cutoff = self.cutoff,
-  }
-
-  for key, value in pairs(light) do
-    is_updated = is_updated or old_light[key] ~= value
-  end
-
-  if is_updated then
-    --illumination.set_light(light, self.url)
-    self.light = light
-  end
-end
-
-function on_message(self, message_id, message, sender)
-  if message_id == hash 'debug' then
-    msg.post('#mesh', message.is_enabled and hash('enable') or hash('disable'))
-  end
+	self.light:set_position(position.x, position.y, position.z)
+	self.light:set_direction(direction.x,direction.y,direction.z)
 end
 
 function final(self)
- -- illumination.set_light(nil, self.url)
+	ILLUMINATION:remove_light(self.light)
 end

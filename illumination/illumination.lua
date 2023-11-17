@@ -7,6 +7,7 @@ local VIEW_UP = vmath.vector3()
 
 local V_UP = vmath.vector3(0, 1, 0)
 
+---@class Light
 local Light = CLASS("Light")
 local LIGHT_IDX = 0
 
@@ -33,6 +34,59 @@ function Light:set_enabled(enabled)
 	if self.enabled ~= enabled then
 		self.enabled = enabled
 		self.lights.need_update_lists = true
+	end
+end
+
+function Light:set_position(x, y, z)
+	if self.position.x ~= x or self.position.y ~= y or self.position.z ~= z then
+		self.position.x, self.position.y, self.position.z = x, y, z
+		self.dirty = true
+	end
+end
+
+function Light:set_direction(x, y, z)
+	if self.direction.x ~= x or self.direction.y ~= y or self.direction.z ~= z then
+		self.direction.x, self.direction.y, self.direction.z = x, y, z
+		self.dirty = true
+	end
+end
+
+function Light:set_color(r, g, b, brightness)
+	if self.color.x ~= r or self.color.y ~= g or self.color.z ~= b or self.color.w ~= brightness then
+		self.color.x, self.color.y, self.color.z, self.color.w = r, g, b, brightness
+		self.dirty = true
+	end
+end
+
+function Light:set_radius(radius)
+	assert(radius >= 0)
+	if self.radius~=radius then
+		self.radius = radius
+		self.dirty = true
+	end
+end
+
+function Light:set_specular(specular)
+	assert(specular >= 0 and specular<=1)
+	if self.specular~=specular then
+		self.specular = specular
+		self.dirty = true
+	end
+end
+
+function Light:set_smoothness(smoothness)
+	assert(smoothness >= 0 and smoothness<=1)
+	if self.smoothness~=smoothness then
+		self.smoothness = smoothness
+		self.dirty = true
+	end
+end
+
+function Light:set_cutoff(cutoff)
+	assert(cutoff >= 0 and cutoff<=1)
+	if self.cutoff~=cutoff then
+		self.cutoff = cutoff
+		self.dirty = true
 	end
 end
 
@@ -146,7 +200,6 @@ end
 function Lights:init_lights_data(data_url)
 	self.lights.texture = create_lights_data_texture()
 	self.lights.texture.path = go.get(data_url, "texture0")
-	resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
 end
 
 function Lights:draw_debug()
@@ -181,20 +234,6 @@ end
 
 function Lights:set_debug(debug)
 	self.debug = debug
-end
-
-function Lights:update_lights(dt)
-	if self.lights.need_update_lists then
-		self.lights.enabled_list = {}
-		for i = 1, #self.lights.all do
-			local l = self.lights.all[i]
-			if l.enabled then
-				table.insert(self.lights.enabled_list, l)
-			end
-		end
-		print("Lights. Enabled:" .. #self.lights.enabled_list .. " Disabled:" .. #self.lights.all - #self.lights.enabled_list)
-	end
-
 end
 
 function Lights:add_constants(constant)
@@ -395,9 +434,44 @@ function Lights:render_shadows()
 	render.set_render_target(render.RENDER_TARGET_DEFAULT)
 end
 
+
+--region Lights
 function Lights:create_light()
 	local l = Light(self)
 	table.insert(self.lights.all, l)
+	self.lights.need_update_lists = true
+	return l
 end
+
+---@param light LightsData
+function Lights:remove_light(light)
+	light.removed = true
+	self.lights.need_update_lists = true
+end
+
+function Lights:update_lights()
+	if self.lights.need_update_lists then
+		self.lights.enabled_list = {}
+		local removed = 0
+		for i = #self.lights.all, 1, -1 do
+			local l = self.lights.all[i]
+			if l.removed then
+				removed = removed + 1
+				table.remove(self.lights.all[i])
+			else
+				if l.enabled then
+					table.insert(self.lights.enabled_list, l)
+				end
+			end
+
+		end
+		print("Lights.Removed:" .. removed .. " Enabled:" .. #self.lights.enabled_list .. " Disabled:" .. #self.lights.all - #self.lights.enabled_list)
+		self.lights.need_update_lists = false
+	end
+
+	resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
+
+end
+--endregion
 
 return Lights()

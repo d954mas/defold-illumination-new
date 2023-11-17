@@ -7,3 +7,7 @@ function init(self)
 	ILLUMINATION:init_lights_data(data_url)
 end
 
+function update(self, dt)
+	ILLUMINATION:update_lights()
+end
+
