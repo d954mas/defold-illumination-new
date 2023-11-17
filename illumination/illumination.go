@@ -1,5 +1,5 @@
 components {
-  id: "illumination_script"
+  id: "illumination"
   component: "/illumination/illumination_script.script"
   position {
     x: 0.0

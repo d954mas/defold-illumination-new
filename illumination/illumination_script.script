@@ -1,5 +1,17 @@
 local ILLUMINATION = require "illumination.illumination"
 
+
+go.property('ambient_color', vmath.vector3(1.0, 1.0, 1.0))
+go.property('ambient_level', 0.2)
+go.property('sunlight_color', vmath.vector3(1.0))
+go.property('sunlight_brightness', 1.0)
+
+go.property('fog', true)
+go.property('fog_distance_min', 10)
+go.property('fog_distance_max', 15)
+go.property('fog_color', vmath.vector3(0.53, 0.80, 0.92))
+go.property('fog_level', 0.9)
+
 function init(self)
 	local data_url = msg.url("#data")
 	msg.post(data_url, hash("disable"))
@@ -9,5 +21,14 @@ end
 
 function update(self, dt)
 	ILLUMINATION:update_lights()
+	ILLUMINATION:set_ambient_color(self.ambient_color.x,self.ambient_color.y,self.ambient_color.z)
+	ILLUMINATION:set_ambient_color_intensity(self.ambient_level)
+
+	ILLUMINATION:set_sunlight_color(self.sunlight_color.x,self.sunlight_color.y,self.sunlight_color.z)
+	ILLUMINATION:set_sunlight_color_intensity(self.sunlight_brightness)
+	ILLUMINATION:set_shadow_color_intensity(self.sunlight_brightness)
+
+	ILLUMINATION:set_fog(self.fog_distance_min, self.fog_distance_max, self.fog_level)
+	ILLUMINATION:set_fog_color(self.fog_color.x,self.fog_color.y,self.fog_color.z)
 end
 
