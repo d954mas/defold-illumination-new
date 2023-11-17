@@ -20,6 +20,9 @@ function Light:initialize(lights)
 
 	self.enabled = false
 
+	---idx in active list
+	self.active_idx = -1
+
 	self.direction = vmath.vector3(0, 0, -1)
 	self.position = vmath.vector3(0, 0, 0)
 	self.color = vmath.vector4(1) --r,g,b brightness
@@ -33,7 +36,6 @@ end
 function Light:set_enabled(enabled)
 	if self.enabled ~= enabled then
 		self.enabled = enabled
-		self.lights.need_update_lists = true
 	end
 end
 
@@ -60,34 +62,40 @@ end
 
 function Light:set_radius(radius)
 	assert(radius >= 0)
-	if self.radius~=radius then
+	if self.radius ~= radius then
 		self.radius = radius
 		self.dirty = true
 	end
 end
 
 function Light:set_specular(specular)
-	assert(specular >= 0 and specular<=1)
-	if self.specular~=specular then
+	assert(specular >= 0 and specular <= 1)
+	if self.specular ~= specular then
 		self.specular = specular
 		self.dirty = true
 	end
 end
 
 function Light:set_smoothness(smoothness)
-	assert(smoothness >= 0 and smoothness<=1)
-	if self.smoothness~=smoothness then
+	assert(smoothness >= 0 and smoothness <= 1)
+	if self.smoothness ~= smoothness then
 		self.smoothness = smoothness
 		self.dirty = true
 	end
 end
 
 function Light:set_cutoff(cutoff)
-	assert(cutoff >= 0 and cutoff<=1)
-	if self.cutoff~=cutoff then
+	assert(cutoff >= 0 and cutoff <= 1)
+	if self.cutoff ~= cutoff then
 		self.cutoff = cutoff
 		self.dirty = true
 	end
+end
+
+function Light:is_visible()
+	if not self.enabled or self.color.w == 0 then return false end
+
+	return true
 end
 
 local function create_depth_buffer(w, h)
@@ -186,13 +194,6 @@ function Lights:initialize()
 	---@class LightsData
 	self.lights = {
 		all = {},
-
-		--if true some lights changed enable/disable
-		need_update_lists = false,
-
-		enabled_list = {},
-		active_list = {},
-
 		texture = nil
 	}
 end
@@ -439,36 +440,37 @@ end
 function Lights:create_light()
 	local l = Light(self)
 	table.insert(self.lights.all, l)
-	self.lights.need_update_lists = true
 	return l
 end
 
 ---@param light LightsData
 function Lights:remove_light(light)
 	light.removed = true
-	self.lights.need_update_lists = true
 end
 
 function Lights:update_lights()
-	if self.lights.need_update_lists then
-		self.lights.enabled_list = {}
-		local removed = 0
-		for i = #self.lights.all, 1, -1 do
-			local l = self.lights.all[i]
-			if l.removed then
-				removed = removed + 1
-				table.remove(self.lights.all[i])
-			else
-				if l.enabled then
-					table.insert(self.lights.enabled_list, l)
+	--check culling and disabled lights
+	local active_list = {}
+	local idx = 1
+	for i = #self.lights.all, 1, -1 do
+		local l = self.lights.all[i]
+		if l.removed then
+			table.remove(self.lights.all, i)
+		else
+			if l:is_visible() then
+				active_list[idx] = l
+				if l.active_idx ~= idx then l.dirty = true end
+				idx = idx + 1
+
+				if l.dirty then
+					l.dirty = false
+					--rewrite data in texture
 				end
 			end
-
 		end
-		print("Lights.Removed:" .. removed .. " Enabled:" .. #self.lights.enabled_list .. " Disabled:" .. #self.lights.all - #self.lights.enabled_list)
-		self.lights.need_update_lists = false
 	end
 
+	print("lights active:" .. #active_list)
 	resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
 
 end

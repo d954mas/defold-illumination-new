@@ -19,6 +19,7 @@ local VECTOR_FORWARD = vmath.vector3(0, 0, 1)
 
 function init(self)
 	self.light = ILLUMINATION:create_light()
+	self.light:set_enabled(true)
 	self.light:set_color(self.color.x, self.color.y, self.color.z, self.brightness)
 	self.light:set_radius(self.radius)
 	self.light:set_specular(self.specular)
@@ -32,6 +33,11 @@ function update(self, dt)
 
 	self.light:set_position(position.x, position.y, position.z)
 	self.light:set_direction(direction.x,direction.y,direction.z)
+	self.light:set_color(self.color.x, self.color.y, self.color.z, self.brightness)
+	self.light:set_radius(self.radius)
+	self.light:set_specular(self.specular)
+	self.light:set_smoothness(self.smoothness)
+	self.light:set_cutoff(self.cutoff)
 end
 
 function final(self)
