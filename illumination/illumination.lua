@@ -7,6 +7,10 @@ local VIEW_UP = vmath.vector3()
 
 local V_UP = vmath.vector3(0, 1, 0)
 
+local HASH_RGBA = hash("rgba")
+
+local RADIUS_MAX = 256
+
 ---@class Light
 local Light = CLASS("Light")
 local LIGHT_IDX = 0
@@ -98,8 +102,25 @@ function Light:is_visible()
 	return true
 end
 
-function Light:write_to_buffer(x_capacity, y_capacity, z_capacity)
+local light_size = 6 --6 pixels per light
+local light_data = {}
+function Light:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
+	assert(self.radius <= RADIUS_MAX, "radius > " .. RADIUS_MAX)
 
+	local idx = (self.active_idx - 1) * light_size + 1--lua side start from 1
+	light_data[1], light_data[2], light_data[3], light_data[4] = illumination.float_to_rgba(self.position.x, x_min, x_max)
+	light_data[5], light_data[6], light_data[7], light_data[8] = illumination.float_to_rgba(self.position.y, y_min, y_max)
+	light_data[9], light_data[10], light_data[11], light_data[12] = illumination.float_to_rgba(self.position.z, z_min, z_max)
+
+	light_data[13], light_data[14], light_data[15] = self.direction.x, self.direction.y, self.direction.z
+
+	light_data[16] = 0
+
+	light_data[17], light_data[18], light_data[19], light_data[20] = self.color.x, self.color.y, self.color.z, self.color.w
+
+	light_data[21], light_data[22], light_data[23], light_data[24] = self.radius / RADIUS_MAX, self.smoothness, self.specular, self.cutoff
+
+	illumination.fill_stream_uint8(idx, self.lights.lights.texture.buffer, HASH_RGBA, 4, light_data)
 end
 
 local function create_depth_buffer(w, h)
@@ -128,14 +149,14 @@ end
 local function create_lights_data_texture()
 	local path = "/__lights_data.texturec"
 	local tparams = {
-		width = 1024,
-		height = 1024,
+		width = 512,
+		height = 512,
 		type = resource.TEXTURE_TYPE_2D,
 		format = resource.TEXTURE_FORMAT_RGBA,
-		num_mip_maps = 0
+		num_mip_maps = 1
 	}
 
-	local tbuffer = buffer.create(tparams.width * tparams.height, { { name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4 } })
+	local tbuffer = buffer.create(tparams.width * tparams.height, { { name = HASH_RGBA, type = buffer.VALUE_TYPE_UINT8, count = 4 } })
 
 	local status, error = pcall(resource.create_texture, path, tparams, tbuffer)
 	if status then
@@ -161,8 +182,10 @@ function Lights:initialize()
 	self.shadow_color = vmath.vector4()
 	self.fog = vmath.vector4()
 	self.fog_color = vmath.vector4()
-	self.lights_data = vmath.vector4() --x lights count
-	self.lights_data2 = vmath.vector4() --x lights count
+
+	self.light_texture_data = vmath.vector4()
+	self.lights_data = vmath.vector4(0, RADIUS_MAX, 0, 0)
+	self.lights_data2 = vmath.vector4()
 
 	self.debug = false
 
@@ -207,6 +230,11 @@ end
 function Lights:init_lights_data(data_url)
 	self.lights.texture = create_lights_data_texture()
 	self.lights.texture.path = go.get(data_url, "texture0")
+	self.light_texture_data.x = self.lights.texture.params.width
+	self.light_texture_data.y = self.lights.texture.params.width
+	for _, constant in ipairs(self.constants) do
+		constant.light_texture_data = self.light_texture_data
+	end
 end
 
 function Lights:draw_debug()
@@ -253,6 +281,7 @@ function Lights:add_constants(constant)
 	constant.fog_color = self.fog_color
 	constant.shadow_params = self.shadow_params
 	constant.lights_data = self.lights_data
+	constant.light_texture_data = self.light_texture_data
 
 	V4.x = self.shadow.sun_position.x
 	V4.y = self.shadow.sun_position.y
@@ -527,11 +556,11 @@ function Lights:update_lights()
 		end
 	end
 
-	local axis_capacity_x = x_max - x_min+1
-	local axis_capacity_y = y_max - y_min+1
-	local axis_capacity_z = z_max - z_min+1
+	local axis_capacity_x = x_max - x_min + 1
+	local axis_capacity_y = y_max - y_min + 1
+	local axis_capacity_z = z_max - z_min + 1
 
---	print("axis x: " .. axis_capacity_x .. " y:" .. axis_capacity_y .. " z:" .. axis_capacity_z)
+	--	print("axis x: " .. axis_capacity_x .. " y:" .. axis_capacity_y .. " z:" .. axis_capacity_z)
 	if axis_capacity_x > 1024 then
 		error("axis_capacity_x" .. axis_capacity_x .. " > 1024. accuracy may be low")
 	end
@@ -542,14 +571,14 @@ function Lights:update_lights()
 		print("axis_capacity_z" .. axis_capacity_z .. " > 1024. accuracy may be low")
 	end
 
-	print("lights active:" .. #active_list)
+	--print("lights active:" .. #active_list)
 	for i = #active_list, 1, -1 do
 		local l = active_list[i]
 		--rewrite dirty lights
 		if l.dirty then
 			l.dirty = false
 			dirty_texture = true
-			l:write_to_buffer()
+			l:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
 		end
 	end
 
