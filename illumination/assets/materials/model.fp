@@ -35,7 +35,7 @@ void main() {
     float axis_y = lights_data2.y-lights_data2.x;
     float axis_z = lights_data2.w-lights_data2.z;
 
-    for (int i = 0; i < lights_data.x; ++i) {
+    for (int i = 0; i < int(lights_data.x); ++i) {
 
         int lightIndex = i * LIGHT_DATA_PIXELS;
         float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;

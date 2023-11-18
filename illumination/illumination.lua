@@ -120,7 +120,7 @@ function Light:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
 
 	light_data[21], light_data[22], light_data[23] = self.radius / RADIUS_MAX, self.smoothness, self.specular
 
-	light_data[24] = (math.cos(self.cutoff * math.pi) + 1)/2
+	light_data[24] = self.cutoff<1 and (math.cos(self.cutoff * math.pi) + 1)/2 or 1
 
 	illumination.fill_stream_uint8(idx, self.lights.lights.texture.buffer, HASH_RGBA, 4, light_data)
 end

@@ -6,23 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="7a06ae90-40d6-4dd9-ab2d-5d282f282782" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/garden.collection" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/garden.collection" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/static_1_tiny_element_5.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/static_1_tiny_element_5.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.mesh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.mesh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/assets/materials/light_uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/light_uniforms.glsl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/matrix_utils.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/matrix_utils.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.fp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.fp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.material" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.material" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.vp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.vp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
     </list>
     <list id="439b4f2d-ec9c-44df-b232-30751e5b0157" name="New changelist" comment="" />
@@ -86,7 +71,8 @@
     <MESSAGE value="lights wip" />
     <MESSAGE value="add axis capacity" />
     <MESSAGE value="add light data to texture" />
-    <option name="LAST_COMMIT_MESSAGE" value="add light data to texture" />
+    <MESSAGE value="light data" />
+    <option name="LAST_COMMIT_MESSAGE" value="light data" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
