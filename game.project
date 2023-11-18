@@ -36,3 +36,6 @@ shared_state = 1
 [engine]
 fixed_update_frequency = 60
 
+[mesh]
+max_count = 512
+
