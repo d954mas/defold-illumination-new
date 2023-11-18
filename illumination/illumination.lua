@@ -98,6 +98,10 @@ function Light:is_visible()
 	return true
 end
 
+function Light:write_to_buffer(x_capacity, y_capacity, z_capacity)
+
+end
+
 local function create_depth_buffer(w, h)
 	local color_params = {
 		-- format     = render.FORMAT_RGBA,
@@ -157,6 +161,8 @@ function Lights:initialize()
 	self.shadow_color = vmath.vector4()
 	self.fog = vmath.vector4()
 	self.fog_color = vmath.vector4()
+	self.lights_data = vmath.vector4() --x lights count
+	self.lights_data2 = vmath.vector4() --x lights count
 
 	self.debug = false
 
@@ -246,6 +252,7 @@ function Lights:add_constants(constant)
 	constant.fog = self.fog
 	constant.fog_color = self.fog_color
 	constant.shadow_params = self.shadow_params
+	constant.lights_data = self.lights_data
 
 	V4.x = self.shadow.sun_position.x
 	V4.y = self.shadow.sun_position.y
@@ -451,27 +458,104 @@ end
 function Lights:update_lights()
 	--check culling and disabled lights
 	local active_list = {}
-	local idx = 1
+	local idx = 0
+	local dirty_texture = false
+	--TODO use nil or use first active light coord as min/max
+	local x_min, x_max, y_min, y_max, z_min, z_max
 	for i = #self.lights.all, 1, -1 do
 		local l = self.lights.all[i]
 		if l.removed then
 			table.remove(self.lights.all, i)
 		else
 			if l:is_visible() then
-				active_list[idx] = l
-				if l.active_idx ~= idx then l.dirty = true end
 				idx = idx + 1
+				active_list[idx] = l
+				if not x_min then
+					x_min, x_max = l.position.x, l.position.x
+					y_min, y_max = l.position.y, l.position.y
+					z_min, z_max = l.position.z, l.position.z
+				else
+					x_min = math.min(x_min, l.position.x)
+					x_max = math.max(x_max, l.position.x)
+					y_min = math.min(y_min, l.position.y)
+					y_max = math.max(y_max, l.position.y)
+					z_min = math.min(z_min, l.position.z)
+					z_max = math.max(z_max, l.position.z)
+				end
 
-				if l.dirty then
-					l.dirty = false
-					--rewrite data in texture
+				if l.active_idx ~= idx then
+					l.active_idx = idx
+					l.dirty = true
 				end
 			end
 		end
 	end
 
+	if not x_min then
+		x_min, x_max, y_min, y_max, z_min, z_max = 0, 0, 0, 0, 0, 0
+	end
+	--if min and max changed need to rewrite all light. so use some fixed value to avoid additional rewrite
+	if x_min < -511 then error("x_min < 511") end
+	if x_max > 512 then error("x_max > 512") end
+	if y_min < -511 then error("y_min < 511") end
+	if y_max > 512 then error("y_max > 512") end
+	if z_min < -511 then error("z_min < 511") end
+	if z_max > 512 then error("z_max > 512") end
+
+	x_min, x_max = -511, 512
+	y_min, y_max = -511, 512
+	z_min, z_max = -511, 512
+
+	if self.lights_data.x ~= idx or self.lights_data.z ~= x_min or self.lights_data.w ~= x_max then
+		self.lights_data.x = idx
+		self.lights_data.y = 0
+		self.lights_data.z = x_min
+		self.lights_data.w = x_max
+		for _, constant in ipairs(self.constants) do
+			constant.lights_data = self.lights_data
+		end
+	end
+
+	if self.lights_data2.x ~= y_min or self.lights_data2.y ~= y_max or
+			self.lights_data2.z ~= z_min or self.lights_data2.w ~= z_max then
+		self.lights_data2.x = y_min
+		self.lights_data2.y = y_max
+		self.lights_data2.z = z_min
+		self.lights_data2.w = z_max
+		for _, constant in ipairs(self.constants) do
+			constant.lights_data2 = self.lights_data2
+		end
+	end
+
+	local axis_capacity_x = x_max - x_min+1
+	local axis_capacity_y = y_max - y_min+1
+	local axis_capacity_z = z_max - z_min+1
+
+--	print("axis x: " .. axis_capacity_x .. " y:" .. axis_capacity_y .. " z:" .. axis_capacity_z)
+	if axis_capacity_x > 1024 then
+		error("axis_capacity_x" .. axis_capacity_x .. " > 1024. accuracy may be low")
+	end
+	if axis_capacity_y > 1024 then
+		print("axis_capacity_y" .. axis_capacity_y .. " > 1024. accuracy may be low")
+	end
+	if axis_capacity_z > 1024 then
+		print("axis_capacity_z" .. axis_capacity_z .. " > 1024. accuracy may be low")
+	end
+
 	print("lights active:" .. #active_list)
-	resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
+	for i = #active_list, 1, -1 do
+		local l = active_list[i]
+		--rewrite dirty lights
+		if l.dirty then
+			l.dirty = false
+			dirty_texture = true
+			l:write_to_buffer()
+		end
+	end
+
+	if dirty_texture then
+		resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
+	end
 
 end
 --endregion
