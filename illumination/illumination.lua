@@ -9,7 +9,7 @@ local V_UP = vmath.vector3(0, 1, 0)
 
 local HASH_RGBA = hash("rgba")
 
-local RADIUS_MAX = 256
+local RADIUS_MAX = 128
 
 ---@class Light
 local Light = CLASS("Light")
@@ -112,13 +112,15 @@ function Light:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
 	light_data[5], light_data[6], light_data[7], light_data[8] = illumination.float_to_rgba(self.position.y, y_min, y_max)
 	light_data[9], light_data[10], light_data[11], light_data[12] = illumination.float_to_rgba(self.position.z, z_min, z_max)
 
-	light_data[13], light_data[14], light_data[15] = self.direction.x, self.direction.y, self.direction.z
+	light_data[13], light_data[14], light_data[15] = (self.direction.x+1)/2, (self.direction.y+1)/2, (self.direction.z+1)/2
 
 	light_data[16] = 0
 
 	light_data[17], light_data[18], light_data[19], light_data[20] = self.color.x, self.color.y, self.color.z, self.color.w
 
-	light_data[21], light_data[22], light_data[23], light_data[24] = self.radius / RADIUS_MAX, self.smoothness, self.specular, self.cutoff
+	light_data[21], light_data[22], light_data[23] = self.radius / RADIUS_MAX, self.smoothness, self.specular
+
+	light_data[24] = (math.cos(self.cutoff * math.pi) + 1)/2
 
 	illumination.fill_stream_uint8(idx, self.lights.lights.texture.buffer, HASH_RGBA, 4, light_data)
 end
@@ -537,7 +539,7 @@ function Lights:update_lights()
 
 	if self.lights_data.x ~= idx or self.lights_data.z ~= x_min or self.lights_data.w ~= x_max then
 		self.lights_data.x = idx
-		self.lights_data.y = 0
+		self.lights_data.y = RADIUS_MAX
 		self.lights_data.z = x_min
 		self.lights_data.w = x_max
 		for _, constant in ipairs(self.constants) do

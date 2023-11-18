@@ -11,6 +11,7 @@ varying mediump vec2 var_texcoord0;
 varying highp vec3 var_world_position;
 varying mediump vec3 var_world_normal;
 varying highp vec4 var_view_position;
+varying highp vec3 var_camera_position;
 
 #include "/illumination/assets/materials/shadow/shadow_vp.glsl"
 #include "/illumination/assets/materials/matrix_utils.glsl"
@@ -29,6 +30,9 @@ void main() {
     var_world_normal = normalize(mtx_normal * normal);
 
     var_texcoord0_shadow = mtx_light * vec4(world_position.xyz, 1);
+
+    mat4 mtx_inv_view = mat4_inverse(mtx_view);
+    var_camera_position = (mtx_inv_view * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
 
     var_texcoord0 = texcoord0;
     gl_Position = mtx_proj * view_position;

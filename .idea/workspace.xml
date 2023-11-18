@@ -6,10 +6,26 @@
   <component name="ChangeListManager">
     <list default="true" id="7a06ae90-40d6-4dd9-ab2d-5d282f282782" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/main.collection" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.collection" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/garden.collection" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/garden.collection" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/static_1_tiny_element_5.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/static_1_tiny_element_5.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.mesh" beforeDir="false" afterPath="$PROJECT_DIR$/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.mesh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/light_uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/light_uniforms.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/matrix_utils.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/matrix_utils.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.fp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.fp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.material" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.material" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.vp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.vp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/render/illumination.render_script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/render/illumination.render_script" afterDir="false" />
     </list>
+    <list id="439b4f2d-ec9c-44df-b232-30751e5b0157" name="New changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -26,38 +42,69 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/user/defold/defold-illumination/illumination&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "last_opened_file_path": "C:/Users/user/defold/defold-illumination/illumination/assets/materials",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\user\defold\defold-illumination\illumination\assets\materials" />
       <recent name="C:\Users\user\defold\defold-illumination\illumination" />
       <recent name="C:\Users\user\defold\defold-illumination" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="remove .idea" />
     <MESSAGE value="fixed render" />
     <MESSAGE value="wip" />
-    <option name="LAST_COMMIT_MESSAGE" value="wip" />
+    <MESSAGE value="debug shadow texture" />
+    <MESSAGE value="fixed shadow color" />
+    <MESSAGE value="prepare for light" />
+    <MESSAGE value="add fog" />
+    <MESSAGE value="add light data texture" />
+    <MESSAGE value="add light class" />
+    <MESSAGE value="lights wip" />
+    <MESSAGE value="add axis capacity" />
+    <MESSAGE value="add light data to texture" />
+    <option name="LAST_COMMIT_MESSAGE" value="add light data to texture" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>132</line>
+          <line>292</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="lua-line">
+          <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
+          <line>247</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="lua-line">
+          <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
+          <line>45</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

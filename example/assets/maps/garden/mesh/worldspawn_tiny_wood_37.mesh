@@ -2,6 +2,7 @@ material: "/illumination/assets/materials/model.material"
 vertices: "/example/assets/maps/garden/buffer/worldspawn_tiny_wood_37.buffer"
 textures: "/example/assets/textures/tiny/wood_37.png"
 textures: "/illumination/textures/shadow.png"
+textures: "/illumination/textures/data.png"
 primitive_type: PRIMITIVE_TRIANGLES
 position_stream: "position"
 normal_stream: "normal"

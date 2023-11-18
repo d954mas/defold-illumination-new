@@ -1,48 +1,5 @@
 name: "garden"
 instances {
-  id: "fireplace"
-  prototype: "/illumination/light_point.go"
-  position {
-    x: -3.59375
-    y: 1.28125
-    z: 1.640625
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  component_properties {
-    id: "light"
-    properties {
-      id: "color"
-      value: "1.0, 0.467964, 0.0"
-      type: PROPERTY_TYPE_VECTOR3
-    }
-    properties {
-      id: "brightness"
-      value: "1.0"
-      type: PROPERTY_TYPE_NUMBER
-    }
-    properties {
-      id: "radius"
-      value: "5.0"
-      type: PROPERTY_TYPE_NUMBER
-    }
-    properties {
-      id: "specular"
-      value: "1.0"
-      type: PROPERTY_TYPE_NUMBER
-    }
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-instances {
   id: "firefly"
   prototype: "/illumination/light_point.go"
   position {
@@ -71,6 +28,49 @@ instances {
     properties {
       id: "radius"
       value: "13.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "specular"
+      value: "1.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
+instances {
+  id: "fireplace"
+  prototype: "/illumination/light_point.go"
+  position {
+    x: -3.59375
+    y: 1.28125
+    z: 1.640625
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  component_properties {
+    id: "light"
+    properties {
+      id: "color"
+      value: "1.0, 0.467964, 0.0"
+      type: PROPERTY_TYPE_VECTOR3
+    }
+    properties {
+      id: "brightness"
+      value: "1.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "radius"
+      value: "5.0"
       type: PROPERTY_TYPE_NUMBER
     }
     properties {
@@ -229,50 +229,6 @@ embedded_instances {
   "  }\n"
   "}\n"
   ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-embedded_instances {
-  id: "light_point"
-  children: "firefly"
-  children: "fireplace"
-  data: ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-embedded_instances {
-  id: "light_spot"
-  children: "light_green"
-  children: "light_red"
-  data: ""
   position {
     x: 0.0
     y: 0.0
@@ -2138,6 +2094,50 @@ embedded_instances {
 embedded_instances {
   id: "world"
   children: "worldspawn"
+  data: ""
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
+embedded_instances {
+  id: "light_point"
+  children: "firefly"
+  children: "fireplace"
+  data: ""
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
+embedded_instances {
+  id: "light_spot"
+  children: "light_green"
+  children: "light_red"
   data: ""
   position {
     x: 0.0
