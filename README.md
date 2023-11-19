@@ -14,8 +14,8 @@ This extension contains ready-to-use forward shading lighting mixed with realtim
 
 **TODO:**
 
-1. [Clustered forward shading](https://github.com/astrochili/defold-illumination/issues/1).
-2. Dynamic shadow matrix(update the shadow matrix whenever the camera moves so that it ideally describes the camera's frustum.
+1. [Clustered forward shading](https://github.com/astrochili/defold-illumination/issues/1)
+2. Dynamic shadow matrix(update the shadow matrix whenever the camera moves so that it ideally describes the camera's frustum)
 
 
 🎮 [Play HTML5 demo](https://astronachos.com/defold/illumination](https://d954mas.github.io/defold-illumination-new/)) with 🔦 on the `E` key.
