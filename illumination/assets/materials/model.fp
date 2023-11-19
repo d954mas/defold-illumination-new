@@ -41,7 +41,7 @@ void main() {
         float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
         float y = lights_data2.x + rgba_to_float(getData(lightIndex+1))*axis_y;
         float z = lights_data2.z + rgba_to_float(getData(lightIndex+2))*axis_z;
-       // vec3 spotDirection = getData(lightIndex+3).xyz;
+        // vec3 spotDirection = getData(lightIndex+3).xyz;
         vec4 lightColorData = getData(lightIndex+4);
         vec4 lightData = getData(lightIndex+5);
 
@@ -60,10 +60,9 @@ void main() {
 
         vec3 lightColor = lightColorData.rgb* lightColorData.a;
         vec3 lightDirection = normalize(lightPosition - var_world_position);
-        vec3 lightIlluminanceColor = lightColor;
+        vec3 lightIlluminanceColor = point_light2(lightColor.rgb, lightSmoothness, lightPosition, var_world_position, var_world_normal
+        , lightSpecular, view_direction);
 
-        float lightAttenuation = pow(clamp(1.0 - lightDistance / lightRadius, 0.0, 1.0), 2.0 * lightSmoothness);
-        float lightStrength = lightAttenuation * max(dot(surface_normal, lightDirection), 0.0);
 
 
         if (lightCutoff < 1.0) {
@@ -85,7 +84,7 @@ void main() {
             }
         }
 
-        illuminance_color = illuminance_color + lightIlluminanceColor* lightStrength;
+        illuminance_color = illuminance_color + lightIlluminanceColor;
 
         //
     }
