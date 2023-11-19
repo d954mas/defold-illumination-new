@@ -5,6 +5,7 @@
 #include <dmsdk/sdk.h>
 
 #include "utils.h"
+#include "frustum_cull.h"
 
 static float Fract(float f){
     return f - floor(f);
@@ -96,11 +97,27 @@ static int FillStreamUint8(lua_State* L){
     return 0;
 }
 
+static int FrustumIsBoxVisibleLua(lua_State* L){
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 7);
+    dmVMath::Matrix4* m = dmScript::CheckMatrix4(L, 1);
+    dmVMath::Vector3 min(luaL_checknumber(L, 2),luaL_checknumber(L, 3),luaL_checknumber(L, 4));
+    dmVMath::Vector3 max(luaL_checknumber(L, 5),luaL_checknumber(L, 6),luaL_checknumber(L, 7));
+
+    Frustum frustum = Frustum(*m);
+
+    const bool visible = frustum.IsBoxVisible(min, max);
+
+    lua_pushboolean(L, visible);
+    return 1;
+}
+
 
 // Functions exposed to Lua
 static const luaL_reg Module_methods[] = {
     {"float_to_rgba", FloatToRGBALua},
     {"fill_stream_uint8",FillStreamUint8},
+    {"frustum_is_box_visible",FrustumIsBoxVisibleLua},
 
     {0, 0}
 

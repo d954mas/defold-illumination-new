@@ -50,6 +50,8 @@ function update(self)
 
 	render.set_viewport(0, 0, width, height)
 
+
+	ILLUMINATION:set_frustum(self.scene.projection*self.scene.view)
 	ILLUMINATION:draw_begin()
 	-- scene
 	render.set_view(self.scene.view)

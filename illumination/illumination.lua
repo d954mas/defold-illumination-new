@@ -15,6 +15,76 @@ local RADIUS_MAX = 128
 local Light = CLASS("Light")
 local LIGHT_IDX = 0
 
+local V1 = vmath.vector3(0)
+local V2 = vmath.vector3(0)
+
+local HASH_DRAW_LINE = hash("draw_line")
+local MSD_DRAW_LINE_COLOR = vmath.vector4(1)
+local MSD_DRAW_LINE_COLOR_AABB = vmath.vector4(1,0,0,1)
+
+local MSD_DRAW_LINE = {
+	start_point = V1,
+	end_point = V2,
+	color = MSD_DRAW_LINE_COLOR
+}
+
+local function draw_aabb3d(x1, y1, z1, x2, y2, z2, color)
+	MSD_DRAW_LINE_COLOR.x = color.x
+	MSD_DRAW_LINE_COLOR.y = color.y
+	MSD_DRAW_LINE_COLOR.z = color.z
+	MSD_DRAW_LINE_COLOR.w = color.w
+
+	--bottom
+	V1.x, V1.y, V1.z = x1, y1, z1
+	V2.x, V2.y, V2.z = x1, y1, z2
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = x1, y1, z1
+	V2.x, V2.y, V2.z = x2, y1, z1
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = x2, y1, z2
+	V2.x, V2.y, V2.z = x1, y1, z2
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = x2, y1, z2
+	V2.x, V2.y, V2.z = x2, y1, z1
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	--top
+	V1.x, V1.y, V1.z = x1, y2, z1
+	V2.x, V2.y, V2.z = x1, y2, z2
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = x1, y2, z1
+	V2.x, V2.y, V2.z = x2, y2, z1
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = x2, y2, z2
+	V2.x, V2.y, V2.z = x1, y2, z2
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = x2, y2, z2
+	V2.x, V2.y, V2.z = x2, y2, z1
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	--edges
+
+	V1.x, V1.y, V1.z = x1, y1, z1
+	V2.x, V2.y, V2.z = x1, y2, z1
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+	V1.x, V1.y, V1.z = x1, y1, z2
+	V2.x, V2.y, V2.z = x1, y2, z2
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+	V1.x, V1.y, V1.z = x2, y1, z1
+	V2.x, V2.y, V2.z = x2, y2, z1
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+	V1.x, V1.y, V1.z = x2, y1, z2
+	V2.x, V2.y, V2.z = x2, y2, z2
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+end
+
 ---@param lights LightsData
 function Light:initialize(lights)
 	self.lights = assert(lights)
@@ -112,7 +182,7 @@ function Light:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
 	light_data[5], light_data[6], light_data[7], light_data[8] = illumination.float_to_rgba(self.position.y, y_min, y_max)
 	light_data[9], light_data[10], light_data[11], light_data[12] = illumination.float_to_rgba(self.position.z, z_min, z_max)
 
-	light_data[13], light_data[14], light_data[15] = (self.direction.x+1)/2, (self.direction.y+1)/2, (self.direction.z+1)/2
+	light_data[13], light_data[14], light_data[15] = (self.direction.x + 1) / 2, (self.direction.y + 1) / 2, (self.direction.z + 1) / 2
 
 	light_data[16] = 0
 
@@ -120,7 +190,7 @@ function Light:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
 
 	light_data[21], light_data[22], light_data[23] = self.radius / RADIUS_MAX, self.smoothness, self.specular
 
-	light_data[24] = self.cutoff<1 and (math.cos(self.cutoff * math.pi) + 1)/2 or 1
+	light_data[24] = self.cutoff < 1 and (math.cos(self.cutoff * math.pi) + 1) / 2 or 1
 
 	illumination.fill_stream_uint8(idx, self.lights.lights.texture.buffer, HASH_RGBA, 4, light_data)
 end
@@ -184,6 +254,7 @@ function Lights:initialize()
 	self.shadow_color = vmath.vector4()
 	self.fog = vmath.vector4()
 	self.fog_color = vmath.vector4()
+	self.frustum = nil
 
 	self.light_texture_data = vmath.vector4()
 	self.lights_data = vmath.vector4(0, RADIUS_MAX, 0, 0)
@@ -493,12 +564,25 @@ function Lights:update_lights()
 	local dirty_texture = false
 	--TODO use nil or use first active light coord as min/max
 	local x_min, x_max, y_min, y_max, z_min, z_max
+
 	for i = #self.lights.all, 1, -1 do
 		local l = self.lights.all[i]
 		if l.removed then
 			table.remove(self.lights.all, i)
 		else
-			if l:is_visible() then
+			local visible = l:is_visible()
+			if visible and self.frustum then
+				local aabb_1 = l.position.x - l.radius
+				local aabb_2 = l.position.y - l.radius
+				local aabb_3 = l.position.z - l.radius
+				local aabb_4 = l.position.x + l.radius
+				local aabb_5 = l.position.y + l.radius
+				local aabb_6 = l.position.z + l.radius
+				--draw_aabb3d(aabb_1,aabb_2,aabb_3, aabb_4, aabb_5, aabb_6, MSD_DRAW_LINE_COLOR_AABB)
+
+				visible = illumination.frustum_is_box_visible(self.frustum, aabb_1, aabb_2, aabb_3, aabb_4, aabb_5, aabb_6)
+			end
+			if visible then
 				idx = idx + 1
 				active_list[idx] = l
 				if not x_min then
@@ -588,6 +672,10 @@ function Lights:update_lights()
 		resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
 	end
 
+end
+
+function Lights:set_frustum(frustum)
+	self.frustum = frustum
 end
 --endregion
 
