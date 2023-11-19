@@ -7,18 +7,22 @@
 Mix of [defold-illumination](https://github.com/astrochili/defold-illumination) and [defold-light-and-shadows](https://github.com/Dragosha/defold-light-and-shadows)
 This extension contains ready-to-use forward shading lighting mixed with realtime shadow from one source (the sun)
 
-**Cons:**
+🎮 [Play HTML5 demo](https://d954mas.github.io/defold-illumination-new/) with 🔦 on the `E` key.
+
+**Pros:**
 
 1. Worked in mobile( defold-illumination not worked in my mobile looks like shader precision problem)
 2. Frustum culling to light sources(from [scene3d](https://github.com/indiesoftby/defold-scene3d))
+
+**Cons:**
+
+1. Remove normal and specular map. I do not use it in my games. So if you need them you can add them by yourself(look in illumination sources)
 
 **TODO:**
 
 1. [Clustered forward shading](https://github.com/astrochili/defold-illumination/issues/1)
 2. Dynamic shadow matrix(update the shadow matrix whenever the camera moves so that it ideally describes the camera's frustum)
 
-
-🎮 [Play HTML5 demo](https://d954mas.github.io/defold-illumination-new/) with 🔦 on the `E` key.
 
 ## Credits
 
