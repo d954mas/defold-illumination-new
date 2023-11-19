@@ -33,6 +33,28 @@ highp vec4 getData(int index) {
     return texture2D(DATA_TEXTURE, vec2(x, y));
 }
 
+const float phong_shininess = 16.0;
+// const vec3 specular_color = vec3(1.0);
+vec3 point_light2(vec3 light_color, float power, vec3 light_position, vec3 position, vec3 vnormal, float specular, vec3 view_dir)
+{
+
+    vec3 dist = light_position - position;
+    vec3 direction = vec3(normalize(dist));
+    float d = length(dist);
+
+    vec3 reflect_dir = reflect(-direction, vnormal);
+    float spec_dot = max(dot(reflect_dir, view_dir), 0.0);
+
+    float irradiance = max(dot(vnormal, direction), 0.05);
+    float attenuation = (1.0/(1.0 + d*power + 2.0*d*d*power*power));
+    vec3 diffuse = light_color * irradiance * attenuation;
+
+    // if (irradiance > 0.0) {
+    diffuse += irradiance * attenuation * specular * pow(spec_dot, phong_shininess) * light_color; // *specular_color
+    // }
+    return diffuse;
+}
+
 vec3 getSpecularColor(vec3 map_specular, float light_specular, vec3 light_color, vec3 light_direction, vec3 surface_normal, vec3 view_direction) {
     if (light_specular == 0.0 || map_specular.x == 0.0) {
         return vec3(0.0);

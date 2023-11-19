@@ -61,7 +61,6 @@ void main() {
         vec3 lightColor = lightColorData.rgb* lightColorData.a;
         vec3 lightDirection = normalize(lightPosition - var_world_position);
         vec3 lightIlluminanceColor = lightColor;
-        vec3 lightSpecularColor = getSpecularColor(vec3(1.0), lightSpecular, lightColor, lightDirection, surface_normal, view_direction);
 
         float lightAttenuation = pow(clamp(1.0 - lightDistance / lightRadius, 0.0, 1.0), 2.0 * lightSmoothness);
         float lightStrength = lightAttenuation * max(dot(surface_normal, lightDirection), 0.0);
@@ -82,13 +81,11 @@ void main() {
                 float spot_epsilon = spot_cutoff_inner - spot_cutoff;
                 float spot_intensity = clamp((spot_cutoff - spot_theta) / spot_epsilon, 0.0, 1.0);
 
-                lightIlluminanceColor = lightIlluminanceColor * spot_intensity;
-                lightSpecularColor = lightSpecularColor * spot_intensity;
+                lightIlluminanceColor = lightIlluminanceColor * spot_intensity;;
             }
         }
 
         illuminance_color = illuminance_color + lightIlluminanceColor* lightStrength;
-        specular_color = specular_color + lightSpecularColor * lightStrength;
 
         //
     }
