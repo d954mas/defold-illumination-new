@@ -485,8 +485,8 @@ function Lights:set_render(render_obj)
 	-- all objects that have to cast shadows
 	self.shadow.pred = render.predicate({ "shadow" })
 
-	self.shadow.light_projection_base = vmath.matrix4_orthographic(-1, 1,
-			-1, 1, self.shadow.NEAR, self.shadow.FAR)
+	self.shadow.light_projection_base = vmath.matrix4_orthographic(-100, 100,
+			-100, 100, self.shadow.NEAR, self.shadow.FAR)
 	self.shadow.light_projection = vmath.matrix4_orthographic(self.shadow.PROJECTION_X1, self.shadow.PROJECTION_X2,
 			self.shadow.PROJECTION_Y1, self.shadow.PROJECTION_Y2, self.shadow.NEAR, self.shadow.FAR)
 
@@ -626,6 +626,10 @@ function Lights:set_camera(x, y, z)
 		if py < min_y then min_y = py end
 		if py > max_y then max_y = py end
 	end
+	min_x = -100 + min_x*200
+	max_x = -100 + max_x*200
+	min_y = -100 + min_y*200
+	max_y = -100 + max_y*200
 
 	print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y)
 

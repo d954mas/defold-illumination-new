@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/render/illumination.render_script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/render/illumination.render_script" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/main.collection" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.collection" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,7 +96,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>696</line>
+          <line>700</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

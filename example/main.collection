@@ -44,7 +44,7 @@ collection_instances {
       }
       properties {
         id: "camera_far_z"
-        value: "30.0"
+        value: "15.0"
         type: PROPERTY_TYPE_NUMBER
       }
     }
