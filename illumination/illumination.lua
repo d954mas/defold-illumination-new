@@ -631,7 +631,7 @@ function Lights:set_camera(x, y, z)
 	min_y = -100 + min_y*200
 	max_y = -100 + max_y*200
 
-	print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y)
+	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y)
 
 
 
