@@ -4,14 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7a06ae90-40d6-4dd9-ab2d-5d282f282782" name="Changes" comment="fixed html">
-      <change afterPath="$PROJECT_DIR$/illumination/native/include/frustum_cull.h" afterDir="false" />
+    <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/main.collection" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.collection" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/native/src/extension.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/src/extension.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/render/illumination.render_script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/render/illumination.render_script" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/xmath/src/xMath.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/xmath/src/xMath.cpp" afterDir="false" />
     </list>
-    <list id="439b4f2d-ec9c-44df-b232-30751e5b0157" name="New changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -83,18 +82,23 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>363</line>
+          <line>478</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>318</line>
+          <line>422</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>115</line>
+          <line>217</line>
           <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="lua-line">
+          <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
+          <line>696</line>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

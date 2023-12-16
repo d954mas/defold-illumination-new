@@ -33,6 +33,22 @@ collection_instances {
     z: 0.0
     w: 1.0
   }
+  instance_properties {
+    id: "operator/operator"
+    properties {
+      id: "operator"
+      properties {
+        id: "camera_near_z"
+        value: "0.001"
+        type: PROPERTY_TYPE_NUMBER
+      }
+      properties {
+        id: "camera_far_z"
+        value: "30.0"
+        type: PROPERTY_TYPE_NUMBER
+      }
+    }
+  }
   scale3 {
     x: 1.0
     y: 1.0
@@ -157,7 +173,7 @@ embedded_instances {
   data: "embedded_components {\n"
   "  id: \"mesh\"\n"
   "  type: \"mesh\"\n"
-  "  data: \"material: \\\"/illumination/assets/materials/shadow_debug_mesh.material\\\"\\n"
+  "  data: \"material: \\\"/illumination/assets/materials/shadow_debug_shadowmap_mesh.material\\\"\\n"
   "vertices: \\\"/illumination/shadow_debug.buffer\\\"\\n"
   "textures: \\\"/pointer_lock/assets/images/empty.png\\\"\\n"
   "primitive_type: PRIMITIVE_TRIANGLES\\n"
@@ -177,8 +193,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 108.0
-    y: 123.0
+    x: 374.0
+    y: 21.0
     z: 0.0
   }
   rotation {
@@ -188,8 +204,8 @@ embedded_instances {
     w: 1.0
   }
   scale3 {
-    x: 64.0
-    y: 64.0
+    x: 256.0
+    y: 256.0
     z: 1.0
   }
 }

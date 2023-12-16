@@ -391,6 +391,14 @@ static int xMath_matrix_mul(lua_State* L){
     return 0;
 }
 
+static int xMath_matrix_mul_v4(lua_State* L){
+    Vectormath::Aos::Vector4 *out = dmScript::CheckVector4(L, 1);
+    Vectormath::Aos::Matrix4 *lhs = dmScript::CheckMatrix4(L, 2);
+    Vectormath::Aos::Vector4 *rhs = dmScript::CheckVector4(L, 3);
+    *out = *lhs * *rhs;
+    return 0;
+}
+
 static int xMath_matrix_transpose(lua_State* L){
     Vectormath::Aos::Matrix4 *out = dmScript::CheckMatrix4(L, 1);
     Vectormath::Aos::Matrix4 lhs = *dmScript::CheckMatrix4(L, 2);
@@ -634,6 +642,7 @@ static const luaL_reg xMathModule_methods[] =
     {"matrix_rotation_z", xMath_matrix_rotation_z},
     {"matrix_translation", xMath_matrix_translation},
     {"matrix_mul", xMath_matrix_mul},
+    {"matrix_mul_v4", xMath_matrix_mul_v4},
     {"matrix_transpose", xMath_matrix_transpose},
     {0, 0}
 };
@@ -648,28 +657,13 @@ static void xMathLuaInit(lua_State* L)
     assert(top == lua_gettop(L));
 }
 
-dmExtension::Result xMathAppInitialize(dmExtension::AppParams* params)
-{
-    return dmExtension::RESULT_OK;
-}
-
-dmExtension::Result xMathInitialize(dmExtension::Params* params)
+static dmExtension::Result xMathInitialize(dmExtension::Params* params)
 {
     xMathLuaInit(params->m_L);
     dmLogInfo("Registered %s Extension\n", MODULE_NAME);
     return dmExtension::RESULT_OK;
 }
 
-dmExtension::Result xMathAppFinalize(dmExtension::AppParams* params)
-{
-    return dmExtension::RESULT_OK;
-}
-
-dmExtension::Result xMathFinalize(dmExtension::Params* params)
-{
-    return dmExtension::RESULT_OK;
-}
-
 // Defold SDK uses a macro for setting up extension entry points:
 // It must match the name field in the `ext.manifest`
-DM_DECLARE_EXTENSION(xMath, LIB_NAME, xMathAppInitialize, xMathAppFinalize, xMathInitialize, 0, 0, xMathFinalize)
+DM_DECLARE_EXTENSION(xMath, LIB_NAME, 0, 0, xMathInitialize, 0, 0, 0)

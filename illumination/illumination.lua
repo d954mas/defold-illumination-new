@@ -5,6 +5,8 @@ local VIEW_DIRECTION = vmath.vector3()
 local VIEW_RIGHT = vmath.vector3()
 local VIEW_UP = vmath.vector3()
 
+local TEMP_V4 = vmath.vector4()
+
 local V_UP = vmath.vector3(0, 1, 0)
 
 local HASH_RGBA = hash("rgba")
@@ -14,6 +16,28 @@ local RADIUS_MAX = 128
 ---@class Light
 local Light = CLASS("Light")
 local LIGHT_IDX = 0
+
+local POINTS_CUBE = {
+	vmath.vector4(-1.0, -1.0, 1.0, 1.0),
+	vmath.vector4(-1.0, 1.0, 1.0, 1.0),
+	vmath.vector4(1.0, 1.0, 1.0, 1.0),
+	vmath.vector4(1.0, -1.0, 1.0, 1.0),
+	vmath.vector4(-1.0, -1.0, -1.0, 1.0),
+	vmath.vector4(-1.0, 1.0, -1.0, 1.0),
+	vmath.vector4(1.0, 1.0, -1.0, 1.0),
+	vmath.vector4(1.0, -1.0, -1.0, 1.0)
+};
+
+local POINTS_CUBE_RESULT = {
+	vmath.vector4(-1.0, -1.0, 1.0, 1.0),
+	vmath.vector4(-1.0, 1.0, 1.0, 1.0),
+	vmath.vector4(1.0, 1.0, 1.0, 1.0),
+	vmath.vector4(1.0, -1.0, 1.0, 1.0),
+	vmath.vector4(-1.0, -1.0, -1.0, 1.0),
+	vmath.vector4(-1.0, 1.0, -1.0, 1.0),
+	vmath.vector4(1.0, 1.0, -1.0, 1.0),
+	vmath.vector4(1.0, -1.0, -1.0, 1.0)
+};
 
 local V1 = vmath.vector3(0)
 local V2 = vmath.vector3(0)
@@ -83,6 +107,84 @@ local function draw_aabb3d(x1, y1, z1, x2, y2, z2, color)
 	V2.x, V2.y, V2.z = x2, y2, z2
 	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
 
+end
+
+
+local function draw_cube(points, color)
+	MSD_DRAW_LINE_COLOR.x = color.x
+	MSD_DRAW_LINE_COLOR.y = color.y
+	MSD_DRAW_LINE_COLOR.z = color.z
+	MSD_DRAW_LINE_COLOR.w = color.w
+
+	local p1 = points[1]
+	local p2 = points[2]
+	local p3 = points[3]
+	local p4 = points[4]
+	local p5 = points[5]
+	local p6 = points[6]
+	local p7 = points[7]
+	local p8 = points[8]
+
+	--far
+	V1.x, V1.y, V1.z = p1.x, p1.y, p1.z
+	V2.x, V2.y, V2.z = p2.x, p2.y, p2.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = p2.x, p2.y, p2.z
+	V2.x, V2.y, V2.z = p3.x, p3.y, p3.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = p3.x, p3.y, p3.z
+	V2.x, V2.y, V2.z = p4.x, p4.y, p4.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = p4.x, p4.y, p4.z
+	V2.x, V2.y, V2.z = p1.x, p1.y, p1.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+
+	--near
+	V1.x, V1.y, V1.z = p5.x, p5.y, p5.z
+	V2.x, V2.y, V2.z = p6.x, p6.y, p6.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = p6.x, p6.y, p6.z
+	V2.x, V2.y, V2.z = p7.x, p7.y, p7.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = p7.x, p7.y, p7.z
+	V2.x, V2.y, V2.z = p8.x, p8.y, p8.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = p8.x, p8.y, p8.z
+	V2.x, V2.y, V2.z = p5.x, p5.y, p5.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	--edges
+	V1.x, V1.y, V1.z = p1.x, p1.y, p1.z
+	V2.x, V2.y, V2.z = p5.x, p5.y, p5.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = p2.x, p2.y, p2.z
+	V2.x, V2.y, V2.z = p6.x, p6.y, p6.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = p3.x, p3.y, p3.z
+	V2.x, V2.y, V2.z = p7.x, p7.y, p7.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	V1.x, V1.y, V1.z = p4.x, p4.y, p4.z
+	V2.x, V2.y, V2.z = p8.x, p8.y, p8.z
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+
+	--center
+	MSD_DRAW_LINE.color.y = 1
+	V1.x, V1.y, V1.z = (p1.x +p2.x)/2, (p1.y +p2.y)/2, (p1.z +p2.z)/2
+	V2.x, V2.y, V2.z =  (p3.x +p4.x)/2, (p3.y +p4.y)/2, (p3.z +p4.z)/2
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
+	V1.x, V1.y, V1.z = (p2.x +p3.x)/2, (p2.y +p3.y)/2, (p2.z +p3.z)/2
+	V2.x, V2.y, V2.z =  (p1.x +p4.x)/2, (p1.y +p4.y)/2, (p1.z +p4.z)/2
+	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
 end
 
 ---@param lights LightsData
@@ -255,6 +357,7 @@ function Lights:initialize()
 	self.fog = vmath.vector4()
 	self.fog_color = vmath.vector4()
 	self.frustum = nil
+	self.frustum_inv = vmath.matrix4()
 
 	self.light_texture_data = vmath.vector4()
 	self.lights_data = vmath.vector4(0, RADIUS_MAX, 0, 0)
@@ -272,11 +375,12 @@ function Lights:initialize()
 		PROJECTION_X2 = 15,
 		PROJECTION_Y1 = -15,
 		PROJECTION_Y2 = 15,
-		NEAR = -50,
-		FAR = 150,
+		NEAR = 0.001,
+		FAR = 30,
 
 		pred = nil,
 		light_projection = nil,
+		light_projection_base = nil,
 		bias_matrix = vmath.matrix4(),
 		light_matrix = vmath.matrix4(),
 		constants = render.constant_buffer(),
@@ -328,6 +432,17 @@ function Lights:draw_data_lights_debug()
 	render.draw(self.debug_data_lights_predicate)
 end
 
+function Lights:draw_debug_planes()
+	for idx, point in ipairs(POINTS_CUBE) do
+		local result = POINTS_CUBE_RESULT[idx]
+		xmath.matrix_mul_v4(result, self.frustum_inv, point)
+		xmath.div(result, result, result.w)
+		result.w = 1
+	end
+
+	draw_cube(POINTS_CUBE_RESULT, vmath.vector4(1, 0, 0, 1))
+end
+
 function Lights:draw_begin()
 	if (self.shadow.rt) then
 		render.enable_texture(1, self.shadow.rt, render.BUFFER_COLOR_BIT) -- created in light_and_shadows.init
@@ -370,6 +485,8 @@ function Lights:set_render(render_obj)
 	-- all objects that have to cast shadows
 	self.shadow.pred = render.predicate({ "shadow" })
 
+	self.shadow.light_projection_base = vmath.matrix4_orthographic(-1, 1,
+			-1, 1, self.shadow.NEAR, self.shadow.FAR)
 	self.shadow.light_projection = vmath.matrix4_orthographic(self.shadow.PROJECTION_X1, self.shadow.PROJECTION_X2,
 			self.shadow.PROJECTION_Y1, self.shadow.PROJECTION_Y2, self.shadow.NEAR, self.shadow.FAR)
 
@@ -474,19 +591,6 @@ function Lights:set_sun_position(x, y, z)
 end
 
 function Lights:set_camera(x, y, z)
-	local dx = math.abs(self.shadow.root_position.x - x)
-	local dy = math.abs(self.shadow.root_position.y - y)
-	local dz = math.abs(self.shadow.root_position.z - z)
-
-	local current_projection = self.shadow.light_projection
-
-
-	--fixed some shadow jittering when move
-	if (dx < 1 and dy < 1 and dz < 1 and self.current_projection == current_projection) then
-		return
-	end
-
-	self.current_projection = current_projection
 
 	self.shadow.root_position.x = x
 	self.shadow.root_position.y = y
@@ -502,9 +606,42 @@ function Lights:set_camera(x, y, z)
 	xmath.normalize(VIEW_UP, VIEW_UP)
 
 	xmath.matrix_look_at(self.shadow.light_transform, self.shadow.light_position, self.shadow.root_position, VIEW_UP)
-	local light_projection = self.shadow.light_projection
-	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.bias_matrix, light_projection)
+	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.bias_matrix, self.shadow.light_projection_base)
 	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, self.shadow.light_transform)
+
+	for idx, point in ipairs(POINTS_CUBE) do
+		local result = POINTS_CUBE_RESULT[idx]
+		xmath.matrix_mul_v4(result, self.frustum_inv, point)
+		xmath.div(result, result, result.w)
+		result.w = 1
+	end
+
+	local min_x, max_x = math.huge, -math.huge
+	local min_y, max_y = math.huge, -math.huge
+	for _, point in ipairs(POINTS_CUBE_RESULT) do
+		xmath.matrix_mul_v4(TEMP_V4, self.shadow.light_matrix, point)
+		local px, py = TEMP_V4.x / TEMP_V4.w, TEMP_V4.y / TEMP_V4.w
+		if px < min_x then min_x = px end
+		if px > max_x then max_x = px end
+		if py < min_y then min_y = py end
+		if py > max_y then max_y = py end
+	end
+
+	print("shadow uv:[" .. min_x .. " " .. min_y .. "] [" .. max_x .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y)
+
+
+
+	if false then
+		min_x, max_x = self.shadow.PROJECTION_X1, self.shadow.PROJECTION_X2
+		min_y, max_y = self.shadow.PROJECTION_Y1, self.shadow.PROJECTION_Y2
+	end
+
+	xmath.matrix4_orthographic(self.shadow.light_projection, min_x, max_x,
+			min_y, max_y, self.shadow.NEAR, self.shadow.FAR)
+
+	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.bias_matrix, self.shadow.light_projection)
+	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, self.shadow.light_transform)
+
 	--local mtx_light = self.shadow.bias_matrix * self.shadow.light_projection * self.shadow.light_transform
 	for _, constant in ipairs(self.constants) do
 		constant.mtx_light = self.shadow.light_matrix
@@ -676,7 +813,10 @@ end
 
 function Lights:set_frustum(frustum)
 	self.frustum = frustum
+	xmath.matrix_inv(self.frustum_inv, self.frustum)
 end
+
+
 --endregion
 
 return Lights()

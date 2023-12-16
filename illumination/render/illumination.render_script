@@ -79,6 +79,7 @@ function update(self)
 	render.draw(self.gui.predicate)
 	render.draw(self.text.predicate)
 
+	ILLUMINATION:draw_debug_planes()
 	ILLUMINATION:draw_shadow_debug()
 	ILLUMINATION:draw_data_lights_debug()
 end
