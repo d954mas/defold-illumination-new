@@ -627,7 +627,7 @@ function Lights:set_camera(x, y, z)
 		if py > max_y then max_y = py end
 	end
 
-	print("shadow uv:[" .. min_x .. " " .. min_y .. "] [" .. max_x .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y)
+	print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y)
 
 
 
