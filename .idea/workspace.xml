@@ -7,8 +7,7 @@
     <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/illumination_script.script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination_script.script" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/render/illumination.render_script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/render/illumination.render_script" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/native/src/extension.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/src/extension.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,22 +82,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>592</line>
+          <line>604</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>536</line>
+          <line>548</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>233</line>
+          <line>232</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>807</line>
+          <line>819</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

@@ -13,7 +13,6 @@ local HASH_RGBA = hash("rgba")
 
 local RADIUS_MAX = 128
 
-
 local LIGHT_IDX = 0
 
 local POINTS_CUBE = {
@@ -341,8 +340,8 @@ end
 local function create_lights_data_texture()
 	local path = "/__lights_data.texturec"
 	local tparams = {
-		width = 128,
-		height = 128,
+		width = 512,
+		height = 512,
 		type = resource.TEXTURE_TYPE_2D,
 		format = resource.TEXTURE_FORMAT_RGBA,
 		num_mip_maps = 1
@@ -433,7 +432,7 @@ function Lights:initialize()
 	--max_lights_per_cluster * 1pixel(rgba) light idx
 	self.lights.clusters.pixels_per_cluster = 1 + self.lights.clusters.max_lights_per_cluster * 1
 	for i = 1, self.lights.clusters.x_slices * self.lights.clusters.y_slices * self.lights.clusters.z_slices do
-		table.insert(self.lights.clusters.clusters, { lights = {} })
+		table.insert(self.lights.clusters.clusters, { lights = {}, idx = i })
 	end
 end
 
@@ -454,7 +453,6 @@ function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_f
 
 	local tan_Vertical_FoV_by_2 = math.tan(camera_fov * 0.5);
 	local zStride = (camera_far - camera_near) / clusters.z_slices;
-	print(zStride)
 
 	for i = 1, #active_list do
 		local l = active_list[i]
@@ -482,27 +480,27 @@ function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_f
 		local zEndIndex = math.floor(z2 / zStride);
 		local yStartIndex = math.floor((y1 + h_lightFrustum * 0.5) / yStride);
 		local yEndIndex = math.floor((y2 + h_lightFrustum * 0.5) / yStride);
-		local xStartIndex = math.floor((x1 + w_lightFrustum * 0.5) / xStride)-1;
-		local xEndIndex = math.floor((x2 + w_lightFrustum * 0.5) / xStride)+1;
+		local xStartIndex = math.floor((x1 + w_lightFrustum * 0.5) / xStride) - 1;
+		local xEndIndex = math.floor((x2 + w_lightFrustum * 0.5) / xStride) + 1;
 
-		zStartIndex = clamp(zStartIndex, 0, z_slices-1);
-		zEndIndex = clamp(zEndIndex, 0, z_slices-1);
+		zStartIndex = clamp(zStartIndex, 0, z_slices - 1);
+		zEndIndex = clamp(zEndIndex, 0, z_slices - 1);
 
-		yStartIndex = clamp(yStartIndex, 0, y_slices-1);
-		yEndIndex = clamp(yEndIndex, 0, y_slices-1);
+		yStartIndex = clamp(yStartIndex, 0, y_slices - 1);
+		yEndIndex = clamp(yEndIndex, 0, y_slices - 1);
 
-		xStartIndex = clamp(xStartIndex, 0, x_slices-1);
-		xEndIndex = clamp(xEndIndex, 0, x_slices-1);
+		xStartIndex = clamp(xStartIndex, 0, x_slices - 1);
+		xEndIndex = clamp(xEndIndex, 0, x_slices - 1);
 
 		for z = zStartIndex, zEndIndex do
 			for y = yStartIndex, yEndIndex do
 				for x = xStartIndex, xEndIndex do
-					local id = x + y * x_slices + z *x_slices *y_slices + 1;
+					local id = x + y * x_slices + z * x_slices * y_slices + 1;
 					local cluster = clusters.clusters[id]
-					if( #cluster.lights < max_lights_per_cluster) then
-						table.insert(cluster.lights,l)
+					if (#cluster.lights < max_lights_per_cluster) then
+						table.insert(cluster.lights, l)
 					else
-						print("cluster:" .. id .. " already have max lights count")
+						--print("cluster:" .. id .. " already have max lights count")
 					end
 
 				end
@@ -511,9 +509,23 @@ function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_f
 	end
 	for i = 1, x_slices * y_slices * z_slices do
 		local cluster = clusters.clusters[i]
-		print("cluster:" .. i .. " lights:" .. #cluster.lights)
+		--print("cluster:" .. cluster.idx .. " " .. #cluster.lights)
+		self:cluster_write_to_buffer(active_list, cluster)
 	end
 
+end
+
+function Lights:cluster_write_to_buffer(active_list, cluster)
+	local total_lights = #active_list
+	local idx = total_lights * light_size + 1 + (cluster.idx - 1) * self.lights.clusters.pixels_per_cluster + 1--lua side start from 1
+	local data = {}
+	data[1], data[2], data[3], data[4] = illumination.float_to_rgba(#cluster.lights, 0, self.lights.clusters.max_lights_per_cluster)
+	local data_idx = 5
+	for _, l in ipairs(cluster.lights) do
+		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = illumination.float_to_rgba(l.active_idx, 0, total_lights)
+		data_idx = data_idx + 4
+	end
+	illumination.fill_stream_uint8(idx, self.lights.texture.buffer, HASH_RGBA, 4, light_data)
 end
 
 function Lights:init_lights_data(data_url)
@@ -908,6 +920,7 @@ function Lights:update_lights(camera_aspect, camera_fov, camera_far, camera_near
 	end
 
 	self:update_clusters(active_list, camera_aspect, camera_fov, camera_far, camera_near)
+	dirty_texture = true
 
 	if dirty_texture then
 		resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)

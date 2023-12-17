@@ -15,7 +15,7 @@ static dmVMath::Vector4 EncodeFloatRGBA(float v, float min, float max){
     //if (v<MIN_BORDER){MIN_BORDER = v;}
     //if (v>MAX_BORDER){MAX_BORDER = v;}
     assert(v>=min);
-    assert(v<max);
+    assert(v<=max);
     assert(max>min);
     v = (v- min)/(max-min);
     assert(v>=0.0);
