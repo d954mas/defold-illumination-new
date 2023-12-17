@@ -57,8 +57,8 @@ void main() {
    // num_lights = int(lights_data.x);
     for (int i = 0; i < num_lights; ++i) {
         int light_tex_idx = cluster_tex_idx +1 + i;
-        int lightIdx = int(rgba_to_float(getData(light_tex_idx))*int(lights_data.x));
-        //lightIdx = i;
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x))-1; //index need start from 0
+       // lightIdx = i;
 
         int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
         float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
@@ -136,5 +136,5 @@ void main() {
     gl_FragColor = vec4(color, texture_color.a);
 
     //float colorz = floor(-var_view_position.z-camNear)/clusters_data.z;
-    //gl_FragColor = vec4(clusterX_index/clusters_data.x,clusterY_index/clusters_data.y,clusterZ_index/clusters_data.z, texture_color.a);
+    //gl_FragColor = vec4(clusterX_index/clusters_data.x,clusterY_index/clusters_data.y,clusterZ_index/10.0, texture_color.a);
 }

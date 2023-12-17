@@ -340,8 +340,8 @@ end
 local function create_lights_data_texture()
 	local path = "/__lights_data.texturec"
 	local tparams = {
-		width = 512,
-		height = 512,
+		width = 1024,
+		height = 1024,
 		type = resource.TEXTURE_TYPE_2D,
 		format = resource.TEXTURE_FORMAT_RGBA,
 		num_mip_maps = 1
@@ -421,10 +421,10 @@ function Lights:initialize()
 		all = {},
 		texture = nil,
 		clusters = {
-			x_slices = 10,
-			y_slices = 10,
-			z_slices = 10,
-			max_lights_per_cluster = 128,
+			x_slices = 15,
+			y_slices = 15,
+			z_slices = 15,
+			max_lights_per_cluster = 90,
 			clusters = {},
 			pixels_per_cluster = 0
 		}
@@ -521,7 +521,7 @@ function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_f
 
 	for i = 1, x_slices * y_slices * z_slices do
 		local cluster = clusters.clusters[i]
-		--print("cluster:" .. cluster.idx .. " " .. #cluster.lights)
+--		print("cluster:" .. cluster.idx .. " " .. #cluster.lights)
 		self:cluster_write_to_buffer(active_list, cluster)
 	end
 
@@ -533,15 +533,22 @@ function Lights:cluster_write_to_buffer(active_list, cluster)
 	local data = {}
 	data[1], data[2], data[3], data[4] = illumination.float_to_rgba(#cluster.lights, 0, self.lights.clusters.max_lights_per_cluster)
 	local data_idx = 5
-	for _, l in ipairs(cluster.lights) do
+	for lidx, l in ipairs(cluster.lights) do
 		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = illumination.float_to_rgba(l.active_idx, 0, total_lights)
 		data_idx = data_idx + 4
+		--print("light:" .. lidx .. " active_idx:" .. l.active_idx )
 	end
 
-	for i=#cluster.lights+1,self.lights.clusters.max_lights_per_cluster do
-		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = 0,0,0,1
+
+	--[[for i=#cluster.lights+1,self.lights.clusters.max_lights_per_cluster do
+		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = 1,0,0,1
 		data_idx = data_idx + 4
 	end
+	for i=self.lights.clusters.max_lights_per_cluster+2, self.lights.clusters.pixels_per_cluster do
+		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = 0,1,0,1
+		data_idx = data_idx + 4
+	end--]]
+
 
 	illumination.fill_stream_uint8(idx, self.lights.texture.buffer, HASH_RGBA, 4, data)
 end
