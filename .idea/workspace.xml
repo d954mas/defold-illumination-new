@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/model.fp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/model.fp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/light_uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/light_uniforms.glsl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,9 +74,9 @@
     <MESSAGE value="reduce texture size" />
     <MESSAGE value="increase mesh max_count" />
     <MESSAGE value="try count shadowmap projection" />
-    <MESSAGE value="add clusters" />
     <MESSAGE value="clusters at texture" />
-    <option name="LAST_COMMIT_MESSAGE" value="clusters at texture" />
+    <MESSAGE value="add clusters" />
+    <option name="LAST_COMMIT_MESSAGE" value="add clusters" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

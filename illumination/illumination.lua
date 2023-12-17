@@ -522,7 +522,7 @@ end
 
 function Lights:cluster_write_to_buffer(active_list, cluster)
 	local total_lights = #active_list
-	local idx = total_lights * light_size + 1 + (cluster.idx - 1) * self.lights.clusters.pixels_per_cluster + 1--lua side start from 1
+	local idx = total_lights * light_size + (cluster.idx - 1) * self.lights.clusters.pixels_per_cluster + 1--lua side start from 1
 	local data = {}
 	data[1], data[2], data[3], data[4] = illumination.float_to_rgba(#cluster.lights, 0, self.lights.clusters.max_lights_per_cluster)
 	local data_idx = 5

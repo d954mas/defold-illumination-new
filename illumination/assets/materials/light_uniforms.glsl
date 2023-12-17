@@ -15,7 +15,7 @@ radius, smoothnes, specular, cutoff -> rgba()
 
 */
 
-uniform lowp sampler2D DATA_TEXTURE;
+uniform highp sampler2D DATA_TEXTURE;
 
 uniform lowp vec4 ambient_color;
 uniform lowp vec4 sunlight_color;
