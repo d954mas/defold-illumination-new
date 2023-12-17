@@ -631,14 +631,7 @@ function Lights:set_camera(x, y, z)
 	min_y = -100 + min_y*200
 	max_y = -100 + max_y*200
 
-	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y)
-
-
-
-	if false then
-		min_x, max_x = self.shadow.PROJECTION_X1, self.shadow.PROJECTION_X2
-		min_y, max_y = self.shadow.PROJECTION_Y1, self.shadow.PROJECTION_Y2
-	end
+	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y
 
 	xmath.matrix4_orthographic(self.shadow.light_projection, min_x, max_x,
 			min_y, max_y, self.shadow.NEAR, self.shadow.FAR)
