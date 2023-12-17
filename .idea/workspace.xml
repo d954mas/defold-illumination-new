@@ -6,6 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/main.collection" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.collection" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/main.script" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.script" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/render/illumination.render_script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/render/illumination.render_script" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,22 +83,22 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>478</line>
+          <line>538</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>422</line>
+          <line>482</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>217</line>
+          <line>227</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>700</line>
+          <line>753</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

@@ -95,6 +95,23 @@ function init(self)
 	self.is_profiler_enabled = false
 	self.is_gui_enabled = true
 	msg.post(self.urls.go, hash 'acquire_input_focus')
+
+	self.lights = {}
+	for z=-10,10 do
+		for x=-10,10 do
+			local light = illumination:create_light()
+			light:set_position(x,0.5,z)
+			light:set_radius(1.5)
+			light:set_smoothness(0.5)
+			local r = math.abs(z/10)
+			local g = math.abs(x/10)
+			local b = math.abs((z+x)/20)
+			light:set_color(r,g,b,0.75)
+			light:set_enabled(true)
+			table.insert(self.lights,light)
+		end
+	end
+
 end
 
 function on_input(self, action_id, action)

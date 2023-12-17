@@ -44,7 +44,7 @@ local V2 = vmath.vector3(0)
 
 local HASH_DRAW_LINE = hash("draw_line")
 local MSD_DRAW_LINE_COLOR = vmath.vector4(1)
-local MSD_DRAW_LINE_COLOR_AABB = vmath.vector4(1,0,0,1)
+local MSD_DRAW_LINE_COLOR_AABB = vmath.vector4(1, 0, 0, 1)
 
 local MSD_DRAW_LINE = {
 	start_point = V1,
@@ -108,7 +108,6 @@ local function draw_aabb3d(x1, y1, z1, x2, y2, z2, color)
 	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
 
 end
-
 
 local function draw_cube(points, color)
 	MSD_DRAW_LINE_COLOR.x = color.x
@@ -179,11 +178,11 @@ local function draw_cube(points, color)
 
 	--center
 	MSD_DRAW_LINE.color.y = 1
-	V1.x, V1.y, V1.z = (p1.x +p2.x)/2, (p1.y +p2.y)/2, (p1.z +p2.z)/2
-	V2.x, V2.y, V2.z =  (p3.x +p4.x)/2, (p3.y +p4.y)/2, (p3.z +p4.z)/2
+	V1.x, V1.y, V1.z = (p1.x + p2.x) / 2, (p1.y + p2.y) / 2, (p1.z + p2.z) / 2
+	V2.x, V2.y, V2.z = (p3.x + p4.x) / 2, (p3.y + p4.y) / 2, (p3.z + p4.z) / 2
 	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
-	V1.x, V1.y, V1.z = (p2.x +p3.x)/2, (p2.y +p3.y)/2, (p2.z +p3.z)/2
-	V2.x, V2.y, V2.z =  (p1.x +p4.x)/2, (p1.y +p4.y)/2, (p1.z +p4.z)/2
+	V1.x, V1.y, V1.z = (p2.x + p3.x) / 2, (p2.y + p3.y) / 2, (p2.z + p3.z) / 2
+	V2.x, V2.y, V2.z = (p1.x + p4.x) / 2, (p1.y + p4.y) / 2, (p1.z + p4.z) / 2
 	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
 end
 
@@ -207,6 +206,7 @@ function Light:initialize(lights)
 	self.smoothness = 1
 	self.specular = 0.5
 	self.cutoff = 1
+	self.aabb = { x1 = 0, y1 = 0, z1 = 0, x2 = 0, y2 = 0, z2 = 0 }
 end
 
 function Light:set_enabled(enabled)
@@ -215,10 +215,21 @@ function Light:set_enabled(enabled)
 	end
 end
 
+function Light:update_aabb()
+	self.aabb.x1 = self.position.x - self.radius
+	self.aabb.y1= self.position.y - self.radius
+	self.aabb.z1 = self.position.z - self.radius
+	self.aabb.x2 = self.position.x + self.radius
+	self.aabb.y2 = self.position.y + self.radius
+	self.aabb.z2 = self.position.z + self.radius
+
+end
+
 function Light:set_position(x, y, z)
 	if self.position.x ~= x or self.position.y ~= y or self.position.z ~= z then
 		self.position.x, self.position.y, self.position.z = x, y, z
 		self.dirty = true
+		self:update_aabb()
 	end
 end
 
@@ -241,6 +252,7 @@ function Light:set_radius(radius)
 	if self.radius ~= radius then
 		self.radius = radius
 		self.dirty = true
+		self:update_aabb()
 	end
 end
 
@@ -400,8 +412,56 @@ function Lights:initialize()
 	---@class LightsData
 	self.lights = {
 		all = {},
-		texture = nil
+		texture = nil,
+		clusters = {
+			x_slices = 10,
+			y_slices = 10,
+			z_slices = 10,
+			max_lights_per_cluster = 64,
+			clusters = {},
+			pixels_per_cluster = 0
+		}
 	}
+	--1 pixel(rgba) lights count
+	--max_lights_per_cluster * 1pixel(rgba) light idx
+	self.lights.clusters.pixels_per_cluster = 1 + self.lights.clusters.max_lights_per_cluster * 1
+	for i = 1, self.lights.clusters.x_slices * self.lights.clusters.y_slices * self.lights.clusters.z_slices do
+		table.insert(self.lights.clusters.clusters, { lights = {} })
+	end
+end
+
+---@param active_list Light[]
+function Lights:update_clusters(active_list)
+	local lights = self.lights
+	local clusters = lights.clusters
+	local x_slices = clusters.x_slices
+	local y_slices = clusters.y_slices
+	local z_slices = clusters.z_slices
+	local max_lights_per_cluster = clusters.max_lights_per_cluster
+
+	local start_idx = #active_list * LIGHT_IDX + 1
+
+	for i = 1, x_slices * y_slices * z_slices do
+		self.lights.clusters.clusters[i].lights = {}
+	end
+
+	--instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
+	local xStride, yStride;
+	local xStartIndex, yStartIndex, zStartIndex;
+	local xEndIndex, yEndIndex, zEndIndex;
+
+	local h_lightFrustum, w_lightFrustum;
+	local lightRadius;
+	local clusterLightCount;
+
+	for i=1,#active_list do
+		local l = active_list[i]
+	end
+	for i = 1, x_slices * y_slices * z_slices do
+		--write cluster to buffer
+
+	end
+
 end
 
 function Lights:init_lights_data(data_url)
@@ -626,10 +686,10 @@ function Lights:set_camera(x, y, z)
 		if py < min_y then min_y = py end
 		if py > max_y then max_y = py end
 	end
-	min_x = -100 + min_x*200
-	max_x = -100 + max_x*200
-	min_y = -100 + min_y*200
-	max_y = -100 + max_y*200
+	min_x = -100 + min_x * 200
+	max_x = -100 + max_x * 200
+	min_y = -100 + min_y * 200
+	max_y = -100 + max_y * 200
 
 	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y
 
@@ -706,15 +766,8 @@ function Lights:update_lights()
 		else
 			local visible = l:is_visible()
 			if visible and self.frustum then
-				local aabb_1 = l.position.x - l.radius
-				local aabb_2 = l.position.y - l.radius
-				local aabb_3 = l.position.z - l.radius
-				local aabb_4 = l.position.x + l.radius
-				local aabb_5 = l.position.y + l.radius
-				local aabb_6 = l.position.z + l.radius
-				--draw_aabb3d(aabb_1,aabb_2,aabb_3, aabb_4, aabb_5, aabb_6, MSD_DRAW_LINE_COLOR_AABB)
-
-				visible = illumination.frustum_is_box_visible(self.frustum, aabb_1, aabb_2, aabb_3, aabb_4, aabb_5, aabb_6)
+				visible = illumination.frustum_is_box_visible(self.frustum,l.aabb.x1, l.aabb.y1, l.aabb.z1,
+						l.aabb.x2, l.aabb.y2, l.aabb.z2)
 			end
 			if visible then
 				idx = idx + 1
@@ -791,7 +844,7 @@ function Lights:update_lights()
 		print("axis_capacity_z" .. axis_capacity_z .. " > 1024. accuracy may be low")
 	end
 
-	--print("lights active:" .. #active_list)
+	print("lights active:" .. #active_list)
 	for i = #active_list, 1, -1 do
 		local l = active_list[i]
 		--rewrite dirty lights
@@ -801,6 +854,8 @@ function Lights:update_lights()
 			l:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
 		end
 	end
+
+	self:update_clusters(active_list)
 
 	if dirty_texture then
 		resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
