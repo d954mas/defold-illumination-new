@@ -38,6 +38,7 @@ end
 function update(self)
 	local width = render.get_window_width()
 	local height = render.get_window_height()
+	print("w:" .. width .. "h:" .. height)
 
 	ILLUMINATION:set_view(self.scene.view)
 	ILLUMINATION:set_frustum(self.scene.projection*self.scene.view)

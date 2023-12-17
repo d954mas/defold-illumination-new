@@ -36,9 +36,8 @@ void main() {
     float axis_z = lights_data2.w-lights_data2.z;
 
 
-    float u_screenWidth = 960;
-    float u_screenHeight = 640;
-    float camNear = 0.001;
+    float u_screenWidth = 1200;
+    float u_screenHeight = 800;
 
     float xStride = float(u_screenWidth)/float(clusters_data.x);
     float yStride = float(u_screenHeight)/float(clusters_data.y);
@@ -46,7 +45,7 @@ void main() {
 
     int clusterX_index = int(floor(gl_FragCoord.x/ xStride) );
     int clusterY_index = int(floor(gl_FragCoord.y/ yStride) );
-    int clusterZ_index = int(floor(-var_view_position.z-camNear) / zStride*15);
+    int clusterZ_index = int(floor(-var_view_position.z) / zStride);
 
 
     float clusterID = int(clusterX_index +
@@ -55,10 +54,11 @@ void main() {
 
     int cluster_tex_idx = int(lights_data.x*LIGHT_DATA_PIXELS + clusterID * (1+clusters_data.w));
     int num_lights = int(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w);
-
+   // num_lights = int(lights_data.x);
     for (int i = 0; i < num_lights; ++i) {
         int light_tex_idx = cluster_tex_idx +1 + i;
         int lightIdx = int(rgba_to_float(getData(light_tex_idx))*int(lights_data.x));
+        //lightIdx = i;
 
         int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
         float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;

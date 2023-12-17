@@ -424,7 +424,7 @@ function Lights:initialize()
 			x_slices = 10,
 			y_slices = 10,
 			z_slices = 10,
-			max_lights_per_cluster = 64,
+			max_lights_per_cluster = 128,
 			clusters = {},
 			pixels_per_cluster = 0
 		}
@@ -442,7 +442,7 @@ function Lights:initialize()
 end
 
 ---@param active_list Light[]
-function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_far, camera_near)
+function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_far)
 	local lights = self.lights
 	local clusters = lights.clusters
 	local x_slices = clusters.x_slices
@@ -457,7 +457,7 @@ function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_f
 	--instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
 
 	local tan_Vertical_FoV_by_2 = math.tan(camera_fov * 0.5);
-	local zStride = (camera_far - camera_near) / clusters.z_slices;
+	local zStride = (camera_far) / clusters.z_slices;
 
 	for i = 1, #active_list do
 		local l = active_list[i]
@@ -505,13 +505,20 @@ function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_f
 					if (#cluster.lights < max_lights_per_cluster) then
 						table.insert(cluster.lights, l)
 					else
-						--print("cluster:" .. id .. " already have max lights count")
+						print("cluster:" .. id .. " already have max lights count")
 					end
 
 				end
 			end
 		end
 	end
+
+
+	self.clusters_data.z = zStride
+	for _,constant in ipairs(self.constants)do
+		constant.clusters_data = self.clusters_data
+	end
+
 	for i = 1, x_slices * y_slices * z_slices do
 		local cluster = clusters.clusters[i]
 		--print("cluster:" .. cluster.idx .. " " .. #cluster.lights)
@@ -530,7 +537,13 @@ function Lights:cluster_write_to_buffer(active_list, cluster)
 		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = illumination.float_to_rgba(l.active_idx, 0, total_lights)
 		data_idx = data_idx + 4
 	end
-	illumination.fill_stream_uint8(idx, self.lights.texture.buffer, HASH_RGBA, 4, light_data)
+
+	for i=#cluster.lights+1,self.lights.clusters.max_lights_per_cluster do
+		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = 0,0,0,1
+		data_idx = data_idx + 4
+	end
+
+	illumination.fill_stream_uint8(idx, self.lights.texture.buffer, HASH_RGBA, 4, data)
 end
 
 function Lights:init_lights_data(data_url)
@@ -821,7 +834,7 @@ function Lights:remove_light(light)
 	light.removed = true
 end
 
-function Lights:update_lights(camera_aspect, camera_fov, camera_far, camera_near)
+function Lights:update_lights(camera_aspect, camera_fov, camera_far)
 	--check culling and disabled lights
 	local active_list = {}
 	local idx = 0
@@ -925,7 +938,7 @@ function Lights:update_lights(camera_aspect, camera_fov, camera_far, camera_near
 		end
 	end
 
-	self:update_clusters(active_list, camera_aspect, camera_fov, camera_far, camera_near)
+	self:update_clusters(active_list, camera_aspect, camera_fov, camera_far)
 	dirty_texture = true
 
 	if dirty_texture then
