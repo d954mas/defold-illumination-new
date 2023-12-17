@@ -39,6 +39,7 @@ function update(self)
 	local width = render.get_window_width()
 	local height = render.get_window_height()
 
+	ILLUMINATION:set_view(self.scene.view)
 	ILLUMINATION:set_frustum(self.scene.projection*self.scene.view)
 	ILLUMINATION:set_camera(self.scene.view.m03,self.scene.view.m13,self.scene.view.m23)
 

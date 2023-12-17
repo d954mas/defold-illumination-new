@@ -13,8 +13,7 @@ local HASH_RGBA = hash("rgba")
 
 local RADIUS_MAX = 128
 
----@class Light
-local Light = CLASS("Light")
+
 local LIGHT_IDX = 0
 
 local POINTS_CUBE = {
@@ -186,6 +185,13 @@ local function draw_cube(points, color)
 	msg.post("@render:", HASH_DRAW_LINE, MSD_DRAW_LINE)
 end
 
+local function clamp(x, min, max)
+	return x < min and min or (x > max and max or x)
+end
+
+---@class Light
+local Light = CLASS("Light")
+
 ---@param lights LightsData
 function Light:initialize(lights)
 	self.lights = assert(lights)
@@ -217,7 +223,7 @@ end
 
 function Light:update_aabb()
 	self.aabb.x1 = self.position.x - self.radius
-	self.aabb.y1= self.position.y - self.radius
+	self.aabb.y1 = self.position.y - self.radius
 	self.aabb.z1 = self.position.z - self.radius
 	self.aabb.x2 = self.position.x + self.radius
 	self.aabb.y2 = self.position.y + self.radius
@@ -370,6 +376,7 @@ function Lights:initialize()
 	self.fog_color = vmath.vector4()
 	self.frustum = nil
 	self.frustum_inv = vmath.matrix4()
+	self.view = vmath.matrix4()
 
 	self.light_texture_data = vmath.vector4()
 	self.lights_data = vmath.vector4(0, RADIUS_MAX, 0, 0)
@@ -431,7 +438,7 @@ function Lights:initialize()
 end
 
 ---@param active_list Light[]
-function Lights:update_clusters(active_list)
+function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_far, camera_near)
 	local lights = self.lights
 	local clusters = lights.clusters
 	local x_slices = clusters.x_slices
@@ -439,27 +446,72 @@ function Lights:update_clusters(active_list)
 	local z_slices = clusters.z_slices
 	local max_lights_per_cluster = clusters.max_lights_per_cluster
 
-	local start_idx = #active_list * LIGHT_IDX + 1
-
 	for i = 1, x_slices * y_slices * z_slices do
 		self.lights.clusters.clusters[i].lights = {}
 	end
 
 	--instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
-	local xStride, yStride;
-	local xStartIndex, yStartIndex, zStartIndex;
-	local xEndIndex, yEndIndex, zEndIndex;
 
-	local h_lightFrustum, w_lightFrustum;
-	local lightRadius;
-	local clusterLightCount;
+	local tan_Vertical_FoV_by_2 = math.tan(camera_fov * 0.5);
+	local zStride = (camera_far - camera_near) / clusters.z_slices;
+	print(zStride)
 
-	for i=1,#active_list do
+	for i = 1, #active_list do
 		local l = active_list[i]
+		TEMP_V4.x, TEMP_V4.y, TEMP_V4.z, TEMP_V4.w = l.position.x, l.position.y, l.position.z, 1
+		xmath.matrix_mul_v4(TEMP_V4, self.view, TEMP_V4)
+
+		TEMP_V4.z = TEMP_V4.z * -1; --camera looks down negative z, make z axis positive to make calculations easier
+		local x1 = TEMP_V4.x - l.radius
+		local y1 = TEMP_V4.y - l.radius
+		local z1 = TEMP_V4.z - l.radius
+		local x2 = TEMP_V4.x + l.radius
+		local y2 = TEMP_V4.y + l.radius
+		local z2 = TEMP_V4.z + l.radius
+
+		local h_lightFrustum = math.abs(tan_Vertical_FoV_by_2 * TEMP_V4.z * 2);
+		local w_lightFrustum = math.abs(camera_aspect * h_lightFrustum);
+
+		local xStride = w_lightFrustum / x_slices;
+		local yStride = h_lightFrustum / y_slices;
+
+		--Need to extend this by -1 and +1 to avoid edge cases where light
+		--technically could fall outside the bounds we make because the planes themeselves are tilted by some angle
+		-- the effect is exaggerated the steeper the angle the plane makes is
+		local zStartIndex = math.floor(z1 / zStride);
+		local zEndIndex = math.floor(z2 / zStride);
+		local yStartIndex = math.floor((y1 + h_lightFrustum * 0.5) / yStride);
+		local yEndIndex = math.floor((y2 + h_lightFrustum * 0.5) / yStride);
+		local xStartIndex = math.floor((x1 + w_lightFrustum * 0.5) / xStride)-1;
+		local xEndIndex = math.floor((x2 + w_lightFrustum * 0.5) / xStride)+1;
+
+		zStartIndex = clamp(zStartIndex, 0, z_slices-1);
+		zEndIndex = clamp(zEndIndex, 0, z_slices-1);
+
+		yStartIndex = clamp(yStartIndex, 0, y_slices-1);
+		yEndIndex = clamp(yEndIndex, 0, y_slices-1);
+
+		xStartIndex = clamp(xStartIndex, 0, x_slices-1);
+		xEndIndex = clamp(xEndIndex, 0, x_slices-1);
+
+		for z = zStartIndex, zEndIndex do
+			for y = yStartIndex, yEndIndex do
+				for x = xStartIndex, xEndIndex do
+					local id = x + y * x_slices + z *x_slices *y_slices + 1;
+					local cluster = clusters.clusters[id]
+					if( #cluster.lights < max_lights_per_cluster) then
+						table.insert(cluster.lights,l)
+					else
+						print("cluster:" .. id .. " already have max lights count")
+					end
+
+				end
+			end
+		end
 	end
 	for i = 1, x_slices * y_slices * z_slices do
-		--write cluster to buffer
-
+		local cluster = clusters.clusters[i]
+		print("cluster:" .. i .. " lights:" .. #cluster.lights)
 	end
 
 end
@@ -751,7 +803,7 @@ function Lights:remove_light(light)
 	light.removed = true
 end
 
-function Lights:update_lights()
+function Lights:update_lights(camera_aspect, camera_fov, camera_far, camera_near)
 	--check culling and disabled lights
 	local active_list = {}
 	local idx = 0
@@ -766,7 +818,7 @@ function Lights:update_lights()
 		else
 			local visible = l:is_visible()
 			if visible and self.frustum then
-				visible = illumination.frustum_is_box_visible(self.frustum,l.aabb.x1, l.aabb.y1, l.aabb.z1,
+				visible = illumination.frustum_is_box_visible(self.frustum, l.aabb.x1, l.aabb.y1, l.aabb.z1,
 						l.aabb.x2, l.aabb.y2, l.aabb.z2)
 			end
 			if visible then
@@ -855,7 +907,7 @@ function Lights:update_lights()
 		end
 	end
 
-	self:update_clusters(active_list)
+	self:update_clusters(active_list, camera_aspect, camera_fov, camera_far, camera_near)
 
 	if dirty_texture then
 		resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
@@ -868,6 +920,9 @@ function Lights:set_frustum(frustum)
 	xmath.matrix_inv(self.frustum_inv, self.frustum)
 end
 
+function Lights:set_view(view)
+	self.view = view
+end
 
 --endregion
 

@@ -20,7 +20,9 @@ function init(self)
 end
 
 function update(self, dt)
-	ILLUMINATION:update_lights()
+	local w,h = window.get_size()
+	local aspect = w/h
+	ILLUMINATION:update_lights(aspect,math.rad(75),15,0.001)
 	ILLUMINATION:set_ambient_color(self.ambient_color.x,self.ambient_color.y,self.ambient_color.z)
 	ILLUMINATION:set_ambient_color_intensity(self.ambient_level)
 
