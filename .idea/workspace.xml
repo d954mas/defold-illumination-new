@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/assets/materials/light_uniforms.glsl" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/assets/materials/light_uniforms.glsl" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/native/src/extension.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/src/extension.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,19 +75,20 @@
     <MESSAGE value="increase mesh max_count" />
     <MESSAGE value="try count shadowmap projection" />
     <MESSAGE value="add clusters" />
-    <option name="LAST_COMMIT_MESSAGE" value="add clusters" />
+    <MESSAGE value="clusters at texture" />
+    <option name="LAST_COMMIT_MESSAGE" value="clusters at texture" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>604</line>
+          <line>610</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>548</line>
+          <line>553</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
@@ -97,7 +98,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="lua-line">
           <url>file://$PROJECT_DIR$/illumination/illumination.lua</url>
-          <line>819</line>
+          <line>825</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

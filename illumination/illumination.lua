@@ -380,6 +380,7 @@ function Lights:initialize()
 	self.light_texture_data = vmath.vector4()
 	self.lights_data = vmath.vector4(0, RADIUS_MAX, 0, 0)
 	self.lights_data2 = vmath.vector4()
+	self.clusters_data = vmath.vector4() --max_lights_per_cluster, x_slices, y_slices, z_slices
 
 	self.debug = false
 
@@ -434,6 +435,10 @@ function Lights:initialize()
 	for i = 1, self.lights.clusters.x_slices * self.lights.clusters.y_slices * self.lights.clusters.z_slices do
 		table.insert(self.lights.clusters.clusters, { lights = {}, idx = i })
 	end
+	self.clusters_data.x = self.lights.clusters.x_slices
+	self.clusters_data.y = self.lights.clusters.y_slices
+	self.clusters_data.z = self.lights.clusters.z_slices
+	self.clusters_data.w = self.lights.clusters.max_lights_per_cluster
 end
 
 ---@param active_list Light[]
@@ -593,6 +598,7 @@ function Lights:add_constants(constant)
 	constant.fog_color = self.fog_color
 	constant.shadow_params = self.shadow_params
 	constant.lights_data = self.lights_data
+	constant.clusters_data = self.clusters_data
 	constant.light_texture_data = self.light_texture_data
 
 	V4.x = self.shadow.sun_position.x
