@@ -136,5 +136,5 @@ void main() {
     gl_FragColor = vec4(color, texture_color.a);
 
     //float colorz = floor(-var_view_position.z-camNear)/clusters_data.z;
-    //gl_FragColor = vec4(clusterX_index/clusters_data.x,clusterY_index/clusters_data.y,clusterZ_index/10.0, texture_color.a);
+    //gl_FragColor = vec4(clusterX_index/clusters_data.x,clusterY_index/clusters_data.y,clusterZ_index/15.0, texture_color.a);
 }

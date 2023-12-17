@@ -53,7 +53,7 @@ function init(self)
 			ambient_color = vmath.vector3(0.5, 0.5, 1.0),
 			ambient_level = 0.1,
 			fog_color = vmath.vector3(0, 0, 0.1),
-			duration = 10
+			duration = math.huge
 		}, {
 			sunlight_direction = vmath.vector3(-70, 90, 0),
 			sunlight_color = vmath.vector3(1, 1, 1),
@@ -61,7 +61,7 @@ function init(self)
 			ambient_color = vmath.vector3(1, 1, 1),
 			ambient_level = 0.3,
 			fog_color = vmath.vector3(0.53, 0.8, 0.92),
-			duration = 15
+			duration = math.huge
 		}, {
 			sunlight_direction = vmath.vector3(0, 20, 0),
 			sunlight_color = vmath.vector3(0.5, 0.2, 0),
@@ -97,20 +97,24 @@ function init(self)
 	msg.post(self.urls.go, hash 'acquire_input_focus')
 
 	self.lights = {}
-	for z=-10,10 do
-		for x=-10,10 do
-			local light = illumination:create_light()
-			light:set_position(x,0.5,z)
-			light:set_radius(1.5)
-			light:set_smoothness(0.5)
-			local r = math.abs(z/10)
-			local g = math.abs(x/10)
-			local b = math.abs((z+x)/20)
-			light:set_color(r,g,b,0.75)
-			light:set_enabled(true)
-			table.insert(self.lights,light)
+	for y = 1, 2 do
+		for z = -10, 10 do
+			for x = -10, 10 do
+				local light = illumination:create_light()
+				light:set_position(x, 0.25 + (y - 1) * 0.5, z)
+				light:set_radius(1.5)
+				light:set_smoothness(0.5)
+				local r = 0.2 + (math.abs(z / 10) / 2 * y)*0.8
+				local g = 0.2 + (math.abs(x / 10) / 2 * y)*0.8
+				local b = 0.2 + (math.abs((z + x) / 20) / 2 * y)*0.8
+				light:set_color(r, g, b, 0.85)
+				light:set_enabled(true)
+				local obj = factory.create("/factory#light_debug", light.position)
+				table.insert(self.lights, { light, obj })
+			end
 		end
 	end
+
 
 end
 

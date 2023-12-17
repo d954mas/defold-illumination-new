@@ -424,7 +424,7 @@ function Lights:initialize()
 			x_slices = 15,
 			y_slices = 15,
 			z_slices = 15,
-			max_lights_per_cluster = 90,
+			max_lights_per_cluster = 256,
 			clusters = {},
 			pixels_per_cluster = 0
 		}
@@ -934,7 +934,7 @@ function Lights:update_lights(camera_aspect, camera_fov, camera_far)
 		print("axis_capacity_z" .. axis_capacity_z .. " > 1024. accuracy may be low")
 	end
 
-	print("lights active:" .. #active_list)
+	print("lights total::" ..  #self.lights.all .. " lights active:" .. #active_list)
 	for i = #active_list, 1, -1 do
 		local l = active_list[i]
 		--rewrite dirty lights
