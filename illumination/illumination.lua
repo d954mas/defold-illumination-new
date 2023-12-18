@@ -422,10 +422,10 @@ function Lights:initialize()
 		all = {},
 		texture = nil,
 		clusters = {
-			x_slices = 15,
-			y_slices = 15,
-			z_slices = 15,
-			max_lights_per_cluster = 256,
+			x_slices = 5,
+			y_slices = 5,
+			z_slices = 5,
+			max_lights_per_cluster = 1024,
 			clusters = {},
 			pixels_per_cluster = 0
 		}
