@@ -36,22 +36,25 @@ void main() {
     float axis_z = lights_data2.w-lights_data2.z;
 
 
-    float xStride = screen_size.x/float(clusters_data.x);
-    float yStride = screen_size.y/float(clusters_data.y);
+    float xStride = screen_size.x/clusters_data.x;
+    float yStride = screen_size.y/clusters_data.y;
     float zStride = clusters_data.z;
+
 
     int clusterX_index = int(floor(gl_FragCoord.x/ xStride));
     int clusterY_index = int(floor(gl_FragCoord.y/ yStride));
     int clusterZ_index = int(floor(-var_view_position.z) / zStride);
 
 
-    float clusterID = int(clusterX_index +
-    clusterY_index * clusters_data.x +
-    clusterZ_index * clusters_data.x * clusters_data.y);
 
-    int cluster_tex_idx = int(lights_data.x*LIGHT_DATA_PIXELS + clusterID * (1+clusters_data.w));
-    int num_lights = int(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w);
+    float clusterID = round(float(clusterX_index) +
+    float(clusterY_index) * clusters_data.x +
+    float(clusterZ_index) * clusters_data.x * clusters_data.y);
+
+    int cluster_tex_idx = int(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w));
+    int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w));
     // num_lights = int(lights_data.x);
+
     for (int i = 0; i < num_lights; ++i) {
         int light_tex_idx = cluster_tex_idx +1 + i;
         int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x))-1;//index need start from 0
