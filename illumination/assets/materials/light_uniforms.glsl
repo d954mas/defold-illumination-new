@@ -28,9 +28,9 @@ uniform highp vec4 lights_data2; //y_min,y_max,z_min,z_max
 uniform highp vec4 clusters_data; //x_slice, y_slice, z_slice, max_lights_per_cluster
 uniform highp vec4 screen_size;
 
-highp vec4 getData(int index) {
-    float x = mod(float(index), light_texture_data.y) / light_texture_data.x;
-    float y = (float(index) / light_texture_data.x) / light_texture_data.y;
+highp vec4 getData(highp int index) {
+    highp float x = mod(float(index), light_texture_data.y) / light_texture_data.x;
+    highp float y = (float(index) / light_texture_data.x) / light_texture_data.y;
 
     return texture2D(DATA_TEXTURE, vec2(x, y));
 }

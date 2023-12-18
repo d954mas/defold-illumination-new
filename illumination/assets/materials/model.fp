@@ -6,7 +6,7 @@ uniform lowp sampler2D DIFFUSE_TEXTURE;
 
 
 varying mediump vec2 var_texcoord0;
-varying mediump vec3 var_world_position;
+varying highp vec3 var_world_position;
 varying mediump vec3 var_world_normal;
 varying highp vec4 var_view_position;
 varying highp vec3 var_camera_position;
@@ -36,9 +36,9 @@ void main() {
     float axis_z = lights_data2.w-lights_data2.z;
 
 
-    float xStride = screen_size.x/clusters_data.x;
-    float yStride = screen_size.y/clusters_data.y;
-    float zStride = clusters_data.z;
+    highp float xStride = screen_size.x/clusters_data.x;
+    highp float yStride = screen_size.y/clusters_data.y;
+    highp float zStride = clusters_data.z;
 
 
     int clusterX_index = int(floor(gl_FragCoord.x/ xStride));
@@ -51,14 +51,21 @@ void main() {
     float(clusterY_index) * clusters_data.x +
     float(clusterZ_index) * clusters_data.x * clusters_data.y);
 
-    int cluster_tex_idx = int(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w));
+   // clusterID = 0.0;
+    int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
     int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w));
-    // num_lights = int(lights_data.x);
+   // num_lights = int(lights_data.x);
 
     for (int i = 0; i < num_lights; ++i) {
         int light_tex_idx = cluster_tex_idx +1 + i;
-        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x))-1;//index need start from 0
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*2048.0))-1;//index need start from 0
         // lightIdx = i;
+       // if (num_lights!= int(lights_data.x)){
+         //   break;
+       // }
+        //if (lightIdx != i){
+       //     break;
+       // }
 
         int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
         float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
