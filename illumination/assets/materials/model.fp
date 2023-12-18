@@ -58,7 +58,7 @@ void main() {
 
     for (int i = 0; i < num_lights; ++i) {
         int light_tex_idx = cluster_tex_idx +1 + i;
-        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*2048.0))-1;//index need start from 0
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x))-1;//index need start from 0
         // lightIdx = i;
        // if (num_lights!= int(lights_data.x)){
          //   break;
@@ -66,6 +66,10 @@ void main() {
         //if (lightIdx != i){
        //     break;
        // }
+        //if (lightIdx>460){
+          //  gl_FragColor = vec4(1,0,0,1);
+            //return;
+        //}
 
         int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
         float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
