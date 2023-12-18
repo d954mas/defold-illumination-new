@@ -381,6 +381,7 @@ function Lights:initialize()
 	self.lights_data = vmath.vector4(0, RADIUS_MAX, 0, 0)
 	self.lights_data2 = vmath.vector4()
 	self.clusters_data = vmath.vector4() --max_lights_per_cluster, x_slices, y_slices, z_slices
+	self.screen_size = vmath.vector4()
 
 	self.debug = false
 
@@ -439,6 +440,13 @@ function Lights:initialize()
 	self.clusters_data.y = self.lights.clusters.y_slices
 	self.clusters_data.z = self.lights.clusters.z_slices
 	self.clusters_data.w = self.lights.clusters.max_lights_per_cluster
+end
+
+function Lights:on_resize(w, h)
+	self.screen_size.x, self.screen_size.y = w, h
+	for _, constant in ipairs(self.constants) do
+		constant.screen_size = self.screen_size
+	end
 end
 
 ---@param active_list Light[]
@@ -513,15 +521,14 @@ function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_f
 		end
 	end
 
-
 	self.clusters_data.z = zStride
-	for _,constant in ipairs(self.constants)do
+	for _, constant in ipairs(self.constants) do
 		constant.clusters_data = self.clusters_data
 	end
 
 	for i = 1, x_slices * y_slices * z_slices do
 		local cluster = clusters.clusters[i]
---		print("cluster:" .. cluster.idx .. " " .. #cluster.lights)
+		--		print("cluster:" .. cluster.idx .. " " .. #cluster.lights)
 		self:cluster_write_to_buffer(active_list, cluster)
 	end
 
@@ -620,6 +627,7 @@ function Lights:add_constants(constant)
 	constant.lights_data = self.lights_data
 	constant.clusters_data = self.clusters_data
 	constant.light_texture_data = self.light_texture_data
+	constant.screen_size = self.screen_size
 
 	V4.x = self.shadow.sun_position.x
 	V4.y = self.shadow.sun_position.y
@@ -934,7 +942,7 @@ function Lights:update_lights(camera_aspect, camera_fov, camera_far)
 		print("axis_capacity_z" .. axis_capacity_z .. " > 1024. accuracy may be low")
 	end
 
-	print("lights total::" ..  #self.lights.all .. " lights active:" .. #active_list)
+	print("lights total::" .. #self.lights.all .. " lights active:" .. #active_list)
 	for i = #active_list, 1, -1 do
 		local l = active_list[i]
 		--rewrite dirty lights

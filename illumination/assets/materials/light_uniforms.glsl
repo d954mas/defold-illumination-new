@@ -26,6 +26,7 @@ uniform highp vec4 light_texture_data;
 uniform highp vec4 lights_data; //lights count,radius_max,x_min,xmax
 uniform highp vec4 lights_data2; //y_min,y_max,z_min,z_max
 uniform highp vec4 clusters_data; //x_slice, y_slice, z_slice, max_lights_per_cluster
+uniform lowp vec4 screen_size;
 
 highp vec4 getData(int index) {
     float x = mod(float(index), light_texture_data.y) / light_texture_data.x;

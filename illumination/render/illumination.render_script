@@ -25,6 +25,7 @@ function init(self)
 	}
 
 	ILLUMINATION:set_render(self)
+	ILLUMINATION:on_resize(render.get_window_width(), render.get_window_height())
 	ILLUMINATION:add_constants(self.draw_opts.constants)
 
 	self.clear_options = {
@@ -96,5 +97,7 @@ function on_message(self, message_id, message)
 	elseif message_id == hash 'set_view_projection' then
 		self.scene.view = message.view
 		self.scene.projection = message.projection
+	elseif message_id == hash 'window_resized' then
+		ILLUMINATION:on_resize(render.get_window_width(), render.get_window_height())
 	end
 end
