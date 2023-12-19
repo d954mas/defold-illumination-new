@@ -97,7 +97,7 @@ function init(self)
 	msg.post(self.urls.go, hash 'acquire_input_focus')
 
 	self.lights = {}
-	for y = 1, 1 do
+	for y = 1, 2 do
 		for z = -10, 10 do
 			for x = -10, 10 do
 				local light = illumination:create_light()

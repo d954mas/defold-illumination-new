@@ -29,10 +29,15 @@ uniform highp vec4 clusters_data; //x_slice, y_slice, z_slice, max_lights_per_cl
 uniform highp vec4 screen_size;
 
 highp vec4 getData(highp int index) {
-    highp float x = mod(float(index), light_texture_data.y) / light_texture_data.x;
-    highp float y = (float(index) / light_texture_data.x) / light_texture_data.y;
+    // Convert linear index to 2D pixel coordinates
+    highp int x = index % int(light_texture_data.x);
+    highp int y = index / int(light_texture_data.x);
 
-    return texture2D(DATA_TEXTURE, vec2(x, y));
+    // Convert pixel coordinates to normalized coordinates
+    vec2 normalizedCoords = (vec2(x, y) + 0.5) / light_texture_data.xy;
+
+    // Sample the texture at the normalized coordinates
+    return texture2D(DATA_TEXTURE, normalizedCoords);
 }
 
 const float phong_shininess = 16.0;

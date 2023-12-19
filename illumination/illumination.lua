@@ -341,7 +341,7 @@ local function create_lights_data_texture()
 	local path = "/__lights_data.texturec"
 	local tparams = {
 		width = 1024,
-		height = 1024,
+		height = 512,
 		type = resource.TEXTURE_TYPE_2D,
 		format = resource.TEXTURE_FORMAT_RGBA,
 		num_mip_maps = 1
@@ -422,10 +422,10 @@ function Lights:initialize()
 		all = {},
 		texture = nil,
 		clusters = {
-			x_slices = 5,
-			y_slices = 5,
-			z_slices = 5,
-			max_lights_per_cluster = 1024,
+			x_slices = 15,
+			y_slices = 15,
+			z_slices = 15,
+			max_lights_per_cluster = 128,
 			clusters = {},
 			pixels_per_cluster = 0
 		}
@@ -564,7 +564,7 @@ function Lights:init_lights_data(data_url)
 	self.lights.texture = create_lights_data_texture()
 	self.lights.texture.path = go.get(data_url, "texture0")
 	self.light_texture_data.x = self.lights.texture.params.width
-	self.light_texture_data.y = self.lights.texture.params.width
+	self.light_texture_data.y = self.lights.texture.params.height
 	for _, constant in ipairs(self.constants) do
 		constant.light_texture_data = self.light_texture_data
 	end

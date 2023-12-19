@@ -51,27 +51,28 @@ void main() {
     float(clusterY_index) * clusters_data.x +
     float(clusterZ_index) * clusters_data.x * clusters_data.y);
 
-   // clusterID = 0.0;
-    int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
+    //clusterID = 0.0;
+    highp int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
     int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w));
-   // num_lights = int(lights_data.x);
+    //num_lights = int(lights_data.x);
 
     for (int i = 0; i < num_lights; ++i) {
-        int light_tex_idx = cluster_tex_idx +1 + i;
+        highp int light_tex_idx = cluster_tex_idx +1 + i;
         int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x))-1;//index need start from 0
         // lightIdx = i;
        // if (num_lights!= int(lights_data.x)){
-         //   break;
-       // }
-        //if (lightIdx != i){
-       //     break;
+         //   gl_FragColor = vec4(1.0,0.0,0.0, 1.0);
+       //     return;
+      //  }
+       // if (lightIdx != i){
+           // break;
        // }
         //if (lightIdx>460){
           //  gl_FragColor = vec4(1,0,0,1);
             //return;
         //}
 
-        int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
+        highp int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
         float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
         float y = lights_data2.x + rgba_to_float(getData(lightIndex+1))*axis_y;
         float z = lights_data2.z + rgba_to_float(getData(lightIndex+2))*axis_z;
