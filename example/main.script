@@ -98,8 +98,8 @@ function init(self)
 
 	self.lights = {}
 	for y = 1, 2 do
-		for z = -10, 10 do
-			for x = -10, 10 do
+		for z = -8, 8 do
+			for x = -8, 8 do
 				local light = illumination:create_light()
 				light:set_position(x, 0.25 + (y - 1) * 0.5, z)
 				light:set_radius(1.5)
