@@ -1,0 +1,640 @@
+
+¤HŸH#version 300 es
+precision mediump float;
+
+out vec4 _DMENGINE_GENERATED_gl_FragColor_0;
+uniform lowp sampler2D DIFFUSE_TEXTURE;
+#ifndef float_rgba_utils
+#define float_rgba_utils
+
+vec4 float_to_rgba(float v){
+    vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+    enc      = fract(enc);
+    enc     -= enc.yzww * vec4(1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0);
+    return enc;
+}
+
+highp float rgba_to_float(highp vec4 rgba){
+    return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+}
+
+#endif
+#ifndef shadow_fp
+#define shadow_fp
+
+uniform lowp vec4 shadow_params; 
+uniform lowp vec4 shadow_color;
+uniform highp vec4 sun_position; 
+uniform highp sampler2D SHADOW_TEXTURE;
+
+in highp vec4 var_texcoord0_shadow;
+
+vec2 rand(vec2 co){
+    return vec2(fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453),
+    fract(sin(dot(co.yx, vec2(12.9898, 78.233))) * 43758.5453)) * 0.00047;
+}
+
+float shadow_calculation_mobile(vec4 depth_data){
+    vec2 uv = depth_data.xy;
+    
+    vec4 rgba = texture(SHADOW_TEXTURE, uv);
+    float depth = rgba_to_float(rgba);
+    
+    
+    
+    float shadow = 1.0 - step(depth_data.z-shadow_params.y,depth);
+
+    if (uv.x<0.0 || uv.x>1.0 || uv.y<0.0 || uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+float shadow_calculation(vec4 depth_data){
+    float shadow = 0.0;
+    float texel_size = 1.0 / shadow_params.x;
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            vec2 uv = depth_data.st + vec2(x,y) * texel_size;
+            
+            vec4 rgba = texture(SHADOW_TEXTURE, uv);
+            float depth = rgba_to_float(rgba);
+            
+            shadow += depth_data.z - shadow_params.y > depth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+
+    highp vec2 uv = depth_data.xy;
+    if (uv.x<0.0) shadow = 0.0;
+    if (uv.x>1.0) shadow = 0.0;
+    if (uv.y<0.0) shadow = 0.0;
+    if (uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+
+vec3 direct_light(vec3 light_color, vec3 light_position, vec3 position, vec3 vnormal, vec3 shadow_color){
+    vec3 dist = vec3(-5,10,0);
+    vec3 direction = normalize(dist);
+    float n = max(dot(vnormal, direction), 0.0);
+    vec3 diffuse = (light_color - shadow_color) * n;
+    return diffuse;
+}
+
+#endif
+#ifndef light_fp
+#define light_fp
+
+#define LIGHT_DATA_PIXELS 6
+
+
+
+
+
+
+
+
+
+
+
+
+
+uniform highp sampler2D DATA_TEXTURE;
+
+uniform lowp vec4 ambient_color;
+uniform lowp vec4 sunlight_color;
+uniform lowp vec4 fog_color;
+uniform highp vec4 fog;
+
+uniform highp vec4 light_texture_data;
+uniform highp vec4 lights_data; 
+uniform highp vec4 lights_data2; 
+uniform highp vec4 clusters_data; 
+uniform highp vec4 screen_size;
+
+highp vec4 getData(highp int index) {
+    
+    highp int x = index % int(light_texture_data.x);
+    highp int y = index / int(light_texture_data.x);
+
+    
+    vec2 normalizedCoords = (vec2(x, y) + 0.5) / light_texture_data.xy;
+
+    
+    return texture(DATA_TEXTURE, normalizedCoords);
+}
+
+const float phong_shininess = 16.0;
+
+vec3 point_light2(vec3 light_color, float power, vec3 light_position, vec3 position, vec3 vnormal, float specular, vec3 view_dir)
+{
+
+    vec3 dist = light_position - position;
+    vec3 direction = vec3(normalize(dist));
+    float d = length(dist);
+
+    vec3 reflect_dir = reflect(-direction, vnormal);
+    float spec_dot = max(dot(reflect_dir, view_dir), 0.0);
+
+    float irradiance = max(dot(vnormal, direction), 0.05);
+    float attenuation = (1.0/(1.0 + d*power + 2.0*d*d*power*power));
+    vec3 diffuse = light_color * irradiance * attenuation;
+
+    
+    diffuse += irradiance * attenuation * specular * pow(spec_dot, phong_shininess) * light_color; 
+    
+    return diffuse;
+}
+
+vec3 getSpecularColor(vec3 map_specular, float light_specular, vec3 light_color, vec3 light_direction, vec3 surface_normal, vec3 view_direction) {
+    if (light_specular == 0.0 || map_specular.x == 0.0) {
+        return vec3(0.0);
+    }
+
+    float lambertian = max(dot(light_direction, surface_normal), 0.0);
+
+    if (lambertian <= 0.0) {
+        return vec3(0.0);
+    }
+
+    float surface_shininess = 1.0;
+
+    vec3 reflection_direction = reflect(-light_direction, surface_normal);
+    float specular_value = pow(max(dot(view_direction, reflection_direction), 0.0), surface_shininess);
+
+    return light_color * light_specular * specular_value;
+}
+
+
+
+#endif
+
+
+in mediump vec2 var_texcoord0;
+in highp vec3 var_world_position;
+in mediump vec3 var_world_normal;
+in highp vec4 var_view_position;
+in highp vec3 var_camera_position;
+
+void main() {
+    vec4 texture_color = texture(DIFFUSE_TEXTURE, var_texcoord0);
+    vec3 color = texture_color.rgb;
+    
+    
+    
+    
+    
+
+    
+    vec3 illuminance_color = vec3(0);
+    vec3 specular_color = vec3(0);
+
+    vec3 surface_normal = var_world_normal;
+    vec3 view_direction = normalize(var_camera_position - var_world_position);
+
+    
+    vec3 ambient = ambient_color.rgb * ambient_color.w;
+    illuminance_color = illuminance_color + ambient;
+
+    float axis_x = lights_data.w-lights_data.z;
+    float axis_y = lights_data2.y-lights_data2.x;
+    float axis_z = lights_data2.w-lights_data2.z;
+
+
+    highp float xStride = screen_size.x/clusters_data.x;
+    highp float yStride = screen_size.y/clusters_data.y;
+    highp float zStride = clusters_data.z;
+
+
+    int clusterX_index = int(floor(gl_FragCoord.x/ xStride));
+    int clusterY_index = int(floor(gl_FragCoord.y/ yStride));
+    int clusterZ_index = int(floor(-var_view_position.z) / zStride);
+
+
+
+    float clusterID = round(float(clusterX_index) +
+    float(clusterY_index) * clusters_data.x +
+    float(clusterZ_index) * clusters_data.x * clusters_data.y);
+
+    
+    highp int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
+    int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w));
+    
+
+    for (int i = 0; i < num_lights; ++i) {
+        highp int light_tex_idx = cluster_tex_idx +1 + i;
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x))-1;
+        
+       
+         
+       
+      
+       
+           
+       
+        
+          
+            
+        
+
+        highp int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
+        float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
+        float y = lights_data2.x + rgba_to_float(getData(lightIndex+1))*axis_y;
+        float z = lights_data2.z + rgba_to_float(getData(lightIndex+2))*axis_z;
+        
+        vec4 lightColorData = getData(lightIndex+4);
+        vec4 lightData = getData(lightIndex+5);
+
+        vec3 lightPosition = vec3(x, y, z);
+        float lightRadius = lightData.x*lights_data.y;
+        float lightSmoothness = lightData.y;
+        float lightSpecular = lightData.z;
+        float lightCutoff = lightData.w;
+
+
+        float lightDistance = length(lightPosition - var_world_position);
+        if (lightDistance > lightRadius) {
+            
+            continue;
+        }
+
+        vec3 lightColor = lightColorData.rgb* lightColorData.a;
+        vec3 lightDirection = normalize(lightPosition - var_world_position);
+        vec3 lightIlluminanceColor = point_light2(lightColor.rgb, lightSmoothness, lightPosition, var_world_position, var_world_normal
+        , lightSpecular, view_direction);
+
+
+
+        if (lightCutoff < 1.0) {
+            vec3 spotDirection = getData(lightIndex+3).xyz* 2.0 - vec3(1.0);
+            float spot_theta = dot(lightDirection, normalize(spotDirection));
+
+            float spot_cutoff = lightCutoff * 2.0 - 1.0;
+
+            if (spot_theta <= spot_cutoff) {
+                continue;
+            }
+
+            if (lightSmoothness > 0.0) {
+                float spot_cutoff_inner = (spot_cutoff + 1.0) * (1.0 - lightSmoothness) - 1.0;
+                float spot_epsilon = spot_cutoff_inner - spot_cutoff;
+                float spot_intensity = clamp((spot_cutoff - spot_theta) / spot_epsilon, 0.0, 1.0);
+
+                lightIlluminanceColor = lightIlluminanceColor * spot_intensity;;
+            }
+        }
+
+        illuminance_color = illuminance_color + lightIlluminanceColor;
+
+        
+    }
+
+
+    
+    
+    vec4 depth_proj = var_texcoord0_shadow / var_texcoord0_shadow.w;
+    float shadow = shadow_calculation(depth_proj.xyzw);
+    vec3 shadow_color = shadow_color.xyz*shadow_color.w*(sunlight_color.w) * shadow;
+
+    vec3 diff_light = vec3(0);
+    diff_light += max(direct_light(sunlight_color.rgb, sun_position.xyz, var_world_position.xyz, var_world_normal, shadow_color)*sunlight_color.w, 0.0);
+    diff_light += vec3(illuminance_color.xyz);
+
+    color.rgb = color.rgb * (min(diff_light, 1.0));
+
+    
+    float dist = abs(var_view_position.z);
+    float fog_max = fog.y;
+    float fog_min = fog.x;
+    float fog_factor = clamp((fog_max - dist) / (fog_max - fog_min) + fog_color.a, 0.0, 1.0);
+    color = mix(fog_color.rgb, color, fog_factor);
+
+
+    _DMENGINE_GENERATED_gl_FragColor_0 = vec4(color, texture_color.a);
+
+    
+   
+   
+}
+
+¹E´Eprecision mediump float;
+uniform lowp sampler2D DIFFUSE_TEXTURE;
+#ifndef float_rgba_utils
+#define float_rgba_utils
+
+vec4 float_to_rgba(float v){
+    vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+    enc      = fract(enc);
+    enc     -= enc.yzww * vec4(1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0);
+    return enc;
+}
+
+highp float rgba_to_float(highp vec4 rgba){
+    return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+}
+
+#endif
+#ifndef shadow_fp
+#define shadow_fp
+
+uniform lowp vec4 shadow_params; 
+uniform lowp vec4 shadow_color;
+uniform highp vec4 sun_position; 
+uniform highp sampler2D SHADOW_TEXTURE;
+
+varying highp vec4 var_texcoord0_shadow;
+
+vec2 rand(vec2 co){
+    return vec2(fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453),
+    fract(sin(dot(co.yx, vec2(12.9898, 78.233))) * 43758.5453)) * 0.00047;
+}
+
+float shadow_calculation_mobile(vec4 depth_data){
+    vec2 uv = depth_data.xy;
+    
+    vec4 rgba = texture2D(SHADOW_TEXTURE, uv);
+    float depth = rgba_to_float(rgba);
+    
+    
+    
+    float shadow = 1.0 - step(depth_data.z-shadow_params.y,depth);
+
+    if (uv.x<0.0 || uv.x>1.0 || uv.y<0.0 || uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+float shadow_calculation(vec4 depth_data){
+    float shadow = 0.0;
+    float texel_size = 1.0 / shadow_params.x;
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            vec2 uv = depth_data.st + vec2(x,y) * texel_size;
+            
+            vec4 rgba = texture2D(SHADOW_TEXTURE, uv);
+            float depth = rgba_to_float(rgba);
+            
+            shadow += depth_data.z - shadow_params.y > depth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+
+    highp vec2 uv = depth_data.xy;
+    if (uv.x<0.0) shadow = 0.0;
+    if (uv.x>1.0) shadow = 0.0;
+    if (uv.y<0.0) shadow = 0.0;
+    if (uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+
+vec3 direct_light(vec3 light_color, vec3 light_position, vec3 position, vec3 vnormal, vec3 shadow_color){
+    vec3 dist = vec3(-5,10,0);
+    vec3 direction = normalize(dist);
+    float n = max(dot(vnormal, direction), 0.0);
+    vec3 diffuse = (light_color - shadow_color) * n;
+    return diffuse;
+}
+
+#endif
+#ifndef light_fp
+#define light_fp
+
+#define LIGHT_DATA_PIXELS 6
+
+
+
+
+
+
+
+
+
+
+
+
+
+uniform highp sampler2D DATA_TEXTURE;
+
+uniform lowp vec4 ambient_color;
+uniform lowp vec4 sunlight_color;
+uniform lowp vec4 fog_color;
+uniform highp vec4 fog;
+
+uniform highp vec4 light_texture_data;
+uniform highp vec4 lights_data; 
+uniform highp vec4 lights_data2; 
+uniform highp vec4 clusters_data; 
+uniform highp vec4 screen_size;
+
+highp vec4 getData(highp int index) {
+    
+    highp int x = index % int(light_texture_data.x);
+    highp int y = index / int(light_texture_data.x);
+
+    
+    vec2 normalizedCoords = (vec2(x, y) + 0.5) / light_texture_data.xy;
+
+    
+    return texture2D(DATA_TEXTURE, normalizedCoords);
+}
+
+const float phong_shininess = 16.0;
+
+vec3 point_light2(vec3 light_color, float power, vec3 light_position, vec3 position, vec3 vnormal, float specular, vec3 view_dir)
+{
+
+    vec3 dist = light_position - position;
+    vec3 direction = vec3(normalize(dist));
+    float d = length(dist);
+
+    vec3 reflect_dir = reflect(-direction, vnormal);
+    float spec_dot = max(dot(reflect_dir, view_dir), 0.0);
+
+    float irradiance = max(dot(vnormal, direction), 0.05);
+    float attenuation = (1.0/(1.0 + d*power + 2.0*d*d*power*power));
+    vec3 diffuse = light_color * irradiance * attenuation;
+
+    
+    diffuse += irradiance * attenuation * specular * pow(spec_dot, phong_shininess) * light_color; 
+    
+    return diffuse;
+}
+
+vec3 getSpecularColor(vec3 map_specular, float light_specular, vec3 light_color, vec3 light_direction, vec3 surface_normal, vec3 view_direction) {
+    if (light_specular == 0.0 || map_specular.x == 0.0) {
+        return vec3(0.0);
+    }
+
+    float lambertian = max(dot(light_direction, surface_normal), 0.0);
+
+    if (lambertian <= 0.0) {
+        return vec3(0.0);
+    }
+
+    float surface_shininess = 1.0;
+
+    vec3 reflection_direction = reflect(-light_direction, surface_normal);
+    float specular_value = pow(max(dot(view_direction, reflection_direction), 0.0), surface_shininess);
+
+    return light_color * light_specular * specular_value;
+}
+
+
+
+#endif
+
+
+varying mediump vec2 var_texcoord0;
+varying highp vec3 var_world_position;
+varying mediump vec3 var_world_normal;
+varying highp vec4 var_view_position;
+varying highp vec3 var_camera_position;
+
+void main() {
+    vec4 texture_color = texture2D(DIFFUSE_TEXTURE, var_texcoord0);
+    vec3 color = texture_color.rgb;
+    
+    
+    
+    
+    
+
+    
+    vec3 illuminance_color = vec3(0);
+    vec3 specular_color = vec3(0);
+
+    vec3 surface_normal = var_world_normal;
+    vec3 view_direction = normalize(var_camera_position - var_world_position);
+
+    
+    vec3 ambient = ambient_color.rgb * ambient_color.w;
+    illuminance_color = illuminance_color + ambient;
+
+    float axis_x = lights_data.w-lights_data.z;
+    float axis_y = lights_data2.y-lights_data2.x;
+    float axis_z = lights_data2.w-lights_data2.z;
+
+
+    highp float xStride = screen_size.x/clusters_data.x;
+    highp float yStride = screen_size.y/clusters_data.y;
+    highp float zStride = clusters_data.z;
+
+
+    int clusterX_index = int(floor(gl_FragCoord.x/ xStride));
+    int clusterY_index = int(floor(gl_FragCoord.y/ yStride));
+    int clusterZ_index = int(floor(-var_view_position.z) / zStride);
+
+
+
+    float clusterID = round(float(clusterX_index) +
+    float(clusterY_index) * clusters_data.x +
+    float(clusterZ_index) * clusters_data.x * clusters_data.y);
+
+    
+    highp int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
+    int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w));
+    
+
+    for (int i = 0; i < num_lights; ++i) {
+        highp int light_tex_idx = cluster_tex_idx +1 + i;
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x))-1;
+        
+       
+         
+       
+      
+       
+           
+       
+        
+          
+            
+        
+
+        highp int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
+        float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
+        float y = lights_data2.x + rgba_to_float(getData(lightIndex+1))*axis_y;
+        float z = lights_data2.z + rgba_to_float(getData(lightIndex+2))*axis_z;
+        
+        vec4 lightColorData = getData(lightIndex+4);
+        vec4 lightData = getData(lightIndex+5);
+
+        vec3 lightPosition = vec3(x, y, z);
+        float lightRadius = lightData.x*lights_data.y;
+        float lightSmoothness = lightData.y;
+        float lightSpecular = lightData.z;
+        float lightCutoff = lightData.w;
+
+
+        float lightDistance = length(lightPosition - var_world_position);
+        if (lightDistance > lightRadius) {
+            
+            continue;
+        }
+
+        vec3 lightColor = lightColorData.rgb* lightColorData.a;
+        vec3 lightDirection = normalize(lightPosition - var_world_position);
+        vec3 lightIlluminanceColor = point_light2(lightColor.rgb, lightSmoothness, lightPosition, var_world_position, var_world_normal
+        , lightSpecular, view_direction);
+
+
+
+        if (lightCutoff < 1.0) {
+            vec3 spotDirection = getData(lightIndex+3).xyz* 2.0 - vec3(1.0);
+            float spot_theta = dot(lightDirection, normalize(spotDirection));
+
+            float spot_cutoff = lightCutoff * 2.0 - 1.0;
+
+            if (spot_theta <= spot_cutoff) {
+                continue;
+            }
+
+            if (lightSmoothness > 0.0) {
+                float spot_cutoff_inner = (spot_cutoff + 1.0) * (1.0 - lightSmoothness) - 1.0;
+                float spot_epsilon = spot_cutoff_inner - spot_cutoff;
+                float spot_intensity = clamp((spot_cutoff - spot_theta) / spot_epsilon, 0.0, 1.0);
+
+                lightIlluminanceColor = lightIlluminanceColor * spot_intensity;;
+            }
+        }
+
+        illuminance_color = illuminance_color + lightIlluminanceColor;
+
+        
+    }
+
+
+    
+    
+    vec4 depth_proj = var_texcoord0_shadow / var_texcoord0_shadow.w;
+    float shadow = shadow_calculation(depth_proj.xyzw);
+    vec3 shadow_color = shadow_color.xyz*shadow_color.w*(sunlight_color.w) * shadow;
+
+    vec3 diff_light = vec3(0);
+    diff_light += max(direct_light(sunlight_color.rgb, sun_position.xyz, var_world_position.xyz, var_world_normal, shadow_color)*sunlight_color.w, 0.0);
+    diff_light += vec3(illuminance_color.xyz);
+
+    color.rgb = color.rgb * (min(diff_light, 1.0));
+
+    
+    float dist = abs(var_view_position.z);
+    float fog_max = fog.y;
+    float fog_min = fog.x;
+    float fog_factor = clamp((fog_max - dist) / (fog_max - fog_min) + fog_color.a, 0.0, 1.0);
+    color = mix(fog_color.rgb, color, fog_factor);
+
+
+    gl_FragColor = vec4(color, texture_color.a);
+
+    
+   
+   
+}
+ 

@@ -1,0 +1,3 @@
+prototype: "/illumination/light_debug.go"
+load_dynamically: false
+dynamic_prototype: false

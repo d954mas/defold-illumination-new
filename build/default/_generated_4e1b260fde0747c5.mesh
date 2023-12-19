@@ -1,0 +1,5 @@
+material: "/illumination/assets/materials/shadow_debug_shadowmap_mesh.material"
+vertices: "/illumination/shadow_debug.buffer"
+textures: "/pointer_lock/assets/images/empty.png"
+primitive_type: PRIMITIVE_TRIANGLES
+position_stream: "position"

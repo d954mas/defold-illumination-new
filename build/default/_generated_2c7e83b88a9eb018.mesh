@@ -1,0 +1,8 @@
+material: "/illumination/assets/materials/model_world.material"
+vertices: "/illumination/assets/models/box.buffer"
+textures: "/illumination/assets/textures/light_point.png"
+textures: "/illumination/textures/shadow.png"
+textures: "/illumination/textures/data.png"
+primitive_type: PRIMITIVE_TRIANGLES
+position_stream: "position"
+normal_stream: "normal"

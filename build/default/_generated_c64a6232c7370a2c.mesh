@@ -1,0 +1,5 @@
+material: "/illumination/assets/materials/data_not_draw.material"
+vertices: "/illumination/shadow_debug.buffer"
+textures: "/illumination/textures/data.png"
+primitive_type: PRIMITIVE_TRIANGLES
+position_stream: "position"

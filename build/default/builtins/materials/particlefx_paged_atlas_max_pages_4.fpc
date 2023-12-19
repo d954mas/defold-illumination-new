@@ -1,0 +1,64 @@
+
+ÍÂ#version 300 es
+precision mediump float;
+
+out vec4 _DMENGINE_GENERATED_gl_FragColor_0;
+in mediump vec2 var_texcoord0;
+in lowp vec4    var_color;
+in lowp float   var_page_index;
+
+uniform lowp sampler2DArray texture_sampler;
+uniform lowp vec4           tint;
+
+void main()
+{
+    
+    lowp vec4 tint_pm = vec4(tint.xyz * tint.w, tint.w);
+    
+    _DMENGINE_GENERATED_gl_FragColor_0 = texture(texture_sampler, vec3(var_texcoord0.xy, var_page_index)) * var_color * tint_pm;
+}
+
+ùòprecision mediump float;
+varying mediump vec2 var_texcoord0;
+varying lowp vec4    var_color;
+varying lowp float   var_page_index;
+
+uniform lowp sampler2DArray texture_sampler;
+uniform lowp vec4           tint;
+
+void main()
+{
+    
+    lowp vec4 tint_pm = vec4(tint.xyz * tint.w, tint.w);
+    
+    gl_FragColor = texture2DArray(texture_sampler, vec3(var_texcoord0.xy, var_page_index)) * var_color * tint_pm;
+}
+
+±	™	precision mediump float;
+varying mediump vec2 var_texcoord0;
+varying lowp vec4    var_color;
+varying lowp float   var_page_index;
+
+uniform  lowp  sampler2D texture_sampler_0;
+uniform  lowp  sampler2D texture_sampler_1;
+uniform  lowp  sampler2D texture_sampler_2;
+uniform  lowp  sampler2D texture_sampler_3;
+
+vec4 texture2DArray_texture_sampler(vec3 dm_texture_array_args) {
+    int page_index = int(dm_texture_array_args.z);
+     if (page_index == 0) return texture2D(texture_sampler_0, dm_texture_array_args.st);
+    else if (page_index == 1) return texture2D(texture_sampler_1, dm_texture_array_args.st);
+    else if (page_index == 2) return texture2D(texture_sampler_2, dm_texture_array_args.st);
+    else if (page_index == 3) return texture2D(texture_sampler_3, dm_texture_array_args.st);
+   return vec4(0.0);
+}
+uniform lowp vec4           tint;
+
+void main()
+{
+    // Pre-multiply alpha since all runtime textures already are
+    lowp vec4 tint_pm = vec4(tint.xyz * tint.w, tint.w);
+    // var_color is vertex color from the particle system, pre-multiplied in vertex program
+    gl_FragColor = texture2DArray_texture_sampler(vec3(var_texcoord0.xy, var_page_index)) * var_color * tint_pm;
+}
+8

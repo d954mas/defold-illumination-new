@@ -1,0 +1,7 @@
+aspect_ratio: 0.0
+fov: 0.0
+near_z: 0.0
+far_z: 0.0
+auto_aspect_ratio: 1
+orthographic_projection: 0
+orthographic_zoom: 1.0

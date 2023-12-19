@@ -1,0 +1,857 @@
+[ {
+  "path" : "/<AnonymousRoot>",
+  "hexDigest" : null,
+  "children" : [ "/example/main.collectionc", "/illumination/render/illumination.renderc", "/builtins/input/all.input_bindingc", "/builtins/input/default.gamepadsc", "/builtins/render/default.display_profilesc" ]
+}, {
+  "path" : "/example/main.collectionc",
+  "hexDigest" : "c7a0685e6a27e53f5c7d6cb338d4a86ac7faeb00",
+  "children" : [ "/illumination/illumination.goc", "/illumination/light_spot.goc", "/illumination/light_point.goc", "/illumination/light_point.goc", "/illumination/light_spot.goc", "/illumination/light_spot.goc", "/_generated_17cad3c1a97fbe36.goc", "/_generated_ee081cc0ec961066.goc", "/_generated_c3838e23b9975c89.goc", "/_generated_f384a112b399a753.goc", "/_generated_800dc9ccbacb0d1a.goc", "/_generated_29e9c3a56c5dff03.goc", "/_generated_0.goc", "/_generated_7577358853add95a.goc", "/_generated_13b14a523042a212.goc", "/_generated_22109d05b974238c.goc", "/_generated_5bda535083f3031e.goc", "/_generated_0.goc", "/_generated_b82a3d59acf9ef4c.goc", "/_generated_0.goc", "/_generated_0.goc", "/_generated_0.goc" ]
+}, {
+  "path" : "/illumination/illumination.goc",
+  "hexDigest" : "35d32193485ae969f82fa67e85aed5d1432fe856",
+  "children" : [ "/illumination/illumination_script.scriptc", "/_generated_c64a6232c7370a2c.meshc" ]
+}, {
+  "path" : "/illumination/illumination_script.scriptc",
+  "hexDigest" : "8814e6efc970f11b9483278780cc37b3fb40d56d",
+  "children" : [ "/illumination/illumination.luac" ]
+}, {
+  "path" : "/illumination/illumination.luac",
+  "hexDigest" : "8c8e8d5e7688dc49e997a916b74ae137e9603710",
+  "children" : [ "/illumination/middleclass.luac" ]
+}, {
+  "path" : "/illumination/middleclass.luac",
+  "hexDigest" : "cfb043d8d361b3e10d07c9fe5e5a92929be8c7fb",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_c64a6232c7370a2c.meshc",
+  "hexDigest" : "a09112189f7a2034916288e0ddcc797730eba0ae",
+  "children" : [ "/illumination/assets/materials/data_not_draw.materialc", "/illumination/shadow_debug.bufferc", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/illumination/assets/materials/data_not_draw.materialc",
+  "hexDigest" : "3288a6b37bf8787f1c7dba9924174808bc1a5e01",
+  "children" : [ "/illumination/assets/materials/debug.vpc", "/illumination/assets/materials/debug.fpc" ]
+}, {
+  "path" : "/illumination/assets/materials/debug.vpc",
+  "hexDigest" : "798193d490cac315cc89adc309070ac4d2c0c3ee",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/assets/materials/debug.fpc",
+  "hexDigest" : "af74b759d78e6534feade285a1707b1eb77573fa",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/shadow_debug.bufferc",
+  "hexDigest" : "38c9ee835b6b48d67ea35773792f13cf238366ba",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/textures/data.texturec",
+  "hexDigest" : "f62b0d9ae61ab2cb5219242f979edc54f45121e6",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/light_spot.goc",
+  "hexDigest" : "868734690e9ee987c28e0a7fed8511134d9baa5b",
+  "children" : [ "/illumination/light.scriptc", "/_generated_8a096e9fb32d7988.meshc" ]
+}, {
+  "path" : "/illumination/light.scriptc",
+  "hexDigest" : "2c6bcd294bbc5f090e5a5e6f00ecbd475b1e3545",
+  "children" : [ "/illumination/illumination.luac" ]
+}, {
+  "path" : "/_generated_8a096e9fb32d7988.meshc",
+  "hexDigest" : "375ae09c1ef3f1a2383fd605792130e647b38345",
+  "children" : [ "/illumination/assets/materials/debug.materialc", "/illumination/assets/models/box.bufferc", "/illumination/assets/textures/light_spot.texturec" ]
+}, {
+  "path" : "/illumination/assets/materials/debug.materialc",
+  "hexDigest" : "f72e0dff2b8192573c94f58f1efc490372eff3d3",
+  "children" : [ "/illumination/assets/materials/debug.vpc", "/illumination/assets/materials/debug.fpc" ]
+}, {
+  "path" : "/illumination/assets/models/box.bufferc",
+  "hexDigest" : "49c1ab0f72738699ac6fad0052b671b168cf1514",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/assets/textures/light_spot.texturec",
+  "hexDigest" : "9da95852432044fa0dba47df883571b9ecaf4f76",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/light_point.goc",
+  "hexDigest" : "e0838831eaeec26712f26077ae762c81d547b0b1",
+  "children" : [ "/illumination/light.scriptc", "/_generated_fda66c3d9fd675f8.meshc" ]
+}, {
+  "path" : "/_generated_fda66c3d9fd675f8.meshc",
+  "hexDigest" : "86e90555edb19a11d026365c5b9a0420364fd82d",
+  "children" : [ "/illumination/assets/materials/debug.materialc", "/illumination/assets/models/box.bufferc", "/illumination/assets/textures/light_point.texturec" ]
+}, {
+  "path" : "/illumination/assets/textures/light_point.texturec",
+  "hexDigest" : "6f7021598fbeb6c6bc994861f375b56184311b91",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_17cad3c1a97fbe36.goc",
+  "hexDigest" : "dd049d7cd4f1fc4af629606497365f6bdf9b23b7",
+  "children" : [ "/example/main.scriptc", "/pointer_lock/pointer_lock.scriptc" ]
+}, {
+  "path" : "/example/main.scriptc",
+  "hexDigest" : "090664c5af1c32677f99252f095b372361fc236b",
+  "children" : [ "/illumination/illumination.luac" ]
+}, {
+  "path" : "/pointer_lock/pointer_lock.scriptc",
+  "hexDigest" : "f97094298d1c5fac05f91d57a1865bf54bed0799",
+  "children" : [ "/pointer_lock/pointer.luac" ]
+}, {
+  "path" : "/pointer_lock/pointer.luac",
+  "hexDigest" : "77a13ac528ba6147a7f075360f3d013693552a75",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_ee081cc0ec961066.goc",
+  "hexDigest" : "7f08837168f8bba07fa704bdf8f084033d72e8b2",
+  "children" : [ "/example/main.guic" ]
+}, {
+  "path" : "/example/main.guic",
+  "hexDigest" : "84ed6b63ca83e000189f48e9d1ea6de7e879c1f7",
+  "children" : [ "/builtins/fonts/system_font.fontc", "/builtins/materials/gui.materialc" ]
+}, {
+  "path" : "/builtins/fonts/system_font.fontc",
+  "hexDigest" : "1c20443703e9a93f9b39e4b0cc436fe6827cbfd7",
+  "children" : [ "/_generated_ea92dd02716004a2.glyph_bankc", "/builtins/fonts/system_font.materialc" ]
+}, {
+  "path" : "/_generated_ea92dd02716004a2.glyph_bankc",
+  "hexDigest" : "49dd13162d55b71b7ea18d325434e582dba5ead5",
+  "children" : [ ]
+}, {
+  "path" : "/builtins/fonts/system_font.materialc",
+  "hexDigest" : "c707332263965788fcf10714e273c809551bb5d4",
+  "children" : [ "/builtins/fonts/font.vpc", "/builtins/fonts/font.fpc" ]
+}, {
+  "path" : "/builtins/fonts/font.vpc",
+  "hexDigest" : "dbe4035cacf1c4261251cc12517878a40c0595be",
+  "children" : [ ]
+}, {
+  "path" : "/builtins/fonts/font.fpc",
+  "hexDigest" : "87289cc1c8b0c5d8fac3ed26cfc0a9af1fc57954",
+  "children" : [ ]
+}, {
+  "path" : "/builtins/materials/gui.materialc",
+  "hexDigest" : "74e565f59394f8055ea41c94278100e0d10b03c1",
+  "children" : [ "/builtins/materials/gui.vpc", "/builtins/materials/gui.fpc" ]
+}, {
+  "path" : "/builtins/materials/gui.vpc",
+  "hexDigest" : "59a52279f5c7ba9df102b41189d9d7ee7a052e06",
+  "children" : [ ]
+}, {
+  "path" : "/builtins/materials/gui.fpc",
+  "hexDigest" : "e6580fd403b02370d523e432e9c5f7cf5b830509",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_c3838e23b9975c89.goc",
+  "hexDigest" : "a68a5404dbe0d217672c13f6a23c3e320dc5d895",
+  "children" : [ "/_generated_4e1b260fde0747c5.meshc" ]
+}, {
+  "path" : "/_generated_4e1b260fde0747c5.meshc",
+  "hexDigest" : "f3ad163e834005bad022005b0575f073922aeac2",
+  "children" : [ "/illumination/assets/materials/shadow_debug_shadowmap_mesh.materialc", "/illumination/shadow_debug.bufferc", "/pointer_lock/assets/images/empty.texturec" ]
+}, {
+  "path" : "/illumination/assets/materials/shadow_debug_shadowmap_mesh.materialc",
+  "hexDigest" : "de44b55ec7f95b1b6cc95de40bdd3b8eddb2dcc6",
+  "children" : [ "/illumination/assets/materials/debug.vpc", "/illumination/assets/materials/debug_shadowmap.fpc" ]
+}, {
+  "path" : "/illumination/assets/materials/debug_shadowmap.fpc",
+  "hexDigest" : "25b279fc9243cb6be7e2eaf889da23284149410f",
+  "children" : [ ]
+}, {
+  "path" : "/pointer_lock/assets/images/empty.texturec",
+  "hexDigest" : "e908e246d54588dddbc20ddb95fd43d5fa7dcfe0",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_f384a112b399a753.goc",
+  "hexDigest" : "39c5ad970b09406639ab03398832b416a9ff1c34",
+  "children" : [ "/_generated_3f62ec35c9e5d6f9.meshc" ]
+}, {
+  "path" : "/_generated_3f62ec35c9e5d6f9.meshc",
+  "hexDigest" : "2014a0ee9a28f5cbd63a82d1e23e3053e3ddb044",
+  "children" : [ "/illumination/assets/materials/data_lights_debug.materialc", "/illumination/shadow_debug.bufferc", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/illumination/assets/materials/data_lights_debug.materialc",
+  "hexDigest" : "732626406cb9f68fccec381ade021a1f167f5dcc",
+  "children" : [ "/illumination/assets/materials/debug.vpc", "/illumination/assets/materials/debug.fpc" ]
+}, {
+  "path" : "/_generated_800dc9ccbacb0d1a.goc",
+  "hexDigest" : "0e31b043ed097aeca004007137205deb9718c69d",
+  "children" : [ "/_generated_6360e1288c2339c2.factoryc" ]
+}, {
+  "path" : "/_generated_6360e1288c2339c2.factoryc",
+  "hexDigest" : "a9e097ec0f59af829d7a26e5f52a05b351921f33",
+  "children" : [ "/illumination/light_debug.goc" ]
+}, {
+  "path" : "/illumination/light_debug.goc",
+  "hexDigest" : "aed82927f72c566c314cee9954bed60233e32cc0",
+  "children" : [ "/_generated_2c7e83b88a9eb018.meshc" ]
+}, {
+  "path" : "/_generated_2c7e83b88a9eb018.meshc",
+  "hexDigest" : "4079ab888d396c1fbf83ace52cdd7f38fb27b7df",
+  "children" : [ "/illumination/assets/materials/model_world.materialc", "/illumination/assets/models/box.bufferc", "/illumination/assets/textures/light_point.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/illumination/assets/materials/model_world.materialc",
+  "hexDigest" : "04bb0c896b4689cfeee31c07fa0c0b1fb92145a0",
+  "children" : [ "/illumination/assets/materials/model.vpc", "/illumination/assets/materials/model.fpc" ]
+}, {
+  "path" : "/illumination/assets/materials/model.vpc",
+  "hexDigest" : "5d9f8bc1b0e11d7660659f910815799347c93563",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/assets/materials/model.fpc",
+  "hexDigest" : "ac31b58085a28e692c22391440cd67416f60987e",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/textures/shadow.texturec",
+  "hexDigest" : "f62b0d9ae61ab2cb5219242f979edc54f45121e6",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_29e9c3a56c5dff03.goc",
+  "hexDigest" : "809b876a5c8ec29fdcfa476c74a4a5bfb195f9c5",
+  "children" : [ "/example/player.scriptc", "/walker/walker.scriptc" ]
+}, {
+  "path" : "/example/player.scriptc",
+  "hexDigest" : "45d1c1357dea2d65658c9f4c0b282de2dfdaf4b3",
+  "children" : [ ]
+}, {
+  "path" : "/walker/walker.scriptc",
+  "hexDigest" : "f5019d8b5ba3bd54facbb427c91aefc0c28fb86f",
+  "children" : [ "/walker/hashes.luac" ]
+}, {
+  "path" : "/walker/hashes.luac",
+  "hexDigest" : "55c23781be53c68bfc9a7c5b54f862c5ced7c620",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_0.goc",
+  "hexDigest" : "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_7577358853add95a.goc",
+  "hexDigest" : "4fc653028a7211a5f5a6cbb3a689b579a8cfe0de",
+  "children" : [ "/walker/body.scriptc", "/_generated_563631ed750d92ba.collisionobjectc", "/_generated_2330e06014631960.collisionobjectc" ]
+}, {
+  "path" : "/walker/body.scriptc",
+  "hexDigest" : "8829eb27fffe246f75cf803b825c0ab97f28d92b",
+  "children" : [ "/walker/hashes.luac" ]
+}, {
+  "path" : "/_generated_563631ed750d92ba.collisionobjectc",
+  "hexDigest" : "eebc02e99fe6164dd67bb1f3ecafd39e130679f2",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_2330e06014631960.collisionobjectc",
+  "hexDigest" : "a53d4b95d87c6d95541427c57432295ba6b65bd3",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_13b14a523042a212.goc",
+  "hexDigest" : "461d3017a6ef639662fef593ef2dd966c9c17c8d",
+  "children" : [ "/operator/operator/operator.scriptc" ]
+}, {
+  "path" : "/operator/operator/operator.scriptc",
+  "hexDigest" : "01e6b81d86d5b755da591e6a9b4fa1ba2010d22e",
+  "children" : [ "/operator/operator.luac", "/operator/bezier.luac", "/operator/hashes.luac" ]
+}, {
+  "path" : "/operator/operator.luac",
+  "hexDigest" : "c9027a13f02e64b54b779d046ee2c3320b6aa4dd",
+  "children" : [ "/operator/hashes.luac" ]
+}, {
+  "path" : "/operator/hashes.luac",
+  "hexDigest" : "bbb5aa5e12cf04529113a7d23fc17d1935f4144d",
+  "children" : [ ]
+}, {
+  "path" : "/operator/bezier.luac",
+  "hexDigest" : "501ab2e143c29c19e9d50307494dc26d8ef51b0a",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_22109d05b974238c.goc",
+  "hexDigest" : "c2a3b8141d852db7339e9f18c2470a7b00db34bd",
+  "children" : [ "/operator/assets/models/camera.meshc", "/_generated_17190a9348519173.camerac" ]
+}, {
+  "path" : "/operator/assets/models/camera.meshc",
+  "hexDigest" : "f1c3bd15f0b0ff55891ae56093249830c0ab4165",
+  "children" : [ "/operator/assets/materials/operator.materialc", "/operator/assets/models/box.bufferc", "/operator/assets/textures/camera.texturec" ]
+}, {
+  "path" : "/operator/assets/materials/operator.materialc",
+  "hexDigest" : "aaca703dbd704b1d54501ccc34672e9dc0c8f37c",
+  "children" : [ "/operator/assets/materials/operator.vpc", "/operator/assets/materials/operator.fpc" ]
+}, {
+  "path" : "/operator/assets/materials/operator.vpc",
+  "hexDigest" : "1163210309b033063bae5ef5cae2390cdab5db4b",
+  "children" : [ ]
+}, {
+  "path" : "/operator/assets/materials/operator.fpc",
+  "hexDigest" : "6073e4039b0a0b599cf776b040bf8ab794418c85",
+  "children" : [ ]
+}, {
+  "path" : "/operator/assets/models/box.bufferc",
+  "hexDigest" : "49c1ab0f72738699ac6fad0052b671b168cf1514",
+  "children" : [ ]
+}, {
+  "path" : "/operator/assets/textures/camera.texturec",
+  "hexDigest" : "d5e18d5dc2cff391514bd6514e7a030d9f82d912",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_17190a9348519173.camerac",
+  "hexDigest" : "3f0d1c6363da9f28b31ea9e1e4bde39819e4f20f",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_5bda535083f3031e.goc",
+  "hexDigest" : "7fb711bd3ada795507aca865c84831f3b46adc6e",
+  "children" : [ "/example/assets/maps/garden/mesh/static_1_tiny_element_5.meshc", "/example/assets/maps/garden/collisionobject/static_1_b1_static.collisionobjectc" ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/static_1_tiny_element_5.meshc",
+  "hexDigest" : "c9125ce9f507516d637ea4a5ca93e5dc326b85c1",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/static_1_tiny_element_5.bufferc", "/example/assets/textures/tiny/element_5.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/illumination/assets/materials/model.materialc",
+  "hexDigest" : "90022c235c09819968936264794a02d2832000ad",
+  "children" : [ "/illumination/assets/materials/model.vpc", "/illumination/assets/materials/model.fpc" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/static_1_tiny_element_5.bufferc",
+  "hexDigest" : "892ad7e8a9b6f49b0641240cf013bfc686ad12f4",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/element_5.texturec",
+  "hexDigest" : "8d41f8dd6d65de79bf50320e9124f7db6360d4e0",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/static_1_b1_static.collisionobjectc",
+  "hexDigest" : "057bcae547a0c27fbe4c38f45c335a763fce0457",
+  "children" : [ ]
+}, {
+  "path" : "/_generated_b82a3d59acf9ef4c.goc",
+  "hexDigest" : "1484f50da594b6831c0dec0589f4405283b385b7",
+  "children" : [ "/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b57_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b75_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b89_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b44_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b6_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b59_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b14_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b53_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b20_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b39_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b56_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b81_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b76_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b36_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b10_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b92_static.collisionobjectc", "/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b95_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b46_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b74_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b83_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b94_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b22_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b32_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b55_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b54_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b2_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b15_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b23_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b33_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b70_static.collisionobjectc", "/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b62_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b47_static.collisionobjectc", "/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b21_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b18_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b77_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b4_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b67_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b85_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b87_static.collisionobjectc", "/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b48_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b28_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b24_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b60_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b84_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b50_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b17_static.collisionobjectc", "/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b69_static.collisionobjectc", "/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b88_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b5_static.collisionobjectc", "/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b1_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b3_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b91_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b42_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b73_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b29_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b63_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b71_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b27_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b31_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b86_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b58_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b80_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b8_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b68_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b16_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b9_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b93_static.collisionobjectc", "/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b41_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b12_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b38_static.collisionobjectc", "/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.meshc", "/example/assets/maps/garden/collisionobject/worldspawn_b66_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b37_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b61_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b40_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b96_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b78_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b26_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b7_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b82_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b64_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b11_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b79_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b45_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b35_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b90_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b49_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b34_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b19_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b51_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b52_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b43_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b25_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b13_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b30_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b72_static.collisionobjectc", "/example/assets/maps/garden/collisionobject/worldspawn_b65_static.collisionobjectc" ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_tile_23.meshc",
+  "hexDigest" : "4e5cc8b997ee7ad9c6e4f2df1ddc1841a64ac522",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_tile_23.bufferc", "/example/assets/textures/tiny/tile_23.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_tile_23.bufferc",
+  "hexDigest" : "b8c1ebd4eed7e5784a0abbb9a6d6cf56a02b70a3",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/tile_23.texturec",
+  "hexDigest" : "532a7318211148117343d2d5bca583d7e599bb0b",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b57_static.collisionobjectc",
+  "hexDigest" : "55f9dfc87259470dca5ba07834c1ff96eee2efa3",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b75_static.collisionobjectc",
+  "hexDigest" : "2a054fb3b9af9795ba839ceb118a30b4e43d54b6",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b89_static.collisionobjectc",
+  "hexDigest" : "fa114e1542fc7f451b7eadef84ec9625fd6e189d",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b44_static.collisionobjectc",
+  "hexDigest" : "f0092c4cdda74546ca5d4915bff72a2846b4a9a5",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b6_static.collisionobjectc",
+  "hexDigest" : "0a9a6b6da56e240c8f0b5d9d0b674c4bf61a2936",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b59_static.collisionobjectc",
+  "hexDigest" : "1bea1e1c15f5074c575853332ea1f69c7ec75a05",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b14_static.collisionobjectc",
+  "hexDigest" : "2b8e8d00a92ef96e590b705fecabaa8ad1786f09",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b53_static.collisionobjectc",
+  "hexDigest" : "bc840601dc55eeeb26599101f8d9b5898ce09212",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b20_static.collisionobjectc",
+  "hexDigest" : "15a51e79af39e8b9dccacf44e94dcf2d05180873",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b39_static.collisionobjectc",
+  "hexDigest" : "bd89d2ae31aab7e784d5a583d9199711839b1f93",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b56_static.collisionobjectc",
+  "hexDigest" : "87cae3650bb7a4481ab16f8fc7e812993f5ae4bd",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b81_static.collisionobjectc",
+  "hexDigest" : "54bd50d564c7f4ee0d65f615cd0c87483b21fb49",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b76_static.collisionobjectc",
+  "hexDigest" : "5ac907bd924323231f6b2e4b9fbf33fb66a3f1b7",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b36_static.collisionobjectc",
+  "hexDigest" : "adb3c0ee1543a1d924c1ea40fe571c4b2008d9cb",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b10_static.collisionobjectc",
+  "hexDigest" : "9e375b08f2258ca45b82c8322998c44f91e943a0",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b92_static.collisionobjectc",
+  "hexDigest" : "3839e41aa60222b5d368f1c517c7ce70e8066f58",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_metal_17.meshc",
+  "hexDigest" : "1d8a6d56131d36950188b07a95636be3d3fea816",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_metal_17.bufferc", "/example/assets/textures/tiny/metal_17.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_metal_17.bufferc",
+  "hexDigest" : "1c386c5b26019d04c3c6c8adb243f70eba3a4b24",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/metal_17.texturec",
+  "hexDigest" : "8730b992e71733e9232a320b6547c370a80cb576",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b95_static.collisionobjectc",
+  "hexDigest" : "3390533776a416baf4fb2a1e17b4cce0d680069b",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b46_static.collisionobjectc",
+  "hexDigest" : "e2ce52fd3f9ddac2dd8ede8beb88fddf8638a3c5",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b74_static.collisionobjectc",
+  "hexDigest" : "40bf5e9dba3c2fb66f21565b189eed7ae21bd913",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b83_static.collisionobjectc",
+  "hexDigest" : "c049969dc2243cd325e447e2a47fbcbb6521aec5",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b94_static.collisionobjectc",
+  "hexDigest" : "f3745c19db14337ebafbf672947f8d8b043c1428",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b22_static.collisionobjectc",
+  "hexDigest" : "4b523c6d5a8e1c1296188ad31a297405524e05c7",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b32_static.collisionobjectc",
+  "hexDigest" : "0f365f3a097fc488c6fe7cc1a6ada07506009466",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b55_static.collisionobjectc",
+  "hexDigest" : "bcc8ed77aa8ce2ec3ed8cb5d3f65a106cad21f84",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b54_static.collisionobjectc",
+  "hexDigest" : "73d6f005c9da165aacafce8c5a36f8e485e5495c",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b2_static.collisionobjectc",
+  "hexDigest" : "0f207a0ffa2aa18cac8938cce9d510547cc35483",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b15_static.collisionobjectc",
+  "hexDigest" : "05da28485c770d5e6b584805b1354ef4fb7291b6",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b23_static.collisionobjectc",
+  "hexDigest" : "07e06a6472eb9651ee36f73dbb4f693b525f3cb0",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b33_static.collisionobjectc",
+  "hexDigest" : "c12e58eaa60386b9777e9a757b31478d50bc1489",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b70_static.collisionobjectc",
+  "hexDigest" : "d26f06edbe70a284d72e02a317a01d56a842f8c2",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_grass_6.meshc",
+  "hexDigest" : "b69e8fd08600e6114af4c43862cee08deaa05237",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_grass_6.bufferc", "/example/assets/textures/tiny/grass_6.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_grass_6.bufferc",
+  "hexDigest" : "0495d52c3847a3b325d60edcf45c27dcb68bcc9f",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/grass_6.texturec",
+  "hexDigest" : "84b840549ed2b4a860acabd5f734c5383307fc83",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b62_static.collisionobjectc",
+  "hexDigest" : "8a39ac640e7471896cfc1d7309f39e11186cd17f",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b47_static.collisionobjectc",
+  "hexDigest" : "fc8a914139a1d443e4435fe1cfa177f6d6ba376d",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_tile_4.meshc",
+  "hexDigest" : "3420528acf2ba90af00d32938593ec017e7eed3d",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_tile_4.bufferc", "/example/assets/textures/tiny/tile_4.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_tile_4.bufferc",
+  "hexDigest" : "4d4aebc9be2a0e0a2ef0e16dc278df46d58b39cf",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/tile_4.texturec",
+  "hexDigest" : "042e7ef7a8e8de914f9acef63eace5016b346c38",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b21_static.collisionobjectc",
+  "hexDigest" : "5cffde44c8d3118878dccb5c8e9ae10929c97345",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b18_static.collisionobjectc",
+  "hexDigest" : "9dab3a484af86ac52d852e213a604e0e13f152c4",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b77_static.collisionobjectc",
+  "hexDigest" : "8201f7aee046322b5b7da6aa9c8087382e0a938f",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b4_static.collisionobjectc",
+  "hexDigest" : "953d61ff6d89788449c6620dd3c398369710b25c",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b67_static.collisionobjectc",
+  "hexDigest" : "ca41b89cbf7180a78172738b396dba2e9b17d189",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b85_static.collisionobjectc",
+  "hexDigest" : "da46f6b6bf57d1ae449649f8fa1f8b5704303b3e",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b87_static.collisionobjectc",
+  "hexDigest" : "b95198cc6eca289d4d8779cdf7365bff5b75e484",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_wood_37.meshc",
+  "hexDigest" : "4a084c4726fc761ac42ba679dbc3bc879094ba6c",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_wood_37.bufferc", "/example/assets/textures/tiny/wood_37.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_wood_37.bufferc",
+  "hexDigest" : "58b73020267c99f41ba06fe6288ee0d0cff09914",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/wood_37.texturec",
+  "hexDigest" : "b53fa7cf9a964601aaf3a915e089f9b67cb05c57",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b48_static.collisionobjectc",
+  "hexDigest" : "abc7b8fe687ceaa8720dc41a6ee255eccc00108f",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b28_static.collisionobjectc",
+  "hexDigest" : "62e90278efcbeff45cff67808c3356784aa768dd",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b24_static.collisionobjectc",
+  "hexDigest" : "864377224886e9462ca567e81a8c067ddfa3595f",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b60_static.collisionobjectc",
+  "hexDigest" : "799d91cc75402b26071069fd2a2dc6e6693aa9d9",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b84_static.collisionobjectc",
+  "hexDigest" : "dd5302fef54853e5bd26ebe7b306969088df1f95",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b50_static.collisionobjectc",
+  "hexDigest" : "2568590e946d7b37915caed975b5154e2a7df239",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b17_static.collisionobjectc",
+  "hexDigest" : "77455d737836ab7201f9d51bd54e18da73032695",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_brick_21.meshc",
+  "hexDigest" : "b8152a5839e69cd5092111a51465f92fd250424a",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_brick_21.bufferc", "/example/assets/textures/tiny/brick_21.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_brick_21.bufferc",
+  "hexDigest" : "869ab83a661a699d541bf8f064e9d876d335fdba",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/brick_21.texturec",
+  "hexDigest" : "7934acf066888f32470ace00ca1e4a2b4746d784",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b69_static.collisionobjectc",
+  "hexDigest" : "ce6c30f329c674ceaa1ce7cb7fc227f6d49bceaf",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_brick_26.meshc",
+  "hexDigest" : "7851129706625a2b00820edf5cc88ffc5a6f0a37",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_brick_26.bufferc", "/example/assets/textures/tiny/brick_26.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_brick_26.bufferc",
+  "hexDigest" : "b59803492983e55068647fc9ee74b457bd81c496",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/brick_26.texturec",
+  "hexDigest" : "0c49b8af1ebcd2045f585db3755ff65f87098013",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b88_static.collisionobjectc",
+  "hexDigest" : "88b2c5d95d03cea731e308a1972e2ff3360f9419",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b5_static.collisionobjectc",
+  "hexDigest" : "71da5296b3c797baa471dea5cc0526d4721a4374",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_tile_33.meshc",
+  "hexDigest" : "62caf91a57bebb627d4fdeb0bea45bcb367dc4fe",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_tile_33.bufferc", "/example/assets/textures/tiny/tile_33.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_tile_33.bufferc",
+  "hexDigest" : "3d841ee4dcef81e09b92029d25f8453c70d2063f",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/tile_33.texturec",
+  "hexDigest" : "a3f91ad41e8c8b315932946e7770ebbbb087cf35",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b1_static.collisionobjectc",
+  "hexDigest" : "3b311f1a41b368fe45229683d763031801749c34",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b3_static.collisionobjectc",
+  "hexDigest" : "6d2a655fbdf68c6501993ddab122db6c4f1f352c",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b91_static.collisionobjectc",
+  "hexDigest" : "8935434a25b433e9e5a2ad89b4d45e7b0a585ee1",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b42_static.collisionobjectc",
+  "hexDigest" : "dea2e3ae9efcadde151d28bdb3cbddd66113c9f5",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b73_static.collisionobjectc",
+  "hexDigest" : "c414b8f9f46ac765e51567b35e7f652765aed412",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b29_static.collisionobjectc",
+  "hexDigest" : "4a3f91baf06dc1e40fdcb4547e665407ab100895",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b63_static.collisionobjectc",
+  "hexDigest" : "3f65eb0e1bfaa82c3021ae110ad97a75384755d5",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b71_static.collisionobjectc",
+  "hexDigest" : "3562a4f048e083df6255cac53a6b3d6e60df54a8",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b27_static.collisionobjectc",
+  "hexDigest" : "6eb641f042bde620ae7ea1a2f52cf0c4be3261d9",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b31_static.collisionobjectc",
+  "hexDigest" : "69525ec22eb985bd3e02708cac327a8048aca24f",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b86_static.collisionobjectc",
+  "hexDigest" : "f54acfec96ca58ec30ddb2ebe522490750b5d61a",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b58_static.collisionobjectc",
+  "hexDigest" : "5a1e948415d2f7498dc53d55db43a5e3a4d03827",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b80_static.collisionobjectc",
+  "hexDigest" : "14b70c5de07c784dcf2c4f4f39e50657bf1c5fcf",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b8_static.collisionobjectc",
+  "hexDigest" : "aaaea52350923eb9d400432d9c091d9645b8d531",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b68_static.collisionobjectc",
+  "hexDigest" : "ae4d2ba63263dacfa622870d4a12e47d1a69d340",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b16_static.collisionobjectc",
+  "hexDigest" : "afe808c5dc030dbf54104cdbe16a37e7b4072faa",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b9_static.collisionobjectc",
+  "hexDigest" : "291eaea68e97dcf4d7c1e6bf68664283b1feb100",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b93_static.collisionobjectc",
+  "hexDigest" : "a8889985939325eea8c107fd1f26fa56c08548a6",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_tile_22.meshc",
+  "hexDigest" : "bf1e3095b8e41b72b5d9ff97984c4fbecadf8837",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_tile_22.bufferc", "/example/assets/textures/tiny/tile_22.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_tile_22.bufferc",
+  "hexDigest" : "2e702affe892efee6a2e93c3979342e16076ec3c",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/tile_22.texturec",
+  "hexDigest" : "58f21efe77c991a32b8b7b5268f31f8c0d1076cf",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b41_static.collisionobjectc",
+  "hexDigest" : "c764ec06079b8652aefdb861af047bc03a488a76",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b12_static.collisionobjectc",
+  "hexDigest" : "13b041105c59cebd09f15d2a2205d9c03c05c609",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b38_static.collisionobjectc",
+  "hexDigest" : "963d1b9928eeaace00b110203b875ff7a5d759ff",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/mesh/worldspawn_tiny_brick_14.meshc",
+  "hexDigest" : "4ec9a07a30cf07be3cfed17a23f350489ce02c28",
+  "children" : [ "/illumination/assets/materials/model.materialc", "/example/assets/maps/garden/buffer/worldspawn_tiny_brick_14.bufferc", "/example/assets/textures/tiny/brick_14.texturec", "/illumination/textures/shadow.texturec", "/illumination/textures/data.texturec" ]
+}, {
+  "path" : "/example/assets/maps/garden/buffer/worldspawn_tiny_brick_14.bufferc",
+  "hexDigest" : "3296ecbfae3a792c853f116fc8863109fe03b2b2",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/textures/tiny/brick_14.texturec",
+  "hexDigest" : "5439b7247729365e9cdb05746a151360a2b0251b",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b66_static.collisionobjectc",
+  "hexDigest" : "ccb7d49ed8776d0061f4c2854357cd78ee508783",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b37_static.collisionobjectc",
+  "hexDigest" : "51ea9193d00fa1374a79e0cc7e5318b09871e1f2",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b61_static.collisionobjectc",
+  "hexDigest" : "326027a20994f5cc81774e4680370f13ed441b4f",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b40_static.collisionobjectc",
+  "hexDigest" : "9c5d178c3f5fcc4fa2771e5db938ed441d7dd1ed",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b96_static.collisionobjectc",
+  "hexDigest" : "9f5582e16c611b802f6107efd4a04f054dcc6831",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b78_static.collisionobjectc",
+  "hexDigest" : "be3a7eecb4beeade4ac89734588c48e73767e52d",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b26_static.collisionobjectc",
+  "hexDigest" : "9936a5b59a0e0cb86fdd8c27e8237df5e1b50904",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b7_static.collisionobjectc",
+  "hexDigest" : "56f20467efee35df1ebfd9f59579b4e6911377fa",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b82_static.collisionobjectc",
+  "hexDigest" : "cf7557dc90c80d6cfe44b85a5aa0f76b1605c833",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b64_static.collisionobjectc",
+  "hexDigest" : "f1feb599e547d2b75358e47d7987a0e57570d5d7",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b11_static.collisionobjectc",
+  "hexDigest" : "74f9ebf05051a4e48baec678cb26160018621077",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b79_static.collisionobjectc",
+  "hexDigest" : "b144fe907afccad281a9d9374d0643539606a956",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b45_static.collisionobjectc",
+  "hexDigest" : "f4b299200b6a2612c35ea1a086826747867f2b85",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b35_static.collisionobjectc",
+  "hexDigest" : "515b35592e38a04f69711b319a722955fa48a4df",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b90_static.collisionobjectc",
+  "hexDigest" : "84c0b4dae4132a288f77d0765f24b3688692a918",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b49_static.collisionobjectc",
+  "hexDigest" : "6255c8f5dd640f3044f1bcc97ccef80ad9246305",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b34_static.collisionobjectc",
+  "hexDigest" : "504bdc98ff7a43a8493487c4aa1343383c3dc2b8",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b19_static.collisionobjectc",
+  "hexDigest" : "f8e755cb0c1f1eb7990b49881b52cc7895964d0f",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b51_static.collisionobjectc",
+  "hexDigest" : "1356a43805a07bab4a77bfff9232312fa00e2e65",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b52_static.collisionobjectc",
+  "hexDigest" : "75f38b49ab7e3e9f6a0385a602ad1c56ab968556",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b43_static.collisionobjectc",
+  "hexDigest" : "eade1d80d870676dbcc79f84aaf4577e48717092",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b25_static.collisionobjectc",
+  "hexDigest" : "ba5194433e6170e0e4249d80c4cbecc3cc4f8da2",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b13_static.collisionobjectc",
+  "hexDigest" : "5160254f724bdec2795d81c310f945c6b1aa4408",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b30_static.collisionobjectc",
+  "hexDigest" : "d8fdb24647301502384d207f226fb40ac947dd2a",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b72_static.collisionobjectc",
+  "hexDigest" : "479f0fcff9736d9d0fdb30a2cd5c5c81c1183653",
+  "children" : [ ]
+}, {
+  "path" : "/example/assets/maps/garden/collisionobject/worldspawn_b65_static.collisionobjectc",
+  "hexDigest" : "38afcd14783f89905df47c3996291b87eaeea01e",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/render/illumination.renderc",
+  "hexDigest" : "317e7c32cf9c5c2ba6a24efadc9b0d1529b0ddc8",
+  "children" : [ "/illumination/render/illumination.render_scriptc", "/illumination/assets/materials/shadow/shadow.materialc" ]
+}, {
+  "path" : "/illumination/render/illumination.render_scriptc",
+  "hexDigest" : "084405794f2fc0494c4947f063ed6c8e695e1a01",
+  "children" : [ "/illumination/illumination.luac" ]
+}, {
+  "path" : "/illumination/assets/materials/shadow/shadow.materialc",
+  "hexDigest" : "a3b214f0cebdf55c43985f37cdd64adc5817aaef",
+  "children" : [ "/illumination/assets/materials/shadow/shadow.vpc", "/illumination/assets/materials/shadow/shadow.fpc" ]
+}, {
+  "path" : "/illumination/assets/materials/shadow/shadow.vpc",
+  "hexDigest" : "8da3cb3cbb229b9d5b50c4d0882fc1edbf6c46d9",
+  "children" : [ ]
+}, {
+  "path" : "/illumination/assets/materials/shadow/shadow.fpc",
+  "hexDigest" : "e9f74768548cfec60e41b06ba8762e2f9043c17c",
+  "children" : [ ]
+}, {
+  "path" : "/builtins/input/all.input_bindingc",
+  "hexDigest" : "04a1e654c3d4a2641de5c460881b357bec123761",
+  "children" : [ ]
+}, {
+  "path" : "/builtins/input/default.gamepadsc",
+  "hexDigest" : "5a9e7bd012ff1e67e6eaa81150c55a3a86ca4dff",
+  "children" : [ ]
+}, {
+  "path" : "/builtins/render/default.display_profilesc",
+  "hexDigest" : "4187e11a10b0dd0d7f1b34d3ae3c0e9632dc69fd",
+  "children" : [ ]
+} ]

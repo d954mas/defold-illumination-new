@@ -1,0 +1,32 @@
+collision_shape: ""
+type: COLLISION_OBJECT_TYPE_KINEMATIC
+mass: 0.0
+friction: 0.0
+restitution: 0.0
+group: "walker"
+mask: "default"
+mask: "trigger"
+embedded_collision_shape {
+  shapes {
+    shape_type: TYPE_CAPSULE
+    position {
+      x: 0.0
+      y: 0.65
+      z: 0.0
+    }
+    rotation {
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      w: 1.0
+    }
+    index: 0
+    count: 2
+  }
+  data: 0.25
+  data: 0.8
+}
+linear_damping: 0.0
+angular_damping: 0.0
+locked_rotation: true
+bullet: false
