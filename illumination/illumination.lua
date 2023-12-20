@@ -542,7 +542,7 @@ function Lights:cluster_write_to_buffer(active_list, cluster)
 	data[1], data[2], data[3], data[4] = illumination.float_to_rgba(#cluster.lights, 0, self.lights.clusters.max_lights_per_cluster)
 	local data_idx = 5
 	for lidx, l in ipairs(cluster.lights) do
-		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = illumination.float_to_rgba(l.active_idx-1, 0, total_lights+1)
+		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = illumination.float_to_rgba(l.active_idx - 1, 0, total_lights + 1)
 		data_idx = data_idx + 4
 		--print("light:" .. lidx .. " active_idx:" .. l.active_idx )
 	end
@@ -954,7 +954,9 @@ function Lights:update_lights(camera_aspect, camera_fov, camera_far)
 		end
 	end
 
+	local time = chronos.nanotime()
 	self:update_clusters(active_list, camera_aspect, camera_fov, camera_far)
+	print("update clusters:" .. chronos.nanotime() - time)
 	dirty_texture = true
 
 	if dirty_texture then
