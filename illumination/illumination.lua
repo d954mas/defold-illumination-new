@@ -297,6 +297,7 @@ function Light:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
 	assert(self.radius <= RADIUS_MAX, "radius > " .. RADIUS_MAX)
 
 	local idx = (self.active_idx - 1) * light_size + 1--lua side start from 1
+
 	light_data[1], light_data[2], light_data[3], light_data[4] = illumination.float_to_rgba(self.position.x, x_min, x_max)
 	light_data[5], light_data[6], light_data[7], light_data[8] = illumination.float_to_rgba(self.position.y, y_min, y_max)
 	light_data[9], light_data[10], light_data[11], light_data[12] = illumination.float_to_rgba(self.position.z, z_min, z_max)
@@ -341,7 +342,7 @@ local function create_lights_data_texture()
 	local path = "/__lights_data.texturec"
 	local tparams = {
 		width = 1024,
-		height = 512,
+		height = 1024,
 		type = resource.TEXTURE_TYPE_2D,
 		format = resource.TEXTURE_FORMAT_RGBA,
 		num_mip_maps = 1
@@ -425,7 +426,7 @@ function Lights:initialize()
 			x_slices = 15,
 			y_slices = 15,
 			z_slices = 15,
-			max_lights_per_cluster = 128,
+			max_lights_per_cluster = 190,
 			clusters = {},
 			pixels_per_cluster = 0
 		}
@@ -541,7 +542,7 @@ function Lights:cluster_write_to_buffer(active_list, cluster)
 	data[1], data[2], data[3], data[4] = illumination.float_to_rgba(#cluster.lights, 0, self.lights.clusters.max_lights_per_cluster)
 	local data_idx = 5
 	for lidx, l in ipairs(cluster.lights) do
-		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = illumination.float_to_rgba(l.active_idx, 0, total_lights)
+		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = illumination.float_to_rgba(l.active_idx-1, 0, total_lights+1)
 		data_idx = data_idx + 4
 		--print("light:" .. lidx .. " active_idx:" .. l.active_idx )
 	end
