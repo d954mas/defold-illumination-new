@@ -497,26 +497,31 @@ function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_f
 		local xStartIndex = math.floor((x1 + w_lightFrustum * 0.5) / xStride) - 1;
 		local xEndIndex = math.floor((x2 + w_lightFrustum * 0.5) / xStride) + 1;
 
-		zStartIndex = clamp(zStartIndex, 0, z_slices - 1);
-		zEndIndex = clamp(zEndIndex, 0, z_slices - 1);
+		local visible = not ((zStartIndex < 0 and zEndIndex < 0) or (zStartIndex >= z_slices and zEndIndex >= z_slices)) and
+				not ((yStartIndex < 0 and yEndIndex < 0) or (yStartIndex >= y_slices and yEndIndex >= y_slices))
 
-		yStartIndex = clamp(yStartIndex, 0, y_slices - 1);
-		yEndIndex = clamp(yEndIndex, 0, y_slices - 1);
+		if visible then
+			zStartIndex = clamp(zStartIndex, 0, z_slices - 1);
+			zEndIndex = clamp(zEndIndex, 0, z_slices - 1);
 
-		xStartIndex = clamp(xStartIndex, 0, x_slices - 1);
-		xEndIndex = clamp(xEndIndex, 0, x_slices - 1);
+			yStartIndex = clamp(yStartIndex, 0, y_slices - 1);
+			yEndIndex = clamp(yEndIndex, 0, y_slices - 1);
 
-		for z = zStartIndex, zEndIndex do
-			for y = yStartIndex, yEndIndex do
-				for x = xStartIndex, xEndIndex do
-					local id = x + y * x_slices + z * x_slices * y_slices + 1;
-					local cluster = clusters.clusters[id]
-					if (#cluster.lights < max_lights_per_cluster) then
-						table.insert(cluster.lights, l)
-					else
-						print("cluster:" .. id .. " already have max lights count")
+			xStartIndex = clamp(xStartIndex, 0, x_slices - 1);
+			xEndIndex = clamp(xEndIndex, 0, x_slices - 1);
+
+			for z = zStartIndex, zEndIndex do
+				for y = yStartIndex, yEndIndex do
+					for x = xStartIndex, xEndIndex do
+						local id = x + y * x_slices + z * x_slices * y_slices + 1;
+						local cluster = clusters.clusters[id]
+						if (#cluster.lights < max_lights_per_cluster) then
+							table.insert(cluster.lights, l)
+						else
+							print("cluster:" .. id .. " already have max lights count")
+						end
+
 					end
-
 				end
 			end
 		end
@@ -956,7 +961,7 @@ function Lights:update_lights(camera_aspect, camera_fov, camera_far)
 
 	local time = chronos.nanotime()
 	self:update_clusters(active_list, camera_aspect, camera_fov, camera_far)
-	print("update clusters:" .. chronos.nanotime() - time)
+	--print("update clusters:" .. chronos.nanotime() - time)
 	dirty_texture = true
 
 	if dirty_texture then

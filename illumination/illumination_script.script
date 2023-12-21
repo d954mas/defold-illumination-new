@@ -24,7 +24,7 @@ function update(self, dt)
 	local aspect = w/h
 	local time = chronos.nanotime()
 	ILLUMINATION:update_lights(aspect,math.rad(75),15)
-	print("update lights:" .. chronos.nanotime()-time)
+	--print("update lights:" .. chronos.nanotime()-time)
 	ILLUMINATION:set_ambient_color(self.ambient_color.x,self.ambient_color.y,self.ambient_color.z)
 	ILLUMINATION:set_ambient_color_intensity(self.ambient_level)
 
