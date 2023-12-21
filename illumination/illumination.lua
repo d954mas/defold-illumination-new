@@ -441,6 +441,13 @@ function Lights:initialize()
 	self.clusters_data.y = self.lights.clusters.y_slices
 	self.clusters_data.z = self.lights.clusters.z_slices
 	self.clusters_data.w = self.lights.clusters.max_lights_per_cluster
+
+
+
+
+	illumination.lights_init(2048, self.lights.clusters.x_slices, self.lights.clusters.y_slices,
+			self.lights.clusters.z_slices, self.lights.clusters.max_lights_per_cluster)
+
 end
 
 function Lights:on_resize(w, h)

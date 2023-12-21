@@ -6,6 +6,13 @@
 
 #include "utils.h"
 #include "frustum_cull.h"
+#include "lights.h"
+
+using namespace IlluminationLights;
+
+namespace IlluminationLights {
+    LightsManager g_lightsManager;
+}
 
 static float Fract(float f){
     return f - floor(f);
@@ -118,6 +125,11 @@ static const luaL_reg Module_methods[] = {
     {"float_to_rgba", FloatToRGBALua},
     {"fill_stream_uint8",FillStreamUint8},
     {"frustum_is_box_visible",FrustumIsBoxVisibleLua},
+
+
+    {"lights_init", LightsManagerInitLua},
+    {"light_create", LightsManagerCreateLight},
+    {"light_destroy", LightsManagerDestroyLight},
 
     {0, 0}
 
