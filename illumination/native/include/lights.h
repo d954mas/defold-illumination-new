@@ -63,7 +63,7 @@ inline void LightReset(Light* light){
     light->smoothness = 0.5f;
     light->specular = 0.5f;
     light->cutoff = 1.0f;
-    light->dirty = true; // Default dirty flag
+    light->dirty = true;
     LightUpdateAABB(light);
 }
 
@@ -139,22 +139,20 @@ inline LuaLightUserData* LightUserdataCheck(lua_State* L, int index){
 }
 
 static int LuaLightToString(lua_State* L) {
-    // Check if the first argument is a userdata of the expected type
     LuaLightUserData* userData = (LuaLightUserData*)luaL_checkudata(L, 1, LIGHT_META);
     if (!userData->valid) {
         lua_pushfstring(L, "Light[%d]. Invalid userdata",userData->light->index);
-        return 1; // Number of results returned to Lua
+        return 1;
     }
 
     Light* light = userData->light;
 
-    // Use lua_pushfstring to create and push a formatted string onto the Lua stack
     lua_pushfstring(L, "Light[%d]: Position(%.2f, %.2f, %.2f)",
                     light->index,
                     light->position.getX(),
                     light->position.getY(),
                     light->position.getZ());
-    return 1; // Number of results returned to Lua
+    return 1;
 }
 
 static int LuaLightUserdataGC(lua_State* L) {
@@ -177,6 +175,16 @@ static int LuaLightSetPosition(lua_State* L) {
     return 0;
 }
 
+static int LuaLightGetPosition(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 2);
+    LuaLightUserData* userData = LightUserdataCheck(L,1);
+    Vectormath::Aos::Vector3 *out = dmScript::CheckVector3(L, 2);
+    *out = userData->light->position;
+
+    return 0;
+}
+
 static int LuaLightSetDirection(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 0);
     check_arg_count(L, 4);
@@ -185,6 +193,16 @@ static int LuaLightSetDirection(lua_State* L) {
                       luaL_checknumber(L, 2),
                       luaL_checknumber(L, 3),
                       luaL_checknumber(L, 4));
+
+    return 0;
+}
+
+static int LuaLightGetDirection(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 2);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    Vectormath::Aos::Vector3 *out = dmScript::CheckVector3(L, 2);
+    *out = userData->light->direction;
 
     return 0;
 }
@@ -202,6 +220,16 @@ static int LuaLightSetColor(lua_State* L) {
     return 0;
 }
 
+static int LuaLightGetColor(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 2);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    Vectormath::Aos::Vector4 *out = dmScript::CheckVector4(L, 2);
+    *out = userData->light->color;
+
+    return 0;
+}
+
 static int LuaLightSetRadius(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 0);
     check_arg_count(L, 2);
@@ -209,6 +237,15 @@ static int LuaLightSetRadius(lua_State* L) {
     LightSetRadius(userData->light, luaL_checknumber(L, 2));
 
     return 0;
+}
+
+static int LuaLightGetRadius(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    lua_pushnumber(L, userData->light->radius);
+
+    return 1;
 }
 
 static int LuaLightSetSmoothness(lua_State* L) {
@@ -220,6 +257,15 @@ static int LuaLightSetSmoothness(lua_State* L) {
     return 0;
 }
 
+static int LuaLightGetSmoothness(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    lua_pushnumber(L, userData->light->smoothness);
+
+    return 1;
+}
+
 static int LuaLightSetCutoff(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 0);
     check_arg_count(L, 2);
@@ -227,6 +273,15 @@ static int LuaLightSetCutoff(lua_State* L) {
     LightSetCutoff(userData->light, luaL_checknumber(L, 2));
 
     return 0;
+}
+
+static int LuaLightGetCutoff(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    lua_pushnumber(L, userData->light->cutoff);
+
+    return 1;
 }
 
 static int LuaLightSetSpecular(lua_State* L) {
@@ -237,6 +292,16 @@ static int LuaLightSetSpecular(lua_State* L) {
 
     return 0;
 }
+
+static int LuaLightGetSpecular(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    lua_pushnumber(L, userData->light->specular);
+
+    return 1;
+}
+
 
 static int LuaLightSetEnabled(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 0);
@@ -249,21 +314,36 @@ static int LuaLightSetEnabled(lua_State* L) {
     return 0;
 }
 
+static int LuaLightIsEnabled(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 1);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
 
+    lua_pushboolean(L, userData->light->enabled);
 
-// Array of functions to register
+    return 1;
+}
+
 static const luaL_Reg functions[] = {
     {"set_position", LuaLightSetPosition},
+    {"get_position", LuaLightGetPosition},
     {"set_direction", LuaLightSetDirection},
+    {"get_direction", LuaLightGetDirection},
     {"set_color", LuaLightSetColor},
+    {"get_color", LuaLightGetColor},
     {"set_radius", LuaLightSetRadius},
+    {"get_radius", LuaLightGetRadius},
     {"set_smoothness", LuaLightSetSmoothness},
+    {"get_smoothness", LuaLightGetSmoothness},
     {"set_cutoff", LuaLightSetCutoff},
+    {"get_cutoff", LuaLightGetCutoff},
     {"set_specular", LuaLightSetSpecular},
+    {"get_specular", LuaLightGetSpecular},
     {"set_enabled", LuaLightSetEnabled},
+    {"is_enabled", LuaLightIsEnabled},
     {"__gc", LuaLightUserdataGC},
     {"__tostring", LuaLightToString},
-    {NULL, NULL}  // Sentinel element
+    {NULL, NULL}
 };
 //endregion
 
