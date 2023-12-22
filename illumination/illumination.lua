@@ -446,7 +446,7 @@ function Lights:initialize()
 
 
 	illumination.lights_init(2048, self.lights.clusters.x_slices, self.lights.clusters.y_slices,
-			self.lights.clusters.z_slices, self.lights.clusters.max_lights_per_cluster)
+			self.lights.clusters.z_slices, 190)
 
 end
 

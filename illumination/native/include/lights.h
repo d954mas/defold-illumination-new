@@ -1,6 +1,10 @@
 #ifndef illumination_lights_h
 #define illumination_lights_h
 
+#include <dmsdk/sdk.h>
+#include "utils.h"
+#include <cmath> // For sqrt, log2, and pow functions
+
 #define LIGHT_META "IlluminationLights.Light"
 #define LIGHT_PIXELS 6 // pixels per light
 #define LIGHT_RADIUS_MAX 64 // store in r value of pixel. Mb store as rgba value for better precision?
@@ -9,11 +13,46 @@
 #define LIGHT_AXIS_CAPACITY 1024 //[-511 512]
 
 
-#include <dmsdk/sdk.h>
-#include "utils.h"
+
 
 
 namespace IlluminationLights {
+
+//region TEXTURE
+static const dmhash_t HASH_RGBA = dmHashString64("rgba");
+static const dmBuffer::StreamDeclaration rgba_buffer_decl[] = {
+    {HASH_RGBA, dmBuffer::VALUE_TYPE_UINT8, 4},
+};
+
+
+// Function to find the smallest power of two greater than or equal to n
+int SmallestPowerOfTwo(int n) {
+    if (n <= 0) return 1;
+
+    int logVal = (int)std::ceil(std::log2(n));
+    return (int)std::pow(2, logVal);
+}
+
+// Function to find the width and height for the texture
+void FindTextureDimensions(int totalPixels, int& width, int& height) {
+    if (totalPixels <= 0) {
+        width = height = 1;
+        return;
+    }
+
+    // Start with a square texture estimate
+    int sqrtPixels = (int)std::sqrt(totalPixels);
+    int initialDimension = SmallestPowerOfTwo(sqrtPixels);
+
+    width = initialDimension;
+    height = initialDimension;
+
+    //check if one side can be smaller. Texture can be not square
+    if (width * (height / 2) >= totalPixels) {
+        height /= 2;
+    }
+}
+//endregion
 
 
 
@@ -375,10 +414,15 @@ public:
     bool inited = false;
     Light* lights = NULL;
     LightCluster* clusters = NULL;
+
     dmArray<Light*> lightsPool;
     dmArray<Light*> lightsInWorld;
-    int numLights,maxLightsPerCluster;
+    int numLights,maxLightsPerCluster,pixelsPerCluster;
+    int totalClusters;
     int xSlice, ySlice, zSlice;
+
+    dmBuffer::HBuffer textureBuffer = 0x0;
+    int textureWidth, textureHeight;
 
     LightsManager(){
 
@@ -386,11 +430,13 @@ public:
     ~LightsManager(){
         delete[] lights;
         if (clusters != NULL) {
-            for (int i = 0; i < xSlice * ySlice * zSlice; ++i) {
+            for (int i = 0; i < totalClusters; ++i) {
                 delete[] clusters[i].lights;
             }
         }
         delete[] clusters;
+        //for some reasons engine crash when destroy texture buffer. Maybe it destroy in other place when app is closed.
+        //dmBuffer::Destroy(textureBuffer);
     }
 
     void init(int numLights, int xSlice, int ySlice, int zSlice, int maxLightsPerCluster){
@@ -406,6 +452,9 @@ public:
         this->ySlice = ySlice;
         this->zSlice = zSlice;
         this->maxLightsPerCluster = maxLightsPerCluster;
+        //1 pixel(rgba) lights count
+        //max_lights_per_cluster * 1pixel(rgba) light idx
+        pixelsPerCluster = 1 + maxLightsPerCluster;
         lights = new Light[numLights];
         lightsPool.SetCapacity(numLights);
         lightsInWorld.SetCapacity(numLights);
@@ -418,8 +467,8 @@ public:
             lightsPool.Push(light);
         }
 
-         int totalClusters = xSlice * ySlice * zSlice;
-         clusters = new LightCluster[totalClusters];
+        totalClusters = xSlice * ySlice * zSlice;
+        clusters = new LightCluster[totalClusters];
 
         for (int i = 0; i < totalClusters; ++i) {
             LightCluster* cluster = &clusters[i];
@@ -427,7 +476,15 @@ public:
             cluster->numLights = 0;
         }
 
-
+        int pixels = LIGHT_PIXELS * numLights + totalClusters * pixelsPerCluster;
+        FindTextureDimensions(pixels, textureWidth, textureHeight);
+        dmLogInfo("Total pixels:%d.Lights texture: %d x %d", pixels,textureWidth, textureHeight);
+        dmBuffer::Result r = dmBuffer::Create(textureWidth * textureHeight, rgba_buffer_decl,1, &textureBuffer);
+        if (r != dmBuffer::RESULT_OK) {
+            dmLogError("Failed to create lights texture buffer");
+            return;
+        }
+        //dmBuffer::Destroy(textureBuffer);
     }
 private:
     LightsManager(const LightsManager&);
