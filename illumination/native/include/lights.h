@@ -2,6 +2,11 @@
 #define illumination_lights_h
 
 #define LIGHT_META "IlluminationLights.Light"
+#define LIGHT_PIXELS 6 // pixels per light
+#define LIGHT_RADIUS_MAX 64 // store in r value of pixel. Mb store as rgba value for better precision?
+#define LIGHT_MIN_POSITION -511
+#define LIGHT_MAX_POSITION 512
+#define LIGHT_AXIS_CAPACITY 1024 //[-511 512]
 
 
 #include <dmsdk/sdk.h>
@@ -69,6 +74,15 @@ inline void LightReset(Light* light){
 
 //region Light
 inline void LightSetPosition(Light* light, float x, float y, float z) {
+  if (x < LIGHT_MIN_POSITION || x > LIGHT_MAX_POSITION ||
+        y < LIGHT_MIN_POSITION || y > LIGHT_MAX_POSITION ||
+        z < LIGHT_MIN_POSITION || z > LIGHT_MAX_POSITION) {
+        dmLogWarning("Light position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
+        x = fmax((float)LIGHT_MIN_POSITION, fmin(x, (float)LIGHT_MAX_POSITION));
+        y = fmax((float)LIGHT_MIN_POSITION, fmin(y, (float)LIGHT_MAX_POSITION));
+        z = fmax((float)LIGHT_MIN_POSITION, fmin(z, (float)LIGHT_MAX_POSITION));
+    }
+
     if (light->position.getX()!=x || light->position.getY()!=y || light->position.getZ()!=z) {
         light->position = dmVMath::Vector3(x,y,z);
         LightUpdateAABB(light);
@@ -92,6 +106,11 @@ inline void LightSetColor(Light* light, float r, float g, float b, float brightn
 }
 
 inline void LightSetRadius(Light* light, float newRadius) {
+    if (newRadius < 0.0f || newRadius > LIGHT_RADIUS_MAX) {
+        dmLogWarning("Light radius out of bounds. Clamping to [0, %d].", LIGHT_RADIUS_MAX);
+        newRadius = fmax(0.0f, fmin(newRadius, (float)LIGHT_RADIUS_MAX));
+    }
+
     if (light->radius != newRadius) {
         light->radius = newRadius;
         LightUpdateAABB(light);
@@ -125,6 +144,10 @@ inline void LightSetSpecular(Light* light, float newSpecular) {
 
 inline void LightSetEnabled(Light* light, bool enabled) {
     light->enabled = enabled;
+}
+
+inline bool LightIsAddLightToScene(Light* light) {
+	return light->enabled && light->color.getW() > 0.0f;
 }
 
 
