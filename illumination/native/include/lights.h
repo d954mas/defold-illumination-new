@@ -67,6 +67,67 @@ inline void LightReset(Light* light){
     LightUpdateAABB(light);
 }
 
+//region Light
+inline void LightSetPosition(Light* light, float x, float y, float z) {
+    if (light->position.getX()!=x || light->position.getY()!=y || light->position.getZ()!=z) {
+        light->position = dmVMath::Vector3(x,y,z);
+        LightUpdateAABB(light);
+        light->dirty = true;
+    }
+}
+
+inline void LightSetDirection(Light* light, float x, float y, float z) {
+    dmVMath::Vector3 newDir = Vectormath::Aos::normalize(dmVMath::Vector3(x, y, z));
+    if (light->direction.getX() != newDir.getX() || light->direction.getY() != newDir.getY() || light->direction.getZ() != newDir.getZ()) {
+        light->direction = newDir;
+        light->dirty = true;
+    }
+}
+
+inline void LightSetColor(Light* light, float r, float g, float b, float brightness) {
+    if (light->color.getX() != r || light->color.getY() != g || light->color.getZ() != b || light->color.getW() != brightness) {
+        light->color = dmVMath::Vector4(r, g, b, brightness);
+        light->dirty = true;
+    }
+}
+
+inline void LightSetRadius(Light* light, float newRadius) {
+    if (light->radius != newRadius) {
+        light->radius = newRadius;
+        LightUpdateAABB(light);
+        light->dirty = true;
+    }
+}
+
+inline void LightSetSmoothness(Light* light, float newSmoothness) {
+    newSmoothness = fmax(0.0f, fmin(newSmoothness, 1.0f));
+    if (light->smoothness != newSmoothness) {
+        light->smoothness = newSmoothness;
+        light->dirty = true;
+    }
+}
+
+inline void LightSetCutoff(Light* light, float newCutoff) {
+    newCutoff = fmax(0.0f, fmin(newCutoff, 1.0f));
+    if (light->cutoff != newCutoff) {
+        light->cutoff = newCutoff;
+        light->dirty = true;
+    }
+}
+
+inline void LightSetSpecular(Light* light, float newSpecular) {
+    newSpecular = fmax(0.0f, fmin(newSpecular, 1.0f));
+    if (light->specular != newSpecular) {
+        light->specular = newSpecular;
+        light->dirty = true;
+    }
+}
+
+inline void LightSetEnabled(Light* light, bool enabled) {
+    light->enabled = enabled;
+}
+
+
 //endregion
 
 //region light Lua
@@ -77,9 +138,9 @@ inline LuaLightUserData* LightUserdataCheck(lua_State* L, int index){
      return userData;
 }
 
-static int LightToString(lua_State* L) {
+static int LuaLightToString(lua_State* L) {
     // Check if the first argument is a userdata of the expected type
-    LuaLightUserData* userData = LightUserdataCheck(L,1);
+    LuaLightUserData* userData = (LuaLightUserData*)luaL_checkudata(L, 1, LIGHT_META);
     if (!userData->valid) {
         lua_pushfstring(L, "Light[%d]. Invalid userdata",userData->light->index);
         return 1; // Number of results returned to Lua
@@ -96,7 +157,7 @@ static int LightToString(lua_State* L) {
     return 1; // Number of results returned to Lua
 }
 
-static int LightUserdataGC(lua_State* L) {
+static int LuaLightUserdataGC(lua_State* L) {
     LuaLightUserData* userData = (LuaLightUserData*)lua_touserdata(L, 1);
     if(userData->valid){
         dmLogError("Light[%d] memory leak. Userdata was garbage collected without illumination_lights.light_destroy(light)",userData->light->index);
@@ -104,12 +165,104 @@ static int LightUserdataGC(lua_State* L) {
     return 0;
 }
 
+static int LuaLightSetPosition(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 4);
+    LuaLightUserData* userData = LightUserdataCheck(L,1);
+    LightSetPosition(userData->light,
+                     luaL_checknumber(L, 2),
+                     luaL_checknumber(L, 3),
+                     luaL_checknumber(L, 4));
+
+    return 0;
+}
+
+static int LuaLightSetDirection(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 4);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    LightSetDirection(userData->light,
+                      luaL_checknumber(L, 2),
+                      luaL_checknumber(L, 3),
+                      luaL_checknumber(L, 4));
+
+    return 0;
+}
+
+static int LuaLightSetColor(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 5);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    LightSetColor(userData->light,
+                  luaL_checknumber(L, 2),
+                  luaL_checknumber(L, 3),
+                  luaL_checknumber(L, 4),
+                  luaL_checknumber(L, 5));
+
+    return 0;
+}
+
+static int LuaLightSetRadius(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 2);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    LightSetRadius(userData->light, luaL_checknumber(L, 2));
+
+    return 0;
+}
+
+static int LuaLightSetSmoothness(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 2);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    LightSetSmoothness(userData->light, luaL_checknumber(L, 2));
+
+    return 0;
+}
+
+static int LuaLightSetCutoff(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 2);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    LightSetCutoff(userData->light, luaL_checknumber(L, 2));
+
+    return 0;
+}
+
+static int LuaLightSetSpecular(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 2);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    LightSetSpecular(userData->light, luaL_checknumber(L, 2));
+
+    return 0;
+}
+
+static int LuaLightSetEnabled(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 2);
+    LuaLightUserData* userData = LightUserdataCheck(L, 1);
+    bool enabled = lua_toboolean(L, 2);
+
+    LightSetEnabled(userData->light, enabled);
+
+    return 0;
+}
+
 
 
 // Array of functions to register
 static const luaL_Reg functions[] = {
-    {"__gc", LightUserdataGC},
-    {"__tostring", LightToString},
+    {"set_position", LuaLightSetPosition},
+    {"set_direction", LuaLightSetDirection},
+    {"set_color", LuaLightSetColor},
+    {"set_radius", LuaLightSetRadius},
+    {"set_smoothness", LuaLightSetSmoothness},
+    {"set_cutoff", LuaLightSetCutoff},
+    {"set_specular", LuaLightSetSpecular},
+    {"set_enabled", LuaLightSetEnabled},
+    {"__gc", LuaLightUserdataGC},
+    {"__tostring", LuaLightToString},
     {NULL, NULL}  // Sentinel element
 };
 //endregion
