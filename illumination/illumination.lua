@@ -212,11 +212,14 @@ function Light:initialize(lights)
 	self.specular = 0.5
 	self.cutoff = 1
 	self.aabb = { x1 = 0, y1 = 0, z1 = 0, x2 = 0, y2 = 0, z2 = 0 }
+
+	self.native = illumination.light_create()
 end
 
 function Light:set_enabled(enabled)
 	if self.enabled ~= enabled then
 		self.enabled = enabled
+		self.native:set_enabled(enabled)
 	end
 end
 
@@ -235,6 +238,7 @@ function Light:set_position(x, y, z)
 		self.position.x, self.position.y, self.position.z = x, y, z
 		self.dirty = true
 		self:update_aabb()
+		self.native:set_position(x, y, z)
 	end
 end
 
@@ -242,6 +246,7 @@ function Light:set_direction(x, y, z)
 	if self.direction.x ~= x or self.direction.y ~= y or self.direction.z ~= z then
 		self.direction.x, self.direction.y, self.direction.z = x, y, z
 		self.dirty = true
+		self.native:set_direction(x,y,z)
 	end
 end
 
@@ -249,6 +254,7 @@ function Light:set_color(r, g, b, brightness)
 	if self.color.x ~= r or self.color.y ~= g or self.color.z ~= b or self.color.w ~= brightness then
 		self.color.x, self.color.y, self.color.z, self.color.w = r, g, b, brightness
 		self.dirty = true
+		self.native:set_color(r,g,b,brightness)
 	end
 end
 
@@ -258,6 +264,7 @@ function Light:set_radius(radius)
 		self.radius = radius
 		self.dirty = true
 		self:update_aabb()
+		self.native:set_radius(radius)
 	end
 end
 
@@ -266,6 +273,7 @@ function Light:set_specular(specular)
 	if self.specular ~= specular then
 		self.specular = specular
 		self.dirty = true
+		self.native:set_specular(specular)
 	end
 end
 
@@ -274,6 +282,7 @@ function Light:set_smoothness(smoothness)
 	if self.smoothness ~= smoothness then
 		self.smoothness = smoothness
 		self.dirty = true
+		self.native:set_smoothness(smoothness)
 	end
 end
 
@@ -282,6 +291,7 @@ function Light:set_cutoff(cutoff)
 	if self.cutoff ~= cutoff then
 		self.cutoff = cutoff
 		self.dirty = true
+		self.native:set_cutoff(cutoff)
 	end
 end
 
@@ -862,6 +872,10 @@ end
 ---@param light LightsData
 function Lights:remove_light(light)
 	light.removed = true
+	if light.native then
+		illumination.light_destroy(light.native)
+		light.native = nil
+	end
 end
 
 function Lights:update_lights(camera_aspect, camera_fov, camera_far)
@@ -986,6 +1000,12 @@ end
 
 function Lights:set_view(view)
 	self.view = view
+end
+
+function Lights:dispose()
+	for _, l in ipairs(self.lights.all) do
+		self:remove_light(l)
+	end
 end
 
 --endregion

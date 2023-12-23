@@ -4,12 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/illumination/native/include/lights.h" afterDir="false" />
+    <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="native light manager">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/native/include/frustum_cull.h" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/include/frustum_cull.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/native/include/lights.h" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/include/lights.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/native/src/extension.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/src/extension.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/xmath/src/xMath.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/xmath/src/xMath.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/render/illumination.render_script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/render/illumination.render_script" afterDir="false" />
     </list>
     <list id="32e5cb44-c00a-42d9-8100-60d4880106b6" name="New changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -33,18 +34,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "last_opened_file_path": "C:/Users/user/defold/defold-illumination/illumination/native/include",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "preferences.lookFeel"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/user/defold/defold-illumination/illumination/native/include&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\user\defold\defold-illumination\illumination\native\include" />
@@ -86,6 +87,21 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="illumination.lua" type="lua.app" factoryName="Lua Application" temporary="true">
+      <option name="program" value="lua.exe" />
+      <option name="file" value="illumination/illumination.lua" />
+      <option name="workingDir" value="$PROJECT_DIR$" />
+      <option name="debuggerType" value="2" />
+      <option name="params" value="" />
+      <option name="charset" value="UTF-8" />
+      <option name="showConsole" value="true" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Lua Application.illumination.lua" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="Vcs.Log.Tabs.Properties">
@@ -100,10 +116,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="remove .idea" />
-    <MESSAGE value="fixed render" />
-    <MESSAGE value="wip" />
-    <MESSAGE value="debug shadow texture" />
     <MESSAGE value="fixed shadow color" />
     <MESSAGE value="prepare for light" />
     <MESSAGE value="add fog" />
@@ -125,6 +137,10 @@
     <MESSAGE value="fixed web build(precession issues)" />
     <MESSAGE value="check time for update clusters" />
     <MESSAGE value="more culling" />
-    <option name="LAST_COMMIT_MESSAGE" value="more culling" />
+    <MESSAGE value="light methods" />
+    <MESSAGE value="lights methods" />
+    <MESSAGE value="init lights texture" />
+    <MESSAGE value="native light manager" />
+    <option name="LAST_COMMIT_MESSAGE" value="native light manager" />
   </component>
 </project>

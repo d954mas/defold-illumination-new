@@ -46,6 +46,8 @@ function update(self)
 	ILLUMINATION:set_frustum(self.scene.projection*self.scene.view)
 	ILLUMINATION:set_camera(self.scene.view.m03,self.scene.view.m13,self.scene.view.m23)
 
+	illumination.lights_set_view(self.scene.view)
+	illumination.lights_set_frustum(self.scene.projection*self.scene.view)
 	illumination.lights_update()
 
 
@@ -103,4 +105,8 @@ function on_message(self, message_id, message)
 	elseif message_id == hash 'window_resized' then
 		ILLUMINATION:on_resize(render.get_window_width(), render.get_window_height())
 	end
+end
+
+function final(self)
+	ILLUMINATION:dispose()
 end

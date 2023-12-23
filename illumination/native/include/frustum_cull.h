@@ -1,3 +1,6 @@
+#ifndef frustum_cull_h
+#define frustum_cull_h
+
 #include <dmsdk/sdk.h>
 
 // Frustum Culling.
@@ -13,6 +16,8 @@ class Frustum
 
     // m = ProjectionMatrix * ViewMatrix
     Frustum(dmVMath::Matrix4 m);
+
+    void SetMatrix(dmVMath::Matrix4 m);
 
     bool IsBoxVisible(const dmVMath::Vector3& minp, const dmVMath::Vector3& maxp) const;
 
@@ -50,9 +55,12 @@ static inline dmVMath::Vector3 ToVector3(const dmVMath::Vector4& v)
     return dmVMath::Vector3(v.getX(), v.getY(), v.getZ());
 }
 
-inline Frustum::Frustum(dmVMath::Matrix4 m)
-{
-    using namespace dmVMath;
+inline Frustum::Frustum(dmVMath::Matrix4 m){
+   SetMatrix(m);
+}
+
+inline void Frustum::SetMatrix(dmVMath::Matrix4 m){
+     using namespace dmVMath;
 
     m                = transpose(m);
     m_Planes[Left]   = m.getCol3() + m.getCol0();
@@ -89,6 +97,7 @@ inline Frustum::Frustum(dmVMath::Matrix4 m)
     m_Points[6] = intersection<Right, Bottom, Far>(crosses);
     m_Points[7] = intersection<Right, Top, Far>(crosses);
 }
+
 
 inline bool Frustum::IsBoxVisible(const dmVMath::Vector3& minp, const dmVMath::Vector3& maxp) const
 {
@@ -155,3 +164,5 @@ inline dmVMath::Vector3 Frustum::intersection(const dmVMath::Vector3* crosses) c
     Vector3 res = Matrix3(crosses[ij2k<b, c>::k], -crosses[ij2k<a, c>::k], crosses[ij2k<a, b>::k]) * Vector3(m_Planes[a].getW(), m_Planes[b].getW(), m_Planes[c].getW());
     return res * (-1.0f / D);
 }
+
+#endif

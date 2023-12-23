@@ -3,6 +3,7 @@
 
 #include <dmsdk/sdk.h>
 #include "utils.h"
+#include "frustum_cull.h"
 #include <cmath> // For sqrt, log2, and pow functions
 #include <sstream>  // For std::ostringstream
 #include <string>   // For std::string
@@ -419,9 +420,12 @@ public:
     bool inited = false;
     Light* lights = NULL;
     LightCluster* clusters = NULL;
+    Frustum frustum = Frustum(dmVMath::Matrix4());
+    dmVMath::Matrix4 view;
 
     dmArray<Light*> lightsPool;
     dmArray<Light*> lightsInWorld;
+    dmArray<Light*> lightsVisibleInWorld;
     int numLights,maxLightsPerCluster,pixelsPerCluster;
     int totalClusters;
     int xSlice, ySlice, zSlice;
@@ -470,6 +474,7 @@ public:
         lights = new Light[numLights];
         lightsPool.SetCapacity(numLights);
         lightsInWorld.SetCapacity(numLights);
+        lightsVisibleInWorld.SetCapacity(numLights);
 
         for (int i = 0; i < numLights; ++i) {
             Light* light = &lights[i];
@@ -561,6 +566,22 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     if(lightsManager->texturePath==HASH_EMPTY){
         luaL_error(L,"LightsManager texture path not set");
     }
+
+    // Update lights
+   lightsManager->lightsVisibleInWorld.SetSize(0);
+
+    for (int i = 0; i < lightsManager->lightsInWorld.Size(); ++i) {
+        Light* light = lightsManager->lightsInWorld[i];
+        bool addToScene = LightIsAddLightToScene(light);
+        if (addToScene) {
+            addToScene = lightsManager->frustum.IsBoxVisible(dmVMath::Vector3(light->aabb[0], light->aabb[1], light->aabb[2]),
+                                                            dmVMath::Vector3(light->aabb[3], light->aabb[4], light->aabb[5]));
+        }
+        if(addToScene){
+            lightsManager->lightsVisibleInWorld.Push(light);
+        }
+    }
+    dmLogInfo("Lights all:%d. Visible:%d",lightsManager->lightsInWorld.Size(), lightsManager->lightsVisibleInWorld.Size());
 
     //Update texture
     // Step 1: Push the 'resource.set_texture' function onto the stack
@@ -666,6 +687,8 @@ static int LuaLightsManagerCreateLight(lua_State* L){
     Light* light = g_lightsManager.lightsPool[g_lightsManager.lightsPool.Size()-1];
     g_lightsManager.lightsPool.Pop();
 
+    g_lightsManager.lightsInWorld.Push(light);
+
 
    LuaLightUserData* user_data = (LuaLightUserData*)lua_newuserdata(L, sizeof(LuaLightUserData));
    user_data->light = light;
@@ -740,6 +763,26 @@ static int LuaLightsManagerSetTexturePath(lua_State* L){
     }
     g_lightsManager.texturePath = dmScript::CheckHash(L,1);
 
+    return 0;
+}
+
+static int LuaLightsManagerSetFrustumMatrix(lua_State* L){
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    if(!g_lightsManager.inited){
+        return DM_LUA_ERROR("LightsManager not inited");
+    }
+    g_lightsManager.frustum.SetMatrix(*dmScript::CheckMatrix4(L,1));
+    return 0;
+}
+
+static int LuaLightsManagerSetViewMatrix(lua_State* L){
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    if(!g_lightsManager.inited){
+        return DM_LUA_ERROR("LightsManager not inited");
+    }
+    g_lightsManager.view = *dmScript::CheckMatrix4(L,1);
     return 0;
 }
 
