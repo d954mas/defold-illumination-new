@@ -13,8 +13,13 @@
 #define LIGHT_META "IlluminationLights.Light"
 #define LIGHT_PIXELS 6 // pixels per light
 #define LIGHT_RADIUS_MAX 64.0 // store in r value of pixel. Mb store as rgba value for better precision?
-#define LIGHT_MIN_POSITION -511
-#define LIGHT_MAX_POSITION 512
+
+#define LIGHT_MIN_POSITION_X -511
+#define LIGHT_MAX_POSITION_X 512
+#define LIGHT_MIN_POSITION_Y -511
+#define LIGHT_MAX_POSITION_Y 512
+#define LIGHT_MIN_POSITION_Z -511
+#define LIGHT_MAX_POSITION_Z 512
 #define LIGHT_AXIS_CAPACITY 1024 //[-511 512]
 #define M_PI  3.14159265358979323846  /* pi */
 
@@ -142,14 +147,21 @@ inline void LightReset(Light* light){
 
 //region Light
 inline void LightSetPosition(Light* light, float x, float y, float z) {
-  if (x < LIGHT_MIN_POSITION || x > LIGHT_MAX_POSITION ||
-        y < LIGHT_MIN_POSITION || y > LIGHT_MAX_POSITION ||
-        z < LIGHT_MIN_POSITION || z > LIGHT_MAX_POSITION) {
-        dmLogWarning("Light position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
-        x = fmax((float)LIGHT_MIN_POSITION, fmin(x, (float)LIGHT_MAX_POSITION));
-        y = fmax((float)LIGHT_MIN_POSITION, fmin(y, (float)LIGHT_MAX_POSITION));
-        z = fmax((float)LIGHT_MIN_POSITION, fmin(z, (float)LIGHT_MAX_POSITION));
+    if (x < LIGHT_MIN_POSITION_X || x > LIGHT_MAX_POSITION_X) {
+      dmLogWarning("Light X position out of bounds. Clamping to [%f, %f].", LIGHT_MIN_POSITION_X, LIGHT_MAX_POSITION_X);
+      x = fmax(LIGHT_MIN_POSITION_X, fmin(x, LIGHT_MAX_POSITION_X));
     }
+
+    if (y < LIGHT_MIN_POSITION_Y || y > LIGHT_MAX_POSITION_Y) {
+      dmLogWarning("Light Y position out of bounds. Clamping to [%f, %f].", LIGHT_MIN_POSITION_Y, LIGHT_MAX_POSITION_Y);
+      y = fmax(LIGHT_MIN_POSITION_Y, fmin(y, LIGHT_MAX_POSITION_Y));
+    }
+
+    if (z < LIGHT_MIN_POSITION_Z || z > LIGHT_MAX_POSITION_Z) {
+      dmLogWarning("Light Z position out of bounds. Clamping to [%f, %f].", LIGHT_MIN_POSITION_Z, LIGHT_MAX_POSITION_Z);
+      z = fmax(LIGHT_MIN_POSITION_Z, fmin(z, LIGHT_MAX_POSITION_Z));
+    }
+
 
     if (light->position.getX()!=x || light->position.getY()!=y || light->position.getZ()!=z) {
         light->position = dmVMath::Vector3(x,y,z);
@@ -219,17 +231,17 @@ inline bool LightIsAddLightToScene(Light* light) {
 }
 
 inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) {
-    dmVMath::Vector4 posX = EncodeFloatRGBA(light->position.getX(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
+    dmVMath::Vector4 posX = EncodeFloatRGBA(light->position.getX(),LIGHT_MIN_POSITION_X,LIGHT_MAX_POSITION_X)*255;
     values[0] = posX.getX();values[1] = posX.getY();values[2] = posX.getZ();values[3] = posX.getW();
     values+=stride;
 
     //dmLogInfo("light:%d x:%f y:%f z:%f",light->index,light->position.getX(),light->position.getY(),light->position.getZ());
 
-    dmVMath::Vector4 posY = EncodeFloatRGBA(light->position.getY(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
+    dmVMath::Vector4 posY = EncodeFloatRGBA(light->position.getY(),LIGHT_MIN_POSITION_Y,LIGHT_MAX_POSITION_Y)*255;
     values[0] = posY.getX();values[1] = posY.getY();values[2] = posY.getZ();values[3] = posY.getW();
     values+=stride;
 
-    dmVMath::Vector4 posZ = EncodeFloatRGBA(light->position.getZ(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
+    dmVMath::Vector4 posZ = EncodeFloatRGBA(light->position.getZ(),LIGHT_MIN_POSITION_Z,LIGHT_MAX_POSITION_Z)*255;
     values[0] = posZ.getX();values[1] = posZ.getY();values[2] = posZ.getZ();values[3] = posZ.getW();
     values+=stride;
 
@@ -998,6 +1010,78 @@ static int LuaLightsManagerSetCameraFar(lua_State* L) {
     g_lightsManager.cameraFar =  luaL_checknumber(L, 1);
     return 0;
 }
+
+static int LuaLightsManagerGetMaxLights(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,g_lightsManager.numLights);
+    return 1;
+}
+static int LuaLightsManagerGetMaxRadius(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,LIGHT_RADIUS_MAX);
+    return 1;
+}
+static int LuaLightsManagerGetBordersX(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 2);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,LIGHT_MIN_POSITION_X);
+    lua_pushnumber(L,LIGHT_MAX_POSITION_X);
+    return 2;
+}
+static int LuaLightsManagerGetBordersY(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 2);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,LIGHT_MIN_POSITION_Y);
+    lua_pushnumber(L,LIGHT_MAX_POSITION_Y);
+    return 2;
+}
+
+static int LuaLightsManagerGetBordersZ(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 2);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,LIGHT_MIN_POSITION_Z);
+    lua_pushnumber(L,LIGHT_MAX_POSITION_Z);
+    return 2;
+}
+
+static int LuaLightsManagerGetXSlice(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,g_lightsManager.xSlice);
+    return 1;
+}
+
+static int LuaLightsManagerGetYSlice(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,g_lightsManager.ySlice);
+    return 1;
+}
+
+static int LuaLightsManagerGetZSlice(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,g_lightsManager.zSlice);
+    return 1;
+}
+
+static int LuaLightsManagerGetZSliceForShader(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,g_lightsManager.cameraFar/g_lightsManager.zSlice);
+    return 1;
+}
+
+
+static int LuaLightsManagerGetLightsPerCluster(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,g_lightsManager.maxLightsPerCluster);
+    return 1;
+}
+
 
 }  // namespace IlluminationLights
 

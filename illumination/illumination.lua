@@ -9,12 +9,6 @@ local TEMP_V4 = vmath.vector4()
 
 local V_UP = vmath.vector3(0, 1, 0)
 
-local HASH_RGBA = hash("rgba")
-
-local RADIUS_MAX = 64
-
-local LIGHT_IDX = 0
-
 local POINTS_CUBE = {
 	vmath.vector4(-1.0, -1.0, 1.0, 1.0),
 	vmath.vector4(-1.0, 1.0, 1.0, 1.0),
@@ -188,145 +182,6 @@ local function clamp(x, min, max)
 	return x < min and min or (x > max and max or x)
 end
 
----@class Light
-local Light = CLASS("Light")
-
----@param lights LightsData
-function Light:initialize(lights)
-	self.lights = assert(lights)
-
-	LIGHT_IDX = LIGHT_IDX + 1;
-	self.light_idx = LIGHT_IDX
-
-	self.enabled = false
-
-	---idx in active list
-	self.active_idx = -1
-
-	self.direction = vmath.vector3(0, 0, -1)
-	self.position = vmath.vector3(0, 0, 0)
-	self.color = vmath.vector4(1) --r,g,b brightness
-
-	self.radius = 1
-	self.smoothness = 1
-	self.specular = 0.5
-	self.cutoff = 1
-	self.aabb = { x1 = 0, y1 = 0, z1 = 0, x2 = 0, y2 = 0, z2 = 0 }
-
-	self.native = illumination.light_create()
-end
-
-function Light:set_enabled(enabled)
-	if self.enabled ~= enabled then
-		self.enabled = enabled
-		self.native:set_enabled(enabled)
-	end
-end
-
-function Light:update_aabb()
-	self.aabb.x1 = self.position.x - self.radius
-	self.aabb.y1 = self.position.y - self.radius
-	self.aabb.z1 = self.position.z - self.radius
-	self.aabb.x2 = self.position.x + self.radius
-	self.aabb.y2 = self.position.y + self.radius
-	self.aabb.z2 = self.position.z + self.radius
-
-end
-
-function Light:set_position(x, y, z)
-	if self.position.x ~= x or self.position.y ~= y or self.position.z ~= z then
-		self.position.x, self.position.y, self.position.z = x, y, z
-		self.dirty = true
-		self:update_aabb()
-		self.native:set_position(x, y, z)
-	end
-end
-
-function Light:set_direction(x, y, z)
-	if self.direction.x ~= x or self.direction.y ~= y or self.direction.z ~= z then
-		self.direction.x, self.direction.y, self.direction.z = x, y, z
-		self.dirty = true
-		self.native:set_direction(x, y, z)
-	end
-end
-
-function Light:set_color(r, g, b, brightness)
-	if self.color.x ~= r or self.color.y ~= g or self.color.z ~= b or self.color.w ~= brightness then
-		self.color.x, self.color.y, self.color.z, self.color.w = r, g, b, brightness
-		self.dirty = true
-
-		self.native:set_color(r, g, b, brightness)
-	end
-end
-
-function Light:set_radius(radius)
-	assert(radius >= 0)
-	if self.radius ~= radius then
-		self.radius = radius
-		self.dirty = true
-		self:update_aabb()
-		self.native:set_radius(radius)
-	end
-end
-
-function Light:set_specular(specular)
-	assert(specular >= 0 and specular <= 1)
-	if self.specular ~= specular then
-		self.specular = specular
-		self.dirty = true
-		self.native:set_specular(specular)
-	end
-end
-
-function Light:set_smoothness(smoothness)
-	assert(smoothness >= 0 and smoothness <= 1)
-	if self.smoothness ~= smoothness then
-		self.smoothness = smoothness
-		self.dirty = true
-		print("set_smoothness:" .. smoothness)
-		self.native:set_smoothness(smoothness)
-	end
-end
-
-function Light:set_cutoff(cutoff)
-	assert(cutoff >= 0 and cutoff <= 1)
-	if self.cutoff ~= cutoff then
-		self.cutoff = cutoff
-		self.dirty = true
-		self.native:set_cutoff(cutoff)
-	end
-end
-
-function Light:is_visible()
-	if not self.enabled or self.color.w == 0 then return false end
-
-	return true
-end
-
-local light_size = 6 --6 pixels per light
-local light_data = {}
-function Light:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
-	assert(self.radius <= RADIUS_MAX, "radius > " .. RADIUS_MAX)
-
-	local idx = (self.active_idx - 1) * light_size + 1--lua side start from 1
-
-	light_data[1], light_data[2], light_data[3], light_data[4] = illumination.float_to_rgba(self.position.x, x_min, x_max)
-	light_data[5], light_data[6], light_data[7], light_data[8] = illumination.float_to_rgba(self.position.y, y_min, y_max)
-	light_data[9], light_data[10], light_data[11], light_data[12] = illumination.float_to_rgba(self.position.z, z_min, z_max)
-
-	light_data[13], light_data[14], light_data[15] = (self.direction.x + 1) / 2, (self.direction.y + 1) / 2, (self.direction.z + 1) / 2
-
-	light_data[16] = 0
-
-	light_data[17], light_data[18], light_data[19], light_data[20] = self.color.x, self.color.y, self.color.z, self.color.w
-
-	light_data[21], light_data[22], light_data[23] = self.radius / RADIUS_MAX, self.smoothness, self.specular
-
-	light_data[24] = self.cutoff < 1 and (math.cos(self.cutoff * math.pi) + 1) / 2 or 1
-
-	--illumination.fill_stream_uint8(idx, self.lights.lights.texture.buffer, HASH_RGBA, 4, light_data)
-end
-
 local function create_depth_buffer(w, h)
 	local color_params = {
 		-- format     = render.FORMAT_RGBA,
@@ -366,7 +221,7 @@ function Lights:initialize()
 	self.view = vmath.matrix4()
 
 	self.light_texture_data = vmath.vector4()
-	self.lights_data = vmath.vector4(2048, RADIUS_MAX, 0, 0)
+	self.lights_data = vmath.vector4(0, 0, 0, 0)
 	self.lights_data2 = vmath.vector4()
 	self.clusters_data = vmath.vector4() --max_lights_per_cluster, x_slices, y_slices, z_slices
 	self.screen_size = vmath.vector4()
@@ -424,10 +279,7 @@ function Lights:initialize()
 	for i = 1, self.lights.clusters.x_slices * self.lights.clusters.y_slices * self.lights.clusters.z_slices do
 		table.insert(self.lights.clusters.clusters, { lights = {}, idx = i })
 	end
-	self.clusters_data.x = self.lights.clusters.x_slices
-	self.clusters_data.y = self.lights.clusters.y_slices
-	self.clusters_data.z = self.lights.clusters.z_slices
-	self.clusters_data.w = self.lights.clusters.max_lights_per_cluster
+
 end
 
 function Lights:init()
@@ -435,9 +287,26 @@ function Lights:init()
 	illumination.lights_init_texture()
 
 	self.light_texture_data.x, self.light_texture_data.y = illumination.lights_get_texture_size()
+
+	self.lights_data.x = illumination.lights_get_max_lights()
+	self.lights_data.y = illumination.lights_get_max_radius()
+	self.lights_data.z ,self.lights_data.w  = illumination.lights_get_borders_x()
+
+	self.lights_data2.x ,self.lights_data2.y  = illumination.lights_get_borders_y()
+	self.lights_data2.z ,self.lights_data2.w  = illumination.lights_get_borders_z()
+
+	self.clusters_data.x = illumination.lights_get_x_slice()
+	self.clusters_data.y = illumination.lights_get_y_slice()
+	self.clusters_data.z = illumination.lights_get_z_slice_for_shader()
+	self.clusters_data.w = illumination.lights_get_lights_per_cluster()
+
 	for _, constant in ipairs(self.constants) do
 		constant.light_texture_data = self.light_texture_data
+		constant.lights_data = self.lights_data
+		constant.lights_data2 = self.lights_data2
+		constant.clusters_data = self.clusters_data
 	end
+
 
 	local data_url = msg.url("/illumination#data")
 	local texture_path = go.get(data_url, "texture0")
@@ -542,29 +411,7 @@ function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_f
 end
 
 function Lights:cluster_write_to_buffer(active_list, cluster)
-	local total_lights = #active_list
-	local idx = total_lights * light_size + (cluster.idx - 1) * self.lights.clusters.pixels_per_cluster + 1--lua side start from 1
-	local data = {}
-	data[1], data[2], data[3], data[4] = illumination.float_to_rgba(#cluster.lights, 0, self.lights.clusters.max_lights_per_cluster)
-	local data_idx = 5
-	for lidx, l in ipairs(cluster.lights) do
-		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = illumination.float_to_rgba(l.active_idx - 1, 0, total_lights + 1)
-		data_idx = data_idx + 4
-		--print("light:" .. lidx .. " active_idx:" .. l.active_idx )
-	end
-
-
-	--[[for i=#cluster.lights+1,self.lights.clusters.max_lights_per_cluster do
-		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = 1,0,0,1
-		data_idx = data_idx + 4
-	end
-	for i=self.lights.clusters.max_lights_per_cluster+2, self.lights.clusters.pixels_per_cluster do
-		data[data_idx], data[data_idx + 1], data[data_idx + 2], data[data_idx + 3] = 0,1,0,1
-		data_idx = data_idx + 4
-	end--]]
-
-
-	--illumination.fill_stream_uint8(idx, self.lights.texture.buffer, HASH_RGBA, 4, data)
+	
 end
 
 function Lights:draw_debug()
@@ -622,6 +469,7 @@ function Lights:add_constants(constant)
 	constant.fog_color = self.fog_color
 	constant.shadow_params = self.shadow_params
 	constant.lights_data = self.lights_data
+	constant.lights_data2 = self.lights_data2
 	constant.clusters_data = self.clusters_data
 	constant.light_texture_data = self.light_texture_data
 	constant.screen_size = self.screen_size
@@ -849,122 +697,12 @@ function Lights:remove_light(light)
 	end
 end
 
-function Lights:update_lights(camera_aspect, camera_fov, camera_far)
-	illumination.lights_set_camera_aspect(camera_aspect)
-	illumination.lights_set_camera_fov(camera_fov)
-	illumination.lights_set_camera_far(camera_far)
-	--check culling and disabled lights
-	local active_list = {}
-	local idx = 0
-	local dirty_texture = false
-	--TODO use nil or use first active light coord as min/max
-	local x_min, x_max, y_min, y_max, z_min, z_max
-
-	for i = #self.lights.all, 1, -1 do
-		local l = self.lights.all[i]
-		if l.removed then
-			table.remove(self.lights.all, i)
-		else
-			local visible = l:is_visible()
-			if visible and self.frustum then
-				visible = illumination.frustum_is_box_visible(self.frustum, l.aabb.x1, l.aabb.y1, l.aabb.z1,
-						l.aabb.x2, l.aabb.y2, l.aabb.z2)
-			end
-			if visible then
-				idx = idx + 1
-				active_list[idx] = l
-				if not x_min then
-					x_min, x_max = l.position.x, l.position.x
-					y_min, y_max = l.position.y, l.position.y
-					z_min, z_max = l.position.z, l.position.z
-				else
-					x_min = math.min(x_min, l.position.x)
-					x_max = math.max(x_max, l.position.x)
-					y_min = math.min(y_min, l.position.y)
-					y_max = math.max(y_max, l.position.y)
-					z_min = math.min(z_min, l.position.z)
-					z_max = math.max(z_max, l.position.z)
-				end
-
-				if l.active_idx ~= idx then
-					l.active_idx = idx
-					l.dirty = true
-				end
-			end
-		end
+function Lights:update_lights()
+	self.clusters_data.z = illumination.lights_get_z_slice_for_shader()
+	for _, constant in ipairs(self.constants) do
+		constant.clusters_data = self.clusters_data
 	end
-
-	if not x_min then
-		x_min, x_max, y_min, y_max, z_min, z_max = 0, 0, 0, 0, 0, 0
-	end
-	--if min and max changed need to rewrite all light. so use some fixed value to avoid additional rewrite
-	if x_min < -511 then error("x_min < 511") end
-	if x_max > 512 then error("x_max > 512") end
-	if y_min < -511 then error("y_min < 511") end
-	if y_max > 512 then error("y_max > 512") end
-	if z_min < -511 then error("z_min < 511") end
-	if z_max > 512 then error("z_max > 512") end
-
-	x_min, x_max = -511, 512
-	y_min, y_max = -511, 512
-	z_min, z_max = -511, 512
-
-	if self.lights_data.x ~= 2048 or self.lights_data.z ~= x_min or self.lights_data.w ~= x_max then
-		self.lights_data.x = 2048
-		self.lights_data.y = RADIUS_MAX
-		self.lights_data.z = x_min
-		self.lights_data.w = x_max
-		for _, constant in ipairs(self.constants) do
-			constant.lights_data = self.lights_data
-		end
-	end
-
-	if self.lights_data2.x ~= y_min or self.lights_data2.y ~= y_max or
-			self.lights_data2.z ~= z_min or self.lights_data2.w ~= z_max then
-		self.lights_data2.x = y_min
-		self.lights_data2.y = y_max
-		self.lights_data2.z = z_min
-		self.lights_data2.w = z_max
-		for _, constant in ipairs(self.constants) do
-			constant.lights_data2 = self.lights_data2
-		end
-	end
-
-	local axis_capacity_x = x_max - x_min + 1
-	local axis_capacity_y = y_max - y_min + 1
-	local axis_capacity_z = z_max - z_min + 1
-
-	--	print("axis x: " .. axis_capacity_x .. " y:" .. axis_capacity_y .. " z:" .. axis_capacity_z)
-	if axis_capacity_x > 1024 then
-		error("axis_capacity_x" .. axis_capacity_x .. " > 1024. accuracy may be low")
-	end
-	if axis_capacity_y > 1024 then
-		print("axis_capacity_y" .. axis_capacity_y .. " > 1024. accuracy may be low")
-	end
-	if axis_capacity_z > 1024 then
-		print("axis_capacity_z" .. axis_capacity_z .. " > 1024. accuracy may be low")
-	end
-
-	print("lights total::" .. #self.lights.all .. " lights active:" .. #active_list)
-	for i = #active_list, 1, -1 do
-		local l = active_list[i]
-		--rewrite dirty lights
-		if l.dirty then
-			l.dirty = false
-			dirty_texture = true
-			l:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
-		end
-	end
-
-	local time = chronos.nanotime()
-	self:update_clusters(active_list, camera_aspect, camera_fov, camera_far)
-	--print("update clusters:" .. chronos.nanotime() - time)
-	dirty_texture = true
-
-	--if dirty_texture then
-	--	resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
-	--end
-
+	illumination.lights_update()
 end
 
 function Lights:set_frustum(frustum)

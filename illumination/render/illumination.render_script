@@ -49,7 +49,8 @@ function update(self)
 	illumination.lights_set_view(self.scene.view)
 	illumination.lights_set_frustum(self.scene.projection*self.scene.view)
 	local time = chronos.nanotime()
-	illumination.lights_update()
+	ILLUMINATION:update_lights()
+
 	print("update lights:" .. chronos.nanotime()-time)
 
 
