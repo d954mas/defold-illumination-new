@@ -487,6 +487,8 @@ public:
     int totalClusters;
     int xSlice, ySlice, zSlice;
 
+    float cameraAspect, cameraFov, cameraFar;
+
     dmBuffer::HBuffer textureBuffer = 0x0;
     int textureWidth, textureHeight;
     int textureParamsRef = LUA_NOREF;
@@ -638,6 +640,89 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
             lightsManager->lightsVisibleInWorld.Push(light);
         }
     }
+
+    //update clusters https://github.com/AmanSachan1/WebGL-Clustered-Deferred-Forward-Plus/blob/master/src/renderers/clustered.js
+    //mark clusters empty
+    for(int i=0;i<lightsManager->totalClusters;++i){
+        lightsManager->clusters[i].numLights = 0;
+    }
+
+    //instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
+    float tan_Vertical_FoV_by_2 = tan(lightsManager->cameraFov * 0.5);
+    float zStride = (lightsManager->cameraFar) / lightsManager->zSlice;
+
+    for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
+         Light* l = lightsManager->lightsVisibleInWorld[i];
+
+         dmVMath::Vector4 pos = lightsManager->view * dmVMath::Vector4(l->position.getX(),l->position.getY(),
+            l->position.getZ(),1);
+         pos.setZ(-pos.getZ());
+
+        float x1 = pos.getX() - l->radius;
+        float y1 = pos.getY() - l->radius;
+        float z1 = pos.getZ() - l->radius;
+        float x2 = pos.getX() + l->radius;
+        float y2 = pos.getY() + l->radius;
+        float z2 = pos.getZ() + l->radius;
+
+        float h_lightFrustum = abs(tan_Vertical_FoV_by_2 * pos.getZ() * 2);
+        float w_lightFrustum = abs(lightsManager->cameraAspect * h_lightFrustum);
+
+        float xStride = w_lightFrustum / lightsManager->xSlice;
+        float yStride = h_lightFrustum / lightsManager->ySlice;
+
+        //technically could fall outside the bounds we make because the planes themeselves are tilted by some angle
+        // the effect is exaggerated the steeper the angle the plane makes is
+        int zStartIndex = floor(z1 / zStride);
+        int zEndIndex = floor(z2 / zStride);
+        int yStartIndex = floor((y1 + h_lightFrustum * 0.5) / yStride);
+        int yEndIndex = floor((y2 + h_lightFrustum * 0.5) / yStride);
+        int xStartIndex = floor((x1 + w_lightFrustum * 0.5) / xStride) - 1;
+        int xEndIndex = floor((x2 + w_lightFrustum * 0.5) / xStride) + 1;
+
+        if((zStartIndex < 0 && zEndIndex < 0) || (zStartIndex >= lightsManager->zSlice && zEndIndex >= lightsManager->zSlice)){
+            continue; //light wont fall into any cluster
+        }
+        if((yStartIndex < 0 && yEndIndex < 0) || (yStartIndex >= lightsManager->ySlice && yEndIndex >= lightsManager->ySlice)){
+            continue; //light wont fall into any cluster
+        }
+        if((xStartIndex < 0 && xEndIndex < 0) || (xStartIndex >= lightsManager->xSlice && xEndIndex >= lightsManager->xSlice)){
+            continue; //light wont fall into any cluster
+        }
+
+        zStartIndex = fmax(0, fmin(zStartIndex, lightsManager->zSlice - 1));
+        zEndIndex = fmax(0, fmin(zEndIndex, lightsManager->zSlice - 1));
+
+        yStartIndex = fmax(0, fmin(yStartIndex, lightsManager->ySlice - 1));
+        yEndIndex = fmax(0, fmin(yEndIndex, lightsManager->ySlice - 1));
+
+        xStartIndex = fmax(0, fmin(xStartIndex, lightsManager->xSlice - 1));
+        xEndIndex = fmax(0, fmin(xEndIndex, lightsManager->xSlice - 1));
+
+        for (int z = zStartIndex; z <= zEndIndex; ++z) {
+            int zOffset = z * lightsManager->xSlice * lightsManager->ySlice;
+            for (int y = yStartIndex; y <= yEndIndex; ++y) {
+                int yOffset = y * lightsManager->xSlice;
+                int zyOffset = zOffset + yOffset;
+                for (int x = xStartIndex; x <= xEndIndex; ++x) {
+                    int id = zyOffset + x;
+                    LightCluster& cluster = lightsManager->clusters[id];
+
+                    if (cluster.numLights < lightsManager->maxLightsPerCluster) {
+                        // Assuming you have a method to add lights to the cluster
+                        cluster.lights[cluster.numLights] = l;
+                        cluster.numLights++;
+                    } else {
+                        dmLogInfo("Cluster %d already has the maximum number of lights", id);
+                    }
+                }
+            }
+        }
+
+
+    }
+
+
     dmLogInfo("Lights all:%d. Visible:%d",lightsManager->lightsInWorld.Size(), lightsManager->lightsVisibleInWorld.Size());
 
     uint8_t* values = 0x0;
@@ -864,6 +949,26 @@ static int LuaLightsManagerSetViewMatrix(lua_State* L){
     return 0;
 }
 
+static int LuaLightsManagerSetCameraAspect(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    g_lightsManager.cameraAspect =  luaL_checknumber(L, 1);
+    return 0;
+}
+
+static int LuaLightsManagerSetCameraFov(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    g_lightsManager.cameraFov =  luaL_checknumber(L, 1);
+    return 0;
+}
+
+static int LuaLightsManagerSetCameraFar(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    g_lightsManager.cameraFar =  luaL_checknumber(L, 1);
+    return 0;
+}
 
 }  // namespace IlluminationLights
 

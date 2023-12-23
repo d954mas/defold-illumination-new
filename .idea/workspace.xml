@@ -7,10 +7,8 @@
     <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="native light manager">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/native/include/frustum_cull.h" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/include/frustum_cull.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/native/include/lights.h" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/include/lights.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/illumination/native/src/extension.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/src/extension.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/illumination/render/illumination.render_script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/render/illumination.render_script" afterDir="false" />
     </list>
     <list id="32e5cb44-c00a-42d9-8100-60d4880106b6" name="New changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -116,7 +114,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixed shadow color" />
     <MESSAGE value="prepare for light" />
     <MESSAGE value="add fog" />
     <MESSAGE value="add light data texture" />
@@ -141,6 +138,7 @@
     <MESSAGE value="lights methods" />
     <MESSAGE value="init lights texture" />
     <MESSAGE value="native light manager" />
-    <option name="LAST_COMMIT_MESSAGE" value="native light manager" />
+    <MESSAGE value="write lights in texture" />
+    <option name="LAST_COMMIT_MESSAGE" value="write lights in texture" />
   </component>
 </project>

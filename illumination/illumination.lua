@@ -879,6 +879,9 @@ function Lights:remove_light(light)
 end
 
 function Lights:update_lights(camera_aspect, camera_fov, camera_far)
+	illumination.lights_set_camera_aspect(camera_aspect)
+	illumination.lights_set_camera_fov(camera_fov)
+	illumination.lights_set_camera_far(camera_far)
 	--check culling and disabled lights
 	local active_list = {}
 	local idx = 0
