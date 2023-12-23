@@ -441,13 +441,14 @@ function Lights:initialize()
 	self.clusters_data.y = self.lights.clusters.y_slices
 	self.clusters_data.z = self.lights.clusters.z_slices
 	self.clusters_data.w = self.lights.clusters.max_lights_per_cluster
+end
 
-
-
-
-	illumination.lights_init(2048, self.lights.clusters.x_slices, self.lights.clusters.y_slices,
-			self.lights.clusters.z_slices, 190)
-
+function Lights:init()
+	illumination.lights_init(2048, 15,15,15, 190)
+	illumination.lights_init_texture()
+	local data_url = msg.url("/illumination#data")
+	local texture_path = go.get(data_url, "texture0")
+	illumination.lights_set_texture_path(texture_path)
 end
 
 function Lights:on_resize(w, h)
@@ -581,6 +582,7 @@ function Lights:init_lights_data(data_url)
 	for _, constant in ipairs(self.constants) do
 		constant.light_texture_data = self.light_texture_data
 	end
+
 end
 
 function Lights:draw_debug()

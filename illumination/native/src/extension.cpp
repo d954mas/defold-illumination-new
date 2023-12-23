@@ -127,9 +127,13 @@ static const luaL_reg Module_methods[] = {
     {"frustum_is_box_visible",FrustumIsBoxVisibleLua},
 
 
-    {"lights_init", LightsManagerInitLua},
-    {"light_create", LightsManagerCreateLight},
-    {"light_destroy", LightsManagerDestroyLight},
+    {"lights_init", LuaLightsManagerInit},
+    {"lights_init_texture", LuaLightsManagerInitTexture},
+    {"lights_get_texture_path", LuaLightsManagerGetTexturePath},
+    {"lights_set_texture_path", LuaLightsManagerSetTexturePath},
+    {"lights_update", LuaLightsManagerUpdateLights},
+    {"light_create", LuaLightsManagerCreateLight},
+    {"light_destroy", LuaLightsManagerDestroyLight},
 
     {0, 0}
 

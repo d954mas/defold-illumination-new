@@ -32,6 +32,8 @@ end
 -- Lifecycle
 
 function init(self)
+	illumination:init()
+
 	self.urls = {
 		go = msg.url('.'),
 		gui = msg.url('gui'),

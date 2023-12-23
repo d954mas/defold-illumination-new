@@ -34,6 +34,7 @@ function init(self)
 		[render.BUFFER_STENCIL_BIT] = 0
 	}
 
+
 end
 
 function update(self)
@@ -44,6 +45,8 @@ function update(self)
 	ILLUMINATION:set_view(self.scene.view)
 	ILLUMINATION:set_frustum(self.scene.projection*self.scene.view)
 	ILLUMINATION:set_camera(self.scene.view.m03,self.scene.view.m13,self.scene.view.m23)
+
+	illumination.lights_update()
 
 
 	ILLUMINATION:render_shadows()

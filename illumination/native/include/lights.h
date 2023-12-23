@@ -4,6 +4,10 @@
 #include <dmsdk/sdk.h>
 #include "utils.h"
 #include <cmath> // For sqrt, log2, and pow functions
+#include <sstream>  // For std::ostringstream
+#include <string>   // For std::string
+#include <cstring>  // For std::strcpy
+
 
 #define LIGHT_META "IlluminationLights.Light"
 #define LIGHT_PIXELS 6 // pixels per light
@@ -20,6 +24,7 @@ namespace IlluminationLights {
 
 //region TEXTURE
 static const dmhash_t HASH_RGBA = dmHashString64("rgba");
+static const dmhash_t HASH_EMPTY = dmHashString64("empty");
 static const dmBuffer::StreamDeclaration rgba_buffer_decl[] = {
     {HASH_RGBA, dmBuffer::VALUE_TYPE_UINT8, 4},
 };
@@ -423,6 +428,10 @@ public:
 
     dmBuffer::HBuffer textureBuffer = 0x0;
     int textureWidth, textureHeight;
+    int textureParamsRef = LUA_NOREF;
+    char * textureResourcePath = 0x0;
+    dmhash_t texturePath = HASH_EMPTY;
+
 
     LightsManager(){
 
@@ -435,11 +444,14 @@ public:
             }
         }
         delete[] clusters;
+        delete[] textureResourcePath;
+        //need L to unref
+        //luaL_unref(L, LUA_REGISTRYINDEX, textureParamsRef);
         //for some reasons engine crash when destroy texture buffer. Maybe it destroy in other place when app is closed.
         //dmBuffer::Destroy(textureBuffer);
     }
 
-    void init(int numLights, int xSlice, int ySlice, int zSlice, int maxLightsPerCluster){
+    void init(lua_State* L, int numLights, int xSlice, int ySlice, int zSlice, int maxLightsPerCluster){
         assert(!inited);
         assert(numLights>0);
         assert(xSlice>0);
@@ -479,21 +491,141 @@ public:
         int pixels = LIGHT_PIXELS * numLights + totalClusters * pixelsPerCluster;
         FindTextureDimensions(pixels, textureWidth, textureHeight);
         dmLogInfo("Total pixels:%d.Lights texture: %d x %d", pixels,textureWidth, textureHeight);
+
+        /*
+        //not worked when init in render.
+        //resource not exited yet
+        //create params for texture use it later when changed texture
+        lua_getglobal(L, "resource");
+
+        lua_getfield(L, -1, "TEXTURE_TYPE_2D");
+        int textureType2D = lua_tointeger(L, -1);
+        lua_pop(L, 1);
+
+        lua_getfield(L, -1, "TEXTURE_FORMAT_RGBA");
+        int textureFormatRGBA = lua_tointeger(L, -1);
+        lua_pop(L, 1);
+
+        lua_pop(L, 1);
+        */
+        //
+      int textureType2D = 0;
+      int textureFormatRGBA = 3;
+
+        // Create params
+        lua_newtable(L);
+
+        // Set width
+        lua_pushstring(L, "width");
+        lua_pushinteger(L, textureWidth);
+        lua_settable(L, -3);
+
+        // Set height
+        lua_pushstring(L, "height");
+        lua_pushinteger(L, textureHeight);
+        lua_settable(L, -3);
+
+        // Set type
+        lua_pushstring(L, "type");
+        lua_pushinteger(L, textureType2D);
+        lua_settable(L, -3);
+
+        // Set format
+        lua_pushstring(L, "format");
+        lua_pushinteger(L, textureFormatRGBA);
+        lua_settable(L, -3);
+
+        // Set num_mip_maps
+        lua_pushstring(L, "num_mip_maps");
+        lua_pushinteger(L, 1);
+        lua_settable(L, -3);
+
+        // Store userdata in the registry and save the reference
+        textureParamsRef = luaL_ref(L, LUA_REGISTRYINDEX);
+
         dmBuffer::Result r = dmBuffer::Create(textureWidth * textureHeight, rgba_buffer_decl,1, &textureBuffer);
         if (r != dmBuffer::RESULT_OK) {
             dmLogError("Failed to create lights texture buffer");
             return;
         }
-        //dmBuffer::Destroy(textureBuffer);
     }
 private:
     LightsManager(const LightsManager&);
 };
 
+inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager){
+    assert(lightsManager->inited);
+    if(lightsManager->textureResourcePath==0x0){
+        luaL_error(L,"LightsManager texture not created");
+    }
+    if(lightsManager->texturePath==HASH_EMPTY){
+        luaL_error(L,"LightsManager texture path not set");
+    }
+
+    //Update texture
+    // Step 1: Push the 'resource.set_texture' function onto the stack
+    lua_getglobal(L, "resource");
+    lua_getfield(L, -1, "set_texture");
+    lua_remove(L, -2); // Remove 'resource' table from the stack
+
+    // Step 2: Push the arguments
+    dmScript::PushHash(L, lightsManager->texturePath);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, lightsManager->textureParamsRef);
+    dmScript::LuaHBuffer luabuf(lightsManager->textureBuffer, dmScript::OWNER_C);
+    PushBuffer(L, luabuf);
+
+    // Step 3: Call the function
+    if (lua_pcall(L, 3, 0, 0)!= 0) {
+        // Handle error
+        const char* error_msg = lua_tostring(L, -1);
+        lua_pop(L, 1); // Pop error message
+        luaL_error(L, "can't set light texture. %s",error_msg);
+    }
+}
+
+inline void LightsManagerInitTexture(lua_State* L, LightsManager* lightsManager){
+    assert(lightsManager->inited);
+    if(lightsManager->textureResourcePath!=0x0){
+        dmLogError("textureResourcePath already set");
+        return;
+    }
+
+    const std::string prefix = "/__lights_data";
+    const std::string suffix = ".texturec";
+
+    std::ostringstream oss;
+    oss << prefix << reinterpret_cast<unsigned long long>(lightsManager) << suffix;
+
+    std::string formattedPath = oss.str();
+    lightsManager->textureResourcePath = new char[formattedPath.length() + 1];
+    std::strcpy(lightsManager->textureResourcePath, formattedPath.c_str());
+
+    // Push the 'resource.create_texture' function onto the stack
+    lua_getglobal(L, "resource");
+    lua_getfield(L, -1, "create_texture");
+    lua_remove(L, -2); // Remove 'resource' table from the stack
+
+    //push arguments
+    lua_pushstring(L, lightsManager->textureResourcePath);
+    lua_rawgeti(L, LUA_REGISTRYINDEX, lightsManager->textureParamsRef);
+    dmScript::LuaHBuffer luabuf(lightsManager->textureBuffer, dmScript::OWNER_C);
+    PushBuffer(L, luabuf);
+
+    if (lua_pcall(L, 3, 0, 0) != 0) {
+        const char* error_msg = lua_tostring(L, -1);
+        lua_pop(L, 1); // Pop error message
+        dmLogError("Failed to create lights texture: %s", error_msg);
+        return;
+    }
+
+
+
+}
+
 extern LightsManager g_lightsManager;// add g_lightsManager in extension.cpp
 
 
-static int LightsManagerInitLua(lua_State* L){
+static int LuaLightsManagerInit(lua_State* L){
     DM_LUA_STACK_CHECK(L, 0);
     check_arg_count(L, 5);
     if(g_lightsManager.inited){
@@ -513,14 +645,14 @@ static int LightsManagerInitLua(lua_State* L){
     if (zSlice < 0) { return DM_LUA_ERROR("zSlice must be non-negative");}
     if (maxLightsPerCluster < 0) { return DM_LUA_ERROR("maxLightsPerCluster must be non-negative");}
 
-    g_lightsManager.init(numLights, xSlice, ySlice, zSlice, maxLightsPerCluster);
+    g_lightsManager.init(L, numLights, xSlice, ySlice, zSlice, maxLightsPerCluster);
 
     dmLogInfo("LightsManager inited.Lights:%d xSlice:%d ySlice:%d zSlice:%d maxLightsPerCluster:%d" ,
         numLights, xSlice, ySlice, zSlice, maxLightsPerCluster);
     return 0;
 }
 
-static int LightsManagerCreateLight(lua_State* L){
+static int LuaLightsManagerCreateLight(lua_State* L){
     DM_LUA_STACK_CHECK(L, 1);
     check_arg_count(L, 0);
     if(!g_lightsManager.inited){
@@ -550,7 +682,7 @@ static int LightsManagerCreateLight(lua_State* L){
 
     return 1;
 }
-static int LightsManagerDestroyLight(lua_State* L){
+static int LuaLightsManagerDestroyLight(lua_State* L){
     DM_LUA_STACK_CHECK(L, 0);
     check_arg_count(L, 1);
     if(!g_lightsManager.inited){
@@ -566,6 +698,51 @@ static int LightsManagerDestroyLight(lua_State* L){
 
     return 0;
 }
+static int LuaLightsManagerUpdateLights(lua_State* L){
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 0);
+    if(!g_lightsManager.inited){
+        return DM_LUA_ERROR("LightsManager not inited");
+    }
+
+    LightsManagerUpdateLights(L,&g_lightsManager);
+
+    return 0;
+}
+
+static int LuaLightsManagerInitTexture(lua_State* L){
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 0);
+    if(!g_lightsManager.inited){
+        return DM_LUA_ERROR("LightsManager not inited");
+    }
+
+    LightsManagerInitTexture(L,&g_lightsManager);
+
+    return 0;
+}
+static int LuaLightsManagerGetTexturePath(lua_State* L){
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    if(!g_lightsManager.inited){
+        return DM_LUA_ERROR("LightsManager not inited");
+    }
+    dmScript::PushHash(L, g_lightsManager.texturePath);
+
+    return 1;
+}
+
+static int LuaLightsManagerSetTexturePath(lua_State* L){
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    if(!g_lightsManager.inited){
+        return DM_LUA_ERROR("LightsManager not inited");
+    }
+    g_lightsManager.texturePath = dmScript::CheckHash(L,1);
+
+    return 0;
+}
+
 
 }  // namespace IlluminationLights
 
