@@ -15,8 +15,6 @@ go.property('fog_level', 0.9)
 function init(self)
 	local data_url = msg.url("#data")
 	msg.post(data_url, hash("disable"))
-
-	ILLUMINATION:init_lights_data(data_url)
 end
 
 function update(self, dt)

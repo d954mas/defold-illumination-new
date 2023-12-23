@@ -115,6 +115,7 @@ static const luaL_reg Module_methods[] = {
     {"lights_set_camera_fov", LuaLightsManagerSetCameraFov},
     {"lights_set_camera_far", LuaLightsManagerSetCameraFar},
     {"lights_set_camera_aspect", LuaLightsManagerSetCameraAspect},
+    {"lights_get_texture_size", LuaLightsManagerGetTextureSize},
     {"lights_update", LuaLightsManagerUpdateLights},
     {"light_create", LuaLightsManagerCreateLight},
     {"light_destroy", LuaLightsManagerDestroyLight},

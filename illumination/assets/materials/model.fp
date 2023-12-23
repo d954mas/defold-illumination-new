@@ -56,8 +56,7 @@ void main() {
 
     for (int i = 0; i < num_lights; ++i) {
         highp int light_tex_idx = cluster_tex_idx +1 + i;
-        //use lights_data.x+1 to fix some issues)
-        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*(2048.0+1.0)));//index need start from 0(in lua it will be 1
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*(2048.0)));
         // lightIdx = i;
        // if (num_lights!= int(lights_data.x)){
          //   gl_FragColor = vec4(1.0,0.0,0.0, 1.0);

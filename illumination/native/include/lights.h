@@ -752,7 +752,7 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     int stridePerCluster = lightsManager->pixelsPerCluster*stride;
     for(int i=0;i<lightsManager->totalClusters;++i){
         //adding +1 to numLights fixed some precision issue
-        ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->maxLightsPerCluster, lightsManager->numLights+1, values, stride);
+        ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->maxLightsPerCluster, lightsManager->numLights, values, stride);
         values+=stridePerCluster;
     }
 
@@ -943,6 +943,19 @@ static int LuaLightsManagerSetTexturePath(lua_State* L){
 
     return 0;
 }
+
+static int LuaLightsManagerGetTextureSize(lua_State* L){
+    DM_LUA_STACK_CHECK(L, 2);
+    check_arg_count(L, 0);
+    if(!g_lightsManager.inited){
+        return DM_LUA_ERROR("LightsManager not inited");
+    }
+    lua_pushnumber(L, g_lightsManager.textureWidth);
+    lua_pushnumber(L, g_lightsManager.textureHeight);
+
+    return 2;
+}
+
 
 static int LuaLightsManagerSetFrustumMatrix(lua_State* L){
     DM_LUA_STACK_CHECK(L, 0);

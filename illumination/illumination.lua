@@ -324,7 +324,7 @@ function Light:write_to_buffer(x_min, x_max, y_min, y_max, z_min, z_max)
 
 	light_data[24] = self.cutoff < 1 and (math.cos(self.cutoff * math.pi) + 1) / 2 or 1
 
-	illumination.fill_stream_uint8(idx, self.lights.lights.texture.buffer, HASH_RGBA, 4, light_data)
+	--illumination.fill_stream_uint8(idx, self.lights.lights.texture.buffer, HASH_RGBA, 4, light_data)
 end
 
 local function create_depth_buffer(w, h)
@@ -350,30 +350,6 @@ local function create_depth_buffer(w, h)
 	return render.render_target("shadow_buffer", { [render.BUFFER_COLOR_BIT] = color_params, [render.BUFFER_DEPTH_BIT] = depth_params })
 end
 
-local function create_lights_data_texture()
-	local path = "/__lights_data.texturec"
-	local tparams = {
-		width = 1024,
-		height = 512,
-		type = resource.TEXTURE_TYPE_2D,
-		format = resource.TEXTURE_FORMAT_RGBA,
-		num_mip_maps = 1
-	}
-
-	local tbuffer = buffer.create(tparams.width * tparams.height, { { name = HASH_RGBA, type = buffer.VALUE_TYPE_UINT8, count = 4 } })
-
-	local status, error = pcall(resource.create_texture, path, tparams, tbuffer)
-	if status then
-		return {
-			params = tparams,
-			texture_id = error,
-			max_idx = tparams.width * tparams.height,
-			buffer = tbuffer
-		}
-	else
-		print("can't create texture:" .. tostring(error))
-	end
-end
 
 ---@class Lights
 local Lights = CLASS("lights")
@@ -433,7 +409,6 @@ function Lights:initialize()
 	---@class LightsData
 	self.lights = {
 		all = {},
-		texture = nil,
 		clusters = {
 			x_slices = 12,
 			y_slices = 12,
@@ -459,6 +434,12 @@ end
 function Lights:init()
 	illumination.lights_init(2048, 12,12,12, 190)
 	illumination.lights_init_texture()
+
+	self.light_texture_data.x,self.light_texture_data.y  = illumination.lights_get_texture_size()
+	for _, constant in ipairs(self.constants) do
+		constant.light_texture_data = self.light_texture_data
+	end
+
 	local data_url = msg.url("/illumination#data")
 	local texture_path = go.get(data_url, "texture0")
 	illumination.lights_set_texture_path(texture_path)
@@ -584,19 +565,9 @@ function Lights:cluster_write_to_buffer(active_list, cluster)
 	end--]]
 
 
-	illumination.fill_stream_uint8(idx, self.lights.texture.buffer, HASH_RGBA, 4, data)
+	--illumination.fill_stream_uint8(idx, self.lights.texture.buffer, HASH_RGBA, 4, data)
 end
 
-function Lights:init_lights_data(data_url)
-	self.lights.texture = create_lights_data_texture()
-	self.lights.texture.path = go.get(data_url, "texture0")
-	self.light_texture_data.x = self.lights.texture.params.width
-	self.light_texture_data.y = self.lights.texture.params.height
-	for _, constant in ipairs(self.constants) do
-		constant.light_texture_data = self.light_texture_data
-	end
-
-end
 
 function Lights:draw_debug()
 	if self.debug then
@@ -993,9 +964,9 @@ function Lights:update_lights(camera_aspect, camera_fov, camera_far)
 	--print("update clusters:" .. chronos.nanotime() - time)
 	dirty_texture = true
 
-	if dirty_texture then
-		resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
-	end
+	--if dirty_texture then
+	--	resource.set_texture(self.lights.texture.path, self.lights.texture.params, self.lights.texture.buffer)
+	--end
 
 end
 
