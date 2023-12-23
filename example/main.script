@@ -111,7 +111,9 @@ function init(self)
 				local b = 0.2 + (math.abs((z + x) / 20) / 2 * y)*0.8
 				light:set_color(r, g, b, 0.85)
 				light:set_enabled(true)
-				local obj = factory.create("/factory#light_debug", light.position)
+				local pos = vmath.vector3()
+				light:get_position(pos)
+				local obj = factory.create("/factory#light_debug", pos)
 				table.insert(self.lights, { light, obj })
 			end
 		end

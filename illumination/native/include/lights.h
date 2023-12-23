@@ -890,7 +890,8 @@ static int LuaLightsManagerDestroyLight(lua_State* L){
         return DM_LUA_ERROR("LightsManager not inited");
     }
 
-    LuaLightUserData* userData = LightUserdataCheck(L,1);
+    LuaLightUserData* userData = (LuaLightUserData*)luaL_checkudata(L, 1, LIGHT_META);
+    if (!userData->valid) {return 0;}
 
     userData->valid = false;
 

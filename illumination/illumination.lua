@@ -246,7 +246,7 @@ function Light:set_direction(x, y, z)
 	if self.direction.x ~= x or self.direction.y ~= y or self.direction.z ~= z then
 		self.direction.x, self.direction.y, self.direction.z = x, y, z
 		self.dirty = true
-		self.native:set_direction(x,y,z)
+		self.native:set_direction(x, y, z)
 	end
 end
 
@@ -255,7 +255,7 @@ function Light:set_color(r, g, b, brightness)
 		self.color.x, self.color.y, self.color.z, self.color.w = r, g, b, brightness
 		self.dirty = true
 
-		self.native:set_color(r,g,b,brightness)
+		self.native:set_color(r, g, b, brightness)
 	end
 end
 
@@ -350,7 +350,6 @@ local function create_depth_buffer(w, h)
 	return render.render_target("shadow_buffer", { [render.BUFFER_COLOR_BIT] = color_params, [render.BUFFER_DEPTH_BIT] = depth_params })
 end
 
-
 ---@class Lights
 local Lights = CLASS("lights")
 
@@ -408,7 +407,8 @@ function Lights:initialize()
 
 	---@class LightsData
 	self.lights = {
-		all = {},
+		in_world = {},
+		all = {}, --todo remove
 		clusters = {
 			x_slices = 12,
 			y_slices = 12,
@@ -430,12 +430,11 @@ function Lights:initialize()
 	self.clusters_data.w = self.lights.clusters.max_lights_per_cluster
 end
 
-
 function Lights:init()
-	illumination.lights_init(2048, 12,12,12, 190)
+	illumination.lights_init(2048, 12, 12, 12, 190)
 	illumination.lights_init_texture()
 
-	self.light_texture_data.x,self.light_texture_data.y  = illumination.lights_get_texture_size()
+	self.light_texture_data.x, self.light_texture_data.y = illumination.lights_get_texture_size()
 	for _, constant in ipairs(self.constants) do
 		constant.light_texture_data = self.light_texture_data
 	end
@@ -567,7 +566,6 @@ function Lights:cluster_write_to_buffer(active_list, cluster)
 
 	--illumination.fill_stream_uint8(idx, self.lights.texture.buffer, HASH_RGBA, 4, data)
 end
-
 
 function Lights:draw_debug()
 	if self.debug then
@@ -835,20 +833,19 @@ function Lights:render_shadows()
 	render.set_render_target(render.RENDER_TARGET_DEFAULT)
 end
 
-
---region Lights
 function Lights:create_light()
-	local l = Light(self)
-	table.insert(self.lights.all, l)
+	local l = illumination.light_create()
+	table.insert(self.lights.in_world, l)
 	return l
 end
 
----@param light LightsData
 function Lights:remove_light(light)
-	light.removed = true
-	if light.native then
-		illumination.light_destroy(light.native)
-		light.native = nil
+	illumination.light_destroy(light)
+	for i=1,#self.lights.in_world do
+		if self.lights.in_world[i] == light then
+			table.remove(self.lights.in_world, i)
+			break
+		end
 	end
 end
 
@@ -980,9 +977,10 @@ function Lights:set_view(view)
 end
 
 function Lights:dispose()
-	for _, l in ipairs(self.lights.all) do
-		self:remove_light(l)
+	for _, l in ipairs(self.lights.in_world) do
+		illumination.light_destroy(l)
 	end
+	self.lights.in_world = {}
 end
 
 --endregion
