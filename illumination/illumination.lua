@@ -11,7 +11,7 @@ local V_UP = vmath.vector3(0, 1, 0)
 
 local HASH_RGBA = hash("rgba")
 
-local RADIUS_MAX = 128
+local RADIUS_MAX = 64
 
 local LIGHT_IDX = 0
 
@@ -254,6 +254,7 @@ function Light:set_color(r, g, b, brightness)
 	if self.color.x ~= r or self.color.y ~= g or self.color.z ~= b or self.color.w ~= brightness then
 		self.color.x, self.color.y, self.color.z, self.color.w = r, g, b, brightness
 		self.dirty = true
+
 		self.native:set_color(r,g,b,brightness)
 	end
 end
@@ -351,8 +352,8 @@ end
 local function create_lights_data_texture()
 	local path = "/__lights_data.texturec"
 	local tparams = {
-		width = 1024,
-		height = 1024,
+		width = 128,
+		height = 128,
 		type = resource.TEXTURE_TYPE_2D,
 		format = resource.TEXTURE_FORMAT_RGBA,
 		num_mip_maps = 1
@@ -389,7 +390,7 @@ function Lights:initialize()
 	self.view = vmath.matrix4()
 
 	self.light_texture_data = vmath.vector4()
-	self.lights_data = vmath.vector4(0, RADIUS_MAX, 0, 0)
+	self.lights_data = vmath.vector4(2048, RADIUS_MAX, 0, 0)
 	self.lights_data2 = vmath.vector4()
 	self.clusters_data = vmath.vector4() --max_lights_per_cluster, x_slices, y_slices, z_slices
 	self.screen_size = vmath.vector4()
@@ -433,10 +434,10 @@ function Lights:initialize()
 		all = {},
 		texture = nil,
 		clusters = {
-			x_slices = 15,
-			y_slices = 15,
-			z_slices = 15,
-			max_lights_per_cluster = 190,
+			x_slices = 1,
+			y_slices = 1,
+			z_slices = 1,
+			max_lights_per_cluster = 1024,
 			clusters = {},
 			pixels_per_cluster = 0
 		}
@@ -453,8 +454,9 @@ function Lights:initialize()
 	self.clusters_data.w = self.lights.clusters.max_lights_per_cluster
 end
 
+
 function Lights:init()
-	illumination.lights_init(2048, 15,15,15, 190)
+	illumination.lights_init(2048, 1,1,1, 1024)
 	illumination.lights_init_texture()
 	local data_url = msg.url("/illumination#data")
 	local texture_path = go.get(data_url, "texture0")
@@ -938,8 +940,8 @@ function Lights:update_lights(camera_aspect, camera_fov, camera_far)
 	y_min, y_max = -511, 512
 	z_min, z_max = -511, 512
 
-	if self.lights_data.x ~= idx or self.lights_data.z ~= x_min or self.lights_data.w ~= x_max then
-		self.lights_data.x = idx
+	if self.lights_data.x ~= 2048 or self.lights_data.z ~= x_min or self.lights_data.w ~= x_max then
+		self.lights_data.x = 2048
 		self.lights_data.y = RADIUS_MAX
 		self.lights_data.z = x_min
 		self.lights_data.w = x_max

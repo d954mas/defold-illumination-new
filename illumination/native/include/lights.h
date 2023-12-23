@@ -12,7 +12,7 @@
 
 #define LIGHT_META "IlluminationLights.Light"
 #define LIGHT_PIXELS 6 // pixels per light
-#define LIGHT_RADIUS_MAX 64 // store in r value of pixel. Mb store as rgba value for better precision?
+#define LIGHT_RADIUS_MAX 64.0 // store in r value of pixel. Mb store as rgba value for better precision?
 #define LIGHT_MIN_POSITION -511
 #define LIGHT_MAX_POSITION 512
 #define LIGHT_AXIS_CAPACITY 1024 //[-511 512]
@@ -133,7 +133,7 @@ inline void LightReset(Light* light){
     light->direction = dmVMath::Vector3(0.0f, 0.0f, -1.0f);
     light->color = dmVMath::Vector4(1.0f, 1.0f, 1.0f, 1.0f);
     light->radius = 1.0f;
-    light->smoothness = 0.5f;
+    light->smoothness = 1.0f;
     light->specular = 0.5f;
     light->cutoff = 1.0f;
     light->dirty = true;
@@ -221,28 +221,36 @@ inline bool LightIsAddLightToScene(Light* light) {
 inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) {
     dmVMath::Vector4 posX = EncodeFloatRGBA(light->position.getX(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
     values[0] = posX.getX();values[1] = posX.getY();values[2] = posX.getZ();values[3] = posX.getW();
+    values+=stride;
+
+    //dmLogInfo("light:%d x:%f y:%f z:%f",light->index,light->position.getX(),light->position.getY(),light->position.getZ());
 
     dmVMath::Vector4 posY = EncodeFloatRGBA(light->position.getY(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
-    values[4] = posY.getX();values[5] = posY.getY();values[6] = posY.getZ();values[7] = posY.getW();
+    values[0] = posY.getX();values[1] = posY.getY();values[2] = posY.getZ();values[3] = posY.getW();
+    values+=stride;
 
     dmVMath::Vector4 posZ = EncodeFloatRGBA(light->position.getZ(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
-    values[8] = posZ.getX();values[9] = posZ.getY();values[10] = posZ.getZ();values[11] = posZ.getW();
+    values[0] = posZ.getX();values[1] = posZ.getY();values[2] = posZ.getZ();values[3] = posZ.getW();
+    values+=stride;
+
+    values[0] = (light->direction.getX() + 1)/2*255;
+    values[1] = (light->direction.getY() + 1)/2*255;
+    values[2] = (light->direction.getZ() + 1)/2*255;
+    // values[3] = 0 //empty field
+    values+=stride;
+
+    values[0] = light->color.getX()*255;
+    values[1] = light->color.getY()*255;
+    values[2] = light->color.getZ()*255;
+    values[3] = light->color.getW()*255;
+    values+=stride;
 
 
-    values[12] = (light->direction.getX() + 1)/2*255;
-    values[13] = (light->direction.getY() + 1)/2*255;
-    values[14] = (light->direction.getZ() + 1)/2*255;
-    // values[15] = 0 //empty field
-
-    values[16] = light->color.getX()*255;
-    values[17] = light->color.getY()*255;
-    values[18] = light->color.getZ()*255;
-    values[19] = light->color.getW()*255;
-
-    values[20] = light->radius / LIGHT_RADIUS_MAX * 255;
-    values[21] = light->smoothness * 255;
-    values[22] = light->specular * 255;
-    values[23] = light->cutoff < 1 ? (cos(light->cutoff * M_PI) + 1) / 2 * 255 : 255;
+    values[0] = light->radius / LIGHT_RADIUS_MAX * 255;
+    values[1] = light->smoothness * 255;
+    values[2] = light->specular * 255;
+    values[3] = light->cutoff < 1 ? (cos(light->cutoff * M_PI) + 1) / 2 * 255 : 255;
+    values+=stride;
 }
 
 inline void ClusterWriteToBuffer(LightCluster* cluster, int maxLightsPerCluster, int maxLights, uint8_t* values,  uint32_t stride) {
@@ -733,17 +741,17 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
 
     for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
         Light* light = lightsManager->lightsVisibleInWorld[i];
-        if(light->dirty){
+        //if(light->dirty){
             LightWriteToBuffer(light, values+light->index*LIGHT_PIXELS*stride, stride);
             light->dirty = false;
-        }
+       // }
     }
 
     values += lightsManager->numLights*LIGHT_PIXELS*stride;
     int stridePerCluster = lightsManager->pixelsPerCluster*stride;
     for(int i=0;i<lightsManager->totalClusters;++i){
         //adding +1 to numLights fixed some precision issue
-        ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->maxLightsPerCluster, lightsManager->numLights+1, values, stride);
+        //ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->maxLightsPerCluster, lightsManager->numLights+1, values, stride);
         values+=stridePerCluster;
     }
 
