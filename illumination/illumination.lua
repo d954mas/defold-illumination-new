@@ -223,7 +223,7 @@ function Lights:initialize()
 	self.light_texture_data = vmath.vector4()
 	self.lights_data = vmath.vector4(0, 0, 0, 0)
 	self.lights_data2 = vmath.vector4()
-	self.clusters_data = vmath.vector4() --max_lights_per_cluster, x_slices, y_slices, z_slices
+	self.clusters_data = vmath.vector4() -- x_slices, y_slices, z_slices, max_lights_per_cluster
 	self.screen_size = vmath.vector4()
 
 	self.debug = false
@@ -263,23 +263,7 @@ function Lights:initialize()
 	---@class LightsData
 	self.lights = {
 		in_world = {},
-		all = {}, --todo remove
-		clusters = {
-			x_slices = 12,
-			y_slices = 12,
-			z_slices = 12,
-			max_lights_per_cluster = 190,
-			clusters = {},
-			pixels_per_cluster = 0
-		}
 	}
-	--1 pixel(rgba) lights count
-	--max_lights_per_cluster * 1pixel(rgba) light idx
-	self.lights.clusters.pixels_per_cluster = 1 + self.lights.clusters.max_lights_per_cluster * 1
-	for i = 1, self.lights.clusters.x_slices * self.lights.clusters.y_slices * self.lights.clusters.z_slices do
-		table.insert(self.lights.clusters.clusters, { lights = {}, idx = i })
-	end
-
 end
 
 function Lights:init()
@@ -318,100 +302,6 @@ function Lights:on_resize(w, h)
 	for _, constant in ipairs(self.constants) do
 		constant.screen_size = self.screen_size
 	end
-end
-
----@param active_list Light[]
-function Lights:update_clusters(active_list, camera_aspect, camera_fov, camera_far)
-	local lights = self.lights
-	local clusters = lights.clusters
-	local x_slices = clusters.x_slices
-	local y_slices = clusters.y_slices
-	local z_slices = clusters.z_slices
-	local max_lights_per_cluster = clusters.max_lights_per_cluster
-
-	for i = 1, x_slices * y_slices * z_slices do
-		self.lights.clusters.clusters[i].lights = {}
-	end
-
-	--instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
-
-	local tan_Vertical_FoV_by_2 = math.tan(camera_fov * 0.5);
-	local zStride = (camera_far) / clusters.z_slices;
-
-	for i = 1, #active_list do
-		local l = active_list[i]
-		TEMP_V4.x, TEMP_V4.y, TEMP_V4.z, TEMP_V4.w = l.position.x, l.position.y, l.position.z, 1
-		xmath.matrix_mul_v4(TEMP_V4, self.view, TEMP_V4)
-
-		TEMP_V4.z = TEMP_V4.z * -1; --camera looks down negative z, make z axis positive to make calculations easier
-		local x1 = TEMP_V4.x - l.radius
-		local y1 = TEMP_V4.y - l.radius
-		local z1 = TEMP_V4.z - l.radius
-		local x2 = TEMP_V4.x + l.radius
-		local y2 = TEMP_V4.y + l.radius
-		local z2 = TEMP_V4.z + l.radius
-
-		local h_lightFrustum = math.abs(tan_Vertical_FoV_by_2 * TEMP_V4.z * 2);
-		local w_lightFrustum = math.abs(camera_aspect * h_lightFrustum);
-
-		local xStride = w_lightFrustum / x_slices;
-		local yStride = h_lightFrustum / y_slices;
-
-		--Need to extend this by -1 and +1 to avoid edge cases where light
-		--technically could fall outside the bounds we make because the planes themeselves are tilted by some angle
-		-- the effect is exaggerated the steeper the angle the plane makes is
-		local zStartIndex = math.floor(z1 / zStride);
-		local zEndIndex = math.floor(z2 / zStride);
-		local yStartIndex = math.floor((y1 + h_lightFrustum * 0.5) / yStride);
-		local yEndIndex = math.floor((y2 + h_lightFrustum * 0.5) / yStride);
-		local xStartIndex = math.floor((x1 + w_lightFrustum * 0.5) / xStride) - 1;
-		local xEndIndex = math.floor((x2 + w_lightFrustum * 0.5) / xStride) + 1;
-
-		local visible = not ((zStartIndex < 0 and zEndIndex < 0) or (zStartIndex >= z_slices and zEndIndex >= z_slices)) and
-				not ((yStartIndex < 0 and yEndIndex < 0) or (yStartIndex >= y_slices and yEndIndex >= y_slices))
-
-		if visible then
-			zStartIndex = clamp(zStartIndex, 0, z_slices - 1);
-			zEndIndex = clamp(zEndIndex, 0, z_slices - 1);
-
-			yStartIndex = clamp(yStartIndex, 0, y_slices - 1);
-			yEndIndex = clamp(yEndIndex, 0, y_slices - 1);
-
-			xStartIndex = clamp(xStartIndex, 0, x_slices - 1);
-			xEndIndex = clamp(xEndIndex, 0, x_slices - 1);
-
-			for z = zStartIndex, zEndIndex do
-				for y = yStartIndex, yEndIndex do
-					for x = xStartIndex, xEndIndex do
-						local id = x + y * x_slices + z * x_slices * y_slices + 1;
-						local cluster = clusters.clusters[id]
-						if (#cluster.lights < max_lights_per_cluster) then
-							table.insert(cluster.lights, l)
-						else
-							print("cluster:" .. id .. " already have max lights count")
-						end
-
-					end
-				end
-			end
-		end
-	end
-
-	self.clusters_data.z = zStride
-	for _, constant in ipairs(self.constants) do
-		constant.clusters_data = self.clusters_data
-	end
-
-	for i = 1, x_slices * y_slices * z_slices do
-		local cluster = clusters.clusters[i]
-		--		print("cluster:" .. cluster.idx .. " " .. #cluster.lights)
-		self:cluster_write_to_buffer(active_list, cluster)
-	end
-
-end
-
-function Lights:cluster_write_to_buffer(active_list, cluster)
-	
 end
 
 function Lights:draw_debug()

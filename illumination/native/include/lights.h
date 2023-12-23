@@ -743,7 +743,7 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     }
 
 
-    dmLogInfo("Lights all:%d. Visible:%d",lightsManager->lightsInWorld.Size(), lightsManager->lightsVisibleInWorld.Size());
+   // dmLogInfo("Lights all:%d. Visible:%d",lightsManager->lightsInWorld.Size(), lightsManager->lightsVisibleInWorld.Size());
 
     uint8_t* values = 0x0;
     uint32_t stride = 0;
