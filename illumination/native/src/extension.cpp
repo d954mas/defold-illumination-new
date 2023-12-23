@@ -14,27 +14,6 @@ namespace IlluminationLights {
     LightsManager g_lightsManager;
 }
 
-static float Fract(float f){
-    return f - floor(f);
-}
-
-static dmVMath::Vector4 EncodeFloatRGBA(float v, float min, float max){
-    //if (v<MIN_BORDER){MIN_BORDER = v;}
-    //if (v>MAX_BORDER){MAX_BORDER = v;}
-    assert(v>=min);
-    assert(v<=max);
-    assert(max>min);
-    v = (v- min)/(max-min);
-    assert(v>=0.0);
-    assert(v<=1.0);
-    dmVMath::Vector4 enc = dmVMath::Vector4(1.0, 255.0, 65025.0, 16581375.0) * v;
-    enc.setX(Fract(enc.getX()));
-    enc.setY(Fract(enc.getY()));
-    enc.setZ(Fract(enc.getZ()));
-    enc.setW(Fract(enc.getW()));
-    //enc = enc - dmVMath::Vector4(enc.getY()*1.0/255.0,enc.getZ()*1.0/255.0,enc.getW()*1.0/255.0,0.0);
-    return enc;
-}
 
 static int FloatToRGBALua(lua_State* L){
     DM_LUA_STACK_CHECK(L, 4);

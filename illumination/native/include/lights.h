@@ -16,6 +16,7 @@
 #define LIGHT_MIN_POSITION -511
 #define LIGHT_MAX_POSITION 512
 #define LIGHT_AXIS_CAPACITY 1024 //[-511 512]
+#define M_PI  3.14159265358979323846  /* pi */
 
 
 
@@ -59,6 +60,28 @@ void FindTextureDimensions(int totalPixels, int& width, int& height) {
     }
 }
 //endregion
+
+inline float Fract(float f){
+    return f - floor(f);
+}
+
+inline dmVMath::Vector4 EncodeFloatRGBA(float v, float min, float max){
+    //if (v<MIN_BORDER){MIN_BORDER = v;}
+    //if (v>MAX_BORDER){MAX_BORDER = v;}
+    assert(v>=min);
+    assert(v<=max);
+    assert(max>min);
+    v = (v- min)/(max-min);
+    assert(v>=0.0);
+    assert(v<=1.0);
+    dmVMath::Vector4 enc = dmVMath::Vector4(1.0, 255.0, 65025.0, 16581375.0) * v;
+    enc.setX(Fract(enc.getX()));
+    enc.setY(Fract(enc.getY()));
+    enc.setZ(Fract(enc.getZ()));
+    enc.setW(Fract(enc.getW()));
+
+    return enc;
+}
 
 
 
@@ -194,6 +217,40 @@ inline void LightSetEnabled(Light* light, bool enabled) {
 inline bool LightIsAddLightToScene(Light* light) {
 	return light->enabled && light->color.getW() > 0.0f;
 }
+
+inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) {
+    values[0] = 0;
+    values[1] =1;
+    values[2] = 2;
+    values[3] = 2;
+    values += stride;
+
+    dmVMath::Vector4 posX = EncodeFloatRGBA(light->position.getX(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
+    values[0] = posX.getX();values[1] = posX.getY();values[2] = posX.getZ();values[3] = posX.getW();
+
+    dmVMath::Vector4 posY = EncodeFloatRGBA(light->position.getY(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
+    values[4] = posY.getX();values[5] = posY.getY();values[6] = posY.getZ();values[7] = posY.getW();
+
+    dmVMath::Vector4 posZ = EncodeFloatRGBA(light->position.getZ(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
+    values[8] = posZ.getX();values[9] = posZ.getY();values[10] = posZ.getZ();values[11] = posZ.getW();
+
+
+    values[12] = (light->direction.getX() + 1)/2*255;
+    values[13] = (light->direction.getY() + 1)/2*255;
+    values[14] = (light->direction.getZ() + 1)/2*255;
+    // values[15] = 0 //empty field
+
+    values[16] = light->color.getX()*255;
+    values[17] = light->color.getY()*255;
+    values[18] = light->color.getZ()*255;
+    values[19] = light->color.getW()*255;
+
+    values[20] = light->radius / LIGHT_RADIUS_MAX * 255;
+    values[21] = light->smoothness * 255;
+    values[22] = light->specular * 255;
+    values[23] = light->cutoff < 1 ? (cos(light->cutoff * M_PI) + 1) / 2 * 255 : 255;
+}
+
 
 
 //endregion
@@ -582,6 +639,27 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         }
     }
     dmLogInfo("Lights all:%d. Visible:%d",lightsManager->lightsInWorld.Size(), lightsManager->lightsVisibleInWorld.Size());
+
+    uint8_t* values = 0x0;
+    uint32_t stride = 0;
+    dmBuffer::Result dataResult = dmBuffer::GetStream(lightsManager->textureBuffer, HASH_RGBA, (void**)&values, 0x0, 0x0, &stride);
+    if (dataResult != dmBuffer::RESULT_OK) {
+        luaL_error(L,"can't get stream for lights texture");
+    }
+
+    for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
+        Light* light = lightsManager->lightsVisibleInWorld[i];
+        if(light->dirty){
+            LightWriteToBuffer(light, values+light->index*LIGHT_PIXELS*stride, stride);
+            light->dirty = false;
+        }
+    }
+
+
+     dmBuffer::UpdateContentVersion(lightsManager->textureBuffer);
+
+
+    // Update clusters
 
     //Update texture
     // Step 1: Push the 'resource.set_texture' function onto the stack
