@@ -219,12 +219,6 @@ inline bool LightIsAddLightToScene(Light* light) {
 }
 
 inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) {
-    values[0] = 0;
-    values[1] =1;
-    values[2] = 2;
-    values[3] = 2;
-    values += stride;
-
     dmVMath::Vector4 posX = EncodeFloatRGBA(light->position.getX(),LIGHT_MIN_POSITION,LIGHT_MAX_POSITION)*255;
     values[0] = posX.getX();values[1] = posX.getY();values[2] = posX.getZ();values[3] = posX.getW();
 
@@ -251,8 +245,16 @@ inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) 
     values[23] = light->cutoff < 1 ? (cos(light->cutoff * M_PI) + 1) / 2 * 255 : 255;
 }
 
-
-
+inline void ClusterWriteToBuffer(LightCluster* cluster, int maxLightsPerCluster, int maxLights, uint8_t* values,  uint32_t stride) {
+    dmVMath::Vector4 lights = EncodeFloatRGBA(cluster->numLights,0,maxLightsPerCluster)*255;
+    values[0] = lights.getX();values[1] = lights.getY();values[2] = lights.getZ();values[3] = lights.getW();
+    values+=stride;
+    for(int i=0;i<cluster->numLights;++i){
+        dmVMath::Vector4 idx = EncodeFloatRGBA(cluster->lights[i]->index,0,maxLights)*255;
+        values[0] = idx.getX();values[1] = idx.getY();values[2] = idx.getZ();values[3] = idx.getW();
+        values+=stride;
+    }
+}
 //endregion
 
 //region light Lua
@@ -709,17 +711,14 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
                     LightCluster& cluster = lightsManager->clusters[id];
 
                     if (cluster.numLights < lightsManager->maxLightsPerCluster) {
-                        // Assuming you have a method to add lights to the cluster
                         cluster.lights[cluster.numLights] = l;
                         cluster.numLights++;
                     } else {
-                        dmLogInfo("Cluster %d already has the maximum number of lights", id);
+                        dmLogWarning("Cluster %d already has the maximum number of lights", id);
                     }
                 }
             }
         }
-
-
     }
 
 
@@ -740,6 +739,13 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         }
     }
 
+    values += lightsManager->numLights*LIGHT_PIXELS*stride;
+    int stridePerCluster = lightsManager->pixelsPerCluster*stride;
+    for(int i=0;i<lightsManager->totalClusters;++i){
+        //adding +1 to numLights fixed some precision issue
+        ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->maxLightsPerCluster, lightsManager->numLights+1, values, stride);
+        values+=stridePerCluster;
+    }
 
      dmBuffer::UpdateContentVersion(lightsManager->textureBuffer);
 
