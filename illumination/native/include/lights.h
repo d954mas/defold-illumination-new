@@ -550,6 +550,7 @@ public:
              // Initialize default values for each light
             light->index = numLights-1-i;
             light->enabled = false;
+            LightReset(light);
             lightsPool.Push(light);
         }
 
@@ -741,17 +742,17 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
 
     for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
         Light* light = lightsManager->lightsVisibleInWorld[i];
-        //if(light->dirty){
+        if(light->dirty){
             LightWriteToBuffer(light, values+light->index*LIGHT_PIXELS*stride, stride);
             light->dirty = false;
-       // }
+        }
     }
 
     values += lightsManager->numLights*LIGHT_PIXELS*stride;
     int stridePerCluster = lightsManager->pixelsPerCluster*stride;
     for(int i=0;i<lightsManager->totalClusters;++i){
         //adding +1 to numLights fixed some precision issue
-        //ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->maxLightsPerCluster, lightsManager->numLights+1, values, stride);
+        ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->maxLightsPerCluster, lightsManager->numLights+1, values, stride);
         values+=stridePerCluster;
     }
 

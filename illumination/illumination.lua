@@ -207,7 +207,7 @@ function Light:initialize(lights)
 	self.position = vmath.vector3(0, 0, 0)
 	self.color = vmath.vector4(1) --r,g,b brightness
 
-	self.radius = 5
+	self.radius = 1
 	self.smoothness = 1
 	self.specular = 0.5
 	self.cutoff = 1
@@ -283,6 +283,7 @@ function Light:set_smoothness(smoothness)
 	if self.smoothness ~= smoothness then
 		self.smoothness = smoothness
 		self.dirty = true
+		print("set_smoothness:" .. smoothness)
 		self.native:set_smoothness(smoothness)
 	end
 end
@@ -352,8 +353,8 @@ end
 local function create_lights_data_texture()
 	local path = "/__lights_data.texturec"
 	local tparams = {
-		width = 128,
-		height = 128,
+		width = 1024,
+		height = 512,
 		type = resource.TEXTURE_TYPE_2D,
 		format = resource.TEXTURE_FORMAT_RGBA,
 		num_mip_maps = 1
@@ -434,10 +435,10 @@ function Lights:initialize()
 		all = {},
 		texture = nil,
 		clusters = {
-			x_slices = 1,
-			y_slices = 1,
-			z_slices = 1,
-			max_lights_per_cluster = 1024,
+			x_slices = 12,
+			y_slices = 12,
+			z_slices = 12,
+			max_lights_per_cluster = 190,
 			clusters = {},
 			pixels_per_cluster = 0
 		}
@@ -456,7 +457,7 @@ end
 
 
 function Lights:init()
-	illumination.lights_init(2048, 1,1,1, 1024)
+	illumination.lights_init(2048, 12,12,12, 190)
 	illumination.lights_init_texture()
 	local data_url = msg.url("/illumination#data")
 	local texture_path = go.get(data_url, "texture0")
