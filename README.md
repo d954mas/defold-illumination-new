@@ -19,6 +19,7 @@ This example contains ready-to-use forward shading lighting mixed with realtime 
 **Cons:**
 
 1. Remove normal and specular map. I do not use it in my games. So if you need them you can add them by yourself(look in illumination sources)
+2. Web build contains some precision issues(need find and fix them):(
 
 **How to use**
 
