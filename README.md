@@ -21,10 +21,20 @@ This example contains ready-to-use forward shading lighting mixed with realtime 
 1. Remove normal and specular map. I do not use it in my games. So if you need them you can add them by yourself(look in illumination sources)
 
 **How to use**
+
 This is not library this is example so you need manualy add it to you project.
 1)Copy illumination folder
 2)Use illumination render script or add logic to your script
 3)Look at example.collection and add necessary objects to your collection
+
+**Support me:)**
+
+If you like the extension you can support me on patreon.
+It will help me make more items for defold.
+
+[![](https://c5.patreon.com/external/logo/become_a_patron_button.png)](https://www.patreon.com/d954mas)
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/d954mas)
 
 
 
