@@ -508,6 +508,7 @@ public:
     int numLights,maxLightsPerCluster,pixelsPerCluster;
     int totalClusters;
     int xSlice, ySlice, zSlice;
+    int debugVisibleLights = 0;
 
     float cameraAspect, cameraFov, cameraFar;
 
@@ -669,6 +670,7 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     for(int i=0;i<lightsManager->totalClusters;++i){
         lightsManager->clusters[i].numLights = 0;
     }
+    lightsManager->debugVisibleLights = 0;
 
     //instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
     float tan_Vertical_FoV_by_2 = tan(lightsManager->cameraFov * 0.5);
@@ -717,6 +719,8 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         if((xStartIndex < 0 && xEndIndex < 0) || (xStartIndex >= lightsManager->xSlice && xEndIndex >= lightsManager->xSlice)){
             continue; //light wont fall into any cluster
         }
+
+        lightsManager->debugVisibleLights++;
 
         zStartIndex = fmax(0, fmin(zStartIndex, lightsManager->zSlice - 1));
         zEndIndex = fmax(0, fmin(zEndIndex, lightsManager->zSlice - 1));
@@ -1095,6 +1099,18 @@ static int LuaLightsManagerGetLightsPerCluster(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 1);
     check_arg_count(L, 0);
     lua_pushnumber(L,g_lightsManager.maxLightsPerCluster);
+    return 1;
+}
+static int LuaLightsManagerGetInWorldCount(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,g_lightsManager.lightsInWorld.Size());
+    return 1;
+}
+static int LuaLightsManagerGetInWorldVisibleCount(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,g_lightsManager.debugVisibleLights);
     return 1;
 }
 

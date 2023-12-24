@@ -373,7 +373,7 @@ end
 
 ---@param render Render
 function Lights:set_render(render_obj)
-	illumination.lights_init(1024, 15, 15, 15, 200)
+	illumination.lights_init(1024, 15, 15, 15, 150)
 
 	self.render = assert(render_obj)
 

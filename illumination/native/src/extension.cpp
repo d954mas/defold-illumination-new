@@ -129,6 +129,8 @@ static const luaL_reg Module_methods[] = {
     {"lights_update", LuaLightsManagerUpdateLights},
     {"light_create", LuaLightsManagerCreateLight},
     {"light_destroy", LuaLightsManagerDestroyLight},
+    {"lights_get_all_count", LuaLightsManagerGetInWorldCount},
+    {"lights_get_visible_count", LuaLightsManagerGetInWorldVisibleCount},
 
     {0, 0}
 
