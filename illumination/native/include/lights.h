@@ -92,6 +92,7 @@ inline dmVMath::Vector4 EncodeFloatRGBA(float v, float min, float max){
 
 struct Light {
     int index;
+    uint8_t encodedIndex[4];
     bool enabled;
     dmVMath::Vector3 position;
     dmVMath::Vector3 direction;
@@ -265,13 +266,11 @@ inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) 
     values+=stride;
 }
 
-inline void ClusterWriteToBuffer(LightCluster* cluster, int maxLightsPerCluster, int maxLights, uint8_t* values,  uint32_t stride) {
-    dmVMath::Vector4 lights = EncodeFloatRGBA(cluster->numLights,0,maxLightsPerCluster)*255;
-    values[0] = lights.getX();values[1] = lights.getY();values[2] = lights.getZ();values[3] = lights.getW();
+inline void ClusterWriteToBuffer(LightCluster* cluster, uint8_t* encodedClusterLights, uint8_t* values,  uint32_t stride) {
+    memcpy(values, encodedClusterLights+cluster->numLights*4, 4);
     values+=stride;
     for(int i=0;i<cluster->numLights;++i){
-        dmVMath::Vector4 idx = EncodeFloatRGBA(cluster->lights[i]->index,0,maxLights)*255;
-        values[0] = idx.getX();values[1] = idx.getY();values[2] = idx.getZ();values[3] = idx.getW();
+        memcpy(values, cluster->lights[i]->encodedIndex, 4);
         values+=stride;
     }
 }
@@ -506,6 +505,7 @@ public:
     dmArray<Light*> lightsInWorld;
     dmArray<Light*> lightsVisibleInWorld;
     int numLights,maxLightsPerCluster,pixelsPerCluster;
+    uint8_t* encodedClusterLights;//precalculate num light in cluster and store in rgba
     int totalClusters;
     int xSlice, ySlice, zSlice;
     int debugVisibleLights = 0;
@@ -531,6 +531,7 @@ public:
         }
         delete[] clusters;
         delete[] textureResourcePath;
+        delete[] encodedClusterLights;
         //need L to unref
         //luaL_unref(L, LUA_REGISTRYINDEX, textureParamsRef);
         //for some reasons engine crash when destroy texture buffer. Maybe it destroy in other place when app is closed.
@@ -562,6 +563,11 @@ public:
             Light* light = &lights[i];
              // Initialize default values for each light
             light->index = numLights-1-i;
+            dmVMath::Vector4 encodedIndex = EncodeFloatRGBA(light->index,0,numLights)*255;
+            light->encodedIndex[0] = encodedIndex.getX();
+            light->encodedIndex[1] = encodedIndex.getY();
+            light->encodedIndex[2] = encodedIndex.getZ();
+            light->encodedIndex[3] = encodedIndex.getW();
             light->enabled = false;
             LightReset(light);
             lightsPool.Push(light);
@@ -574,6 +580,16 @@ public:
             LightCluster* cluster = &clusters[i];
             cluster->lights = new Light*[maxLightsPerCluster];
             cluster->numLights = 0;
+        }
+        encodedClusterLights = new uint8_t[maxLightsPerCluster*4];
+        uint8_t* encodedClusterLightsIterator = encodedClusterLights;
+        for (int i = 0; i < maxLightsPerCluster; ++i) {
+            dmVMath::Vector4 lights = EncodeFloatRGBA(i,0,maxLightsPerCluster)*255;
+            encodedClusterLightsIterator[0] = lights.getX();
+            encodedClusterLightsIterator[1] = lights.getY();
+            encodedClusterLightsIterator[2] = lights.getZ();
+            encodedClusterLightsIterator[3] = lights.getW();
+            encodedClusterLightsIterator+=4;
         }
 
         int pixels = LIGHT_PIXELS * numLights + totalClusters * pixelsPerCluster;
@@ -782,8 +798,7 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     values += lightsManager->numLights*LIGHT_PIXELS*stride;
     int stridePerCluster = lightsManager->pixelsPerCluster*stride;
     for(int i=0;i<lightsManager->totalClusters;++i){
-        //adding +1 to numLights fixed some precision issue
-        ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->maxLightsPerCluster, lightsManager->numLights, values, stride);
+        ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->encodedClusterLights, values, stride);
         values+=stridePerCluster;
         //dmLogInfo("cluster:%d numLights:%d",i,lightsManager->clusters[i].numLights);
     }
