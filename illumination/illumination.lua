@@ -267,7 +267,6 @@ function Lights:initialize()
 end
 
 function Lights:init()
-	illumination.lights_init(2048, 12, 12, 12, 190)
 	illumination.lights_init_texture()
 
 	self.light_texture_data.x, self.light_texture_data.y = illumination.lights_get_texture_size()
@@ -283,6 +282,7 @@ function Lights:init()
 	self.clusters_data.y = illumination.lights_get_y_slice()
 	self.clusters_data.z = illumination.lights_get_z_slice_for_shader()
 	self.clusters_data.w = illumination.lights_get_lights_per_cluster()
+
 
 	for _, constant in ipairs(self.constants) do
 		constant.light_texture_data = self.light_texture_data
@@ -373,6 +373,8 @@ end
 
 ---@param render Render
 function Lights:set_render(render_obj)
+	illumination.lights_init(1024, 15, 15, 15, 200)
+
 	self.render = assert(render_obj)
 
 	-- all objects that have to cast shadows

@@ -1,0 +1,89 @@
+local STRING_FORMAT = string.format
+
+local function color_parse_hexRGBA(hex)
+	local r, g, b, a = hex:match("#(%x%x)(%x%x)(%x%x)(%x?%x?)")
+	if a == "" then a = "ff" end
+	if r and g and b and a then
+		return vmath.vector4(tonumber(r, 16) / 255, tonumber(g, 16) / 255, tonumber(b, 16) / 255, tonumber(a, 16) / 255)
+	end
+	return nil
+end
+
+local COLORS = {
+	GOOD = color_parse_hexRGBA("#00ff00"),
+	WARNING = color_parse_hexRGBA("#ffff00"),
+	BAD = color_parse_hexRGBA("#ff0000")
+}
+
+
+function init(self)
+	gui.set_render_order(15)
+	self.vh = {
+		root = gui.get_node("root"),
+		lbl_dt = gui.get_node("lbl_dt"),
+		lbl_dt_max = gui.get_node("lbl_dt_max"),
+		lbl_dt_average = gui.get_node("lbl_dt_average")
+	}
+	self.current = {
+		min = 17,
+		max = 17,
+		sum = 0,
+		sum_big = 0,
+		count = 0,
+		count_big = 0
+	}
+	self.delay = 1
+	self.delay_big = 15
+	self.time = 0
+	self.time_big = 0
+	self.enabled = true
+	gui.set_enabled(self.vh.root, self.enabled)
+end
+
+function update(self,dt)
+	dt = dt
+
+	self.time = self.time + dt
+	self.time_big = self.time_big + dt
+	self.current.min = math.min(self.current.min, dt)
+	self.current.max = math.max(self.current.max, dt)
+	self.current.count = self.current.count + 1
+	self.current.count_big = self.current.count_big + 1
+	self.current.sum = self.current.sum + dt
+	self.current.sum_big = self.current.sum_big + dt
+
+	if (self.time > self.delay) then
+		local avg = self.current.sum / self.current.count
+		local color = COLORS.GOOD
+		if (avg > 0.03) then color = COLORS.BAD
+		elseif (avg > 0.020) then color = COLORS.WARNING end
+		gui.set_color(self.vh.lbl_dt, color)
+		gui.set_text(self.vh.lbl_dt, STRING_FORMAT("%0.2f", 1 / avg))
+
+		if (self.current.max > 0.03) then color = COLORS.BAD
+		elseif (self.current.max > 0.020) then color = COLORS.WARNING end
+		gui.set_color(self.vh.lbl_dt_max, color)
+		gui.set_text(self.vh.lbl_dt_max, STRING_FORMAT("%0.2f", 1 / self.current.max))
+
+		self.time = 0
+		self.current.min = dt
+		self.current.max = dt
+		self.current.sum = 0
+		self.current.count = 0
+
+	end
+
+	if (self.time_big > self.delay_big) then
+		local avg = self.current.sum_big / self.current.count_big
+		local color = COLORS.GOOD
+		if (avg > 0.03) then color = COLORS.BAD
+		elseif (avg > 0.020) then color = COLORS.WARNING end
+		gui.set_color(self.vh.lbl_dt_average, color)
+		gui.set_text(self.vh.lbl_dt_average, STRING_FORMAT("%0.2f", 1 / avg))
+
+		self.time_big = 0
+		self.current.sum_big = 0
+		self.current.count_big = 0
+
+	end
+end

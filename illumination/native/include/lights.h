@@ -688,16 +688,21 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         float y2 = pos.getY() + l->radius;
         float z2 = pos.getZ() + l->radius;
 
+      //  dmLogInfo("x1:%f x2:%f y1:%f y2:%f z1:%f z2:%f",x1,x2,y1,y2,z1,z2);
+
         float h_lightFrustum = abs(tan_Vertical_FoV_by_2 * pos.getZ() * 2);
         float w_lightFrustum = abs(lightsManager->cameraAspect * h_lightFrustum);
 
-        float xStride = w_lightFrustum / lightsManager->xSlice;
-        float yStride = h_lightFrustum / lightsManager->ySlice;
+        //fixed bad values when xStride == 0
+        float xStride = fmax(w_lightFrustum / lightsManager->xSlice,0.000001);
+        float yStride = fmax(h_lightFrustum / lightsManager->ySlice,0.000001);
 
+        //Need to extend this by -1 and +1 to avoid edge cases where light
         //technically could fall outside the bounds we make because the planes themeselves are tilted by some angle
         // the effect is exaggerated the steeper the angle the plane makes is
-        int zStartIndex = floor(z1 / zStride);
-        int zEndIndex = floor(z2 / zStride);
+        int zStartIndex = floor(z1 / zStride)-1;
+        int zEndIndex = floor(z2 / zStride)+1;
+      //  dmLogInfo("zStride:%f zStartIndex:%d zEndIndex:%d",zStride,zStartIndex,zEndIndex);
         int yStartIndex = floor((y1 + h_lightFrustum * 0.5) / yStride);
         int yEndIndex = floor((y2 + h_lightFrustum * 0.5) / yStride);
         int xStartIndex = floor((x1 + w_lightFrustum * 0.5) / xStride) - 1;
@@ -722,6 +727,16 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         xStartIndex = fmax(0, fmin(xStartIndex, lightsManager->xSlice - 1));
         xEndIndex = fmax(0, fmin(xEndIndex, lightsManager->xSlice - 1));
 
+       // zStartIndex = 0;
+       // zEndIndex = lightsManager->zSlice-1;
+
+       // yStartIndex = 0;
+       // yEndIndex = lightsManager->ySlice-1;
+
+       // xStartIndex = 0;
+       // xEndIndex = lightsManager->xSlice-1;
+
+
         for (int z = zStartIndex; z <= zEndIndex; ++z) {
             int zOffset = z * lightsManager->xSlice * lightsManager->ySlice;
             for (int y = yStartIndex; y <= yEndIndex; ++y) {
@@ -743,7 +758,7 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     }
 
 
-   // dmLogInfo("Lights all:%d. Visible:%d",lightsManager->lightsInWorld.Size(), lightsManager->lightsVisibleInWorld.Size());
+    //dmLogInfo("Lights all:%d. Visible:%d",lightsManager->lightsInWorld.Size(), lightsManager->lightsVisibleInWorld.Size());
 
     uint8_t* values = 0x0;
     uint32_t stride = 0;
@@ -766,6 +781,7 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         //adding +1 to numLights fixed some precision issue
         ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->maxLightsPerCluster, lightsManager->numLights, values, stride);
         values+=stridePerCluster;
+        //dmLogInfo("cluster:%d numLights:%d",i,lightsManager->clusters[i].numLights);
     }
 
      dmBuffer::UpdateContentVersion(lightsManager->textureBuffer);

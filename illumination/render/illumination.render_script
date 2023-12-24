@@ -50,8 +50,7 @@ function update(self)
 	illumination.lights_set_frustum(self.scene.projection*self.scene.view)
 	local time = chronos.nanotime()
 	ILLUMINATION:update_lights()
-
-	print("update lights:" .. chronos.nanotime()-time)
+	--print("update lights:" .. chronos.nanotime()-time)
 
 
 	ILLUMINATION:render_shadows()

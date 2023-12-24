@@ -75,6 +75,26 @@ collection_instances {
     z: 1.0
   }
 }
+collection_instances {
+  id: "show_dt"
+  collection: "/show_dt/show_dt.collection"
+  position {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  rotation {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+    w: 1.0
+  }
+  scale3 {
+    x: 1.0
+    y: 1.0
+    z: 1.0
+  }
+}
 scale_along_z: 0
 embedded_instances {
   id: "main"
@@ -245,8 +265,8 @@ embedded_instances {
     w: 1.0
   }
   scale3 {
-    x: 256.0
-    y: 256.0
+    x: 64.0
+    y: 64.0
     z: 1.0
   }
 }

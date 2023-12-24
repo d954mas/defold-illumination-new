@@ -56,7 +56,7 @@ void main() {
 
     for (int i = 0; i < num_lights; ++i) {
         highp int light_tex_idx = cluster_tex_idx +1 + i;
-        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*(2048.0)));
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x));
         // lightIdx = i;
        // if (num_lights!= int(lights_data.x)){
          //   gl_FragColor = vec4(1.0,0.0,0.0, 1.0);
@@ -146,6 +146,7 @@ void main() {
     gl_FragColor = vec4(color, texture_color.a);
 
     //float colorz = floor(-var_view_position.z-camNear)/clusters_data.z;
-   // gl_FragColor = vec4(float(clusterX_index)/clusters_data.x,float(clusterY_index)/clusters_data.y,float(clusterZ_index)/5.0, texture_color.a);
+  //  gl_FragColor = vec4(float(clusterX_index)/clusters_data.x,float(clusterY_index)/clusters_data.y,float(clusterZ_index)/1.0, texture_color.a);
    // gl_FragColor = vec4(float(clusterZ_index)/5.0,float(clusterZ_index)/5.0,float(clusterZ_index)/5.0, texture_color.a);
+    //gl_FragColor = vec4(clusterZ_index/10.0,color.g,color.b, texture_color.a);
 }

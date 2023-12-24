@@ -30,8 +30,8 @@ uniform highp vec4 screen_size;
 
 highp vec4 getData(highp int index) {
     // Convert linear index to 2D pixel coordinates
-    highp int x = index % int(light_texture_data.x);
-    highp int y = index / int(light_texture_data.x);
+    int x = index % int(light_texture_data.x);
+    int y = index / int(light_texture_data.x);
 
     // Convert pixel coordinates to normalized coordinates
     vec2 normalizedCoords = (vec2(x, y) + 0.5) / light_texture_data.xy;
