@@ -107,7 +107,6 @@ static const luaL_reg Module_methods[] = {
 
 
     {"lights_init", LuaLightsManagerInit},
-    {"lights_init_texture", LuaLightsManagerInitTexture},
     {"lights_get_texture_path", LuaLightsManagerGetTexturePath},
     {"lights_set_texture_path", LuaLightsManagerSetTexturePath},
     {"lights_set_frustum", LuaLightsManagerSetFrustumMatrix},

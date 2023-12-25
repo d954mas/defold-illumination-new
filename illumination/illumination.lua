@@ -267,8 +267,6 @@ function Lights:initialize()
 end
 
 function Lights:init()
-	illumination.lights_init_texture()
-
 	self.light_texture_data.x, self.light_texture_data.y = illumination.lights_get_texture_size()
 
 	self.lights_data.x = illumination.lights_get_max_lights()

@@ -507,7 +507,6 @@ public:
     dmBuffer::HBuffer textureBuffer = 0x0;
     int textureWidth, textureHeight;
     int textureParamsRef = LUA_NOREF;
-    char * textureResourcePath = 0x0;
     dmhash_t texturePath = HASH_EMPTY;
 
 
@@ -517,7 +516,6 @@ public:
     ~LightsManager(){
         delete[] lights;
         delete[] clusters;
-        delete[] textureResourcePath;
         delete[] encodedClusterLights;
         //need L to unref
         //luaL_unref(L, LUA_REGISTRYINDEX, textureParamsRef);
@@ -656,9 +654,6 @@ private:
 
 inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager){
     assert(lightsManager->inited);
-    if(lightsManager->textureResourcePath==0x0){
-        luaL_error(L,"LightsManager texture not created");
-    }
     if(lightsManager->texturePath==HASH_EMPTY){
         luaL_error(L,"LightsManager texture path not set");
     }
@@ -826,44 +821,6 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     }
 }
 
-inline void LightsManagerInitTexture(lua_State* L, LightsManager* lightsManager){
-    assert(lightsManager->inited);
-    if(lightsManager->textureResourcePath!=0x0){
-        dmLogError("textureResourcePath already set");
-        return;
-    }
-
-    const std::string prefix = "/__lights_data";
-    const std::string suffix = ".texturec";
-
-    std::ostringstream oss;
-    oss << prefix << reinterpret_cast<unsigned long long>(lightsManager) << suffix;
-
-    std::string formattedPath = oss.str();
-    lightsManager->textureResourcePath = new char[formattedPath.length() + 1];
-    std::strcpy(lightsManager->textureResourcePath, formattedPath.c_str());
-
-    // Push the 'resource.create_texture' function onto the stack
-    lua_getglobal(L, "resource");
-    lua_getfield(L, -1, "create_texture");
-    lua_remove(L, -2); // Remove 'resource' table from the stack
-
-    //push arguments
-    lua_pushstring(L, lightsManager->textureResourcePath);
-    lua_rawgeti(L, LUA_REGISTRYINDEX, lightsManager->textureParamsRef);
-    dmScript::LuaHBuffer luabuf(lightsManager->textureBuffer, dmScript::OWNER_C);
-    PushBuffer(L, luabuf);
-
-    if (lua_pcall(L, 3, 0, 0) != 0) {
-        const char* error_msg = lua_tostring(L, -1);
-        lua_pop(L, 1); // Pop error message
-        dmLogError("Failed to create lights texture: %s", error_msg);
-        return;
-    }
-
-
-
-}
 
 extern LightsManager g_lightsManager;// add g_lightsManager in extension.cpp
 
@@ -956,17 +913,7 @@ static int LuaLightsManagerUpdateLights(lua_State* L){
     return 0;
 }
 
-static int LuaLightsManagerInitTexture(lua_State* L){
-    DM_LUA_STACK_CHECK(L, 0);
-    check_arg_count(L, 0);
-    if(!g_lightsManager.inited){
-        return DM_LUA_ERROR("LightsManager not inited");
-    }
 
-    LightsManagerInitTexture(L,&g_lightsManager);
-
-    return 0;
-}
 static int LuaLightsManagerGetTexturePath(lua_State* L){
     DM_LUA_STACK_CHECK(L, 1);
     check_arg_count(L, 0);
