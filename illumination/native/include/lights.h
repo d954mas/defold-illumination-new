@@ -114,7 +114,8 @@ struct LuaLightUserData {
 
 struct LightCluster {
     int numLights;
-    Light** lights;
+    uint8_t* clusterStart;
+    uint8_t* currentLightStart;
 };
 
 
@@ -264,15 +265,6 @@ inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) 
     values[2] = light->specular * 255;
     values[3] = light->cutoff < 1 ? (cos(light->cutoff * M_PI) + 1) / 2 * 255 : 255;
     values+=stride;
-}
-
-inline void ClusterWriteToBuffer(LightCluster* cluster, uint8_t* encodedClusterLights, uint8_t* values,  uint32_t stride) {
-    memcpy(values, encodedClusterLights+cluster->numLights*4, 4);
-    values+=stride;
-    for(int i=0;i<cluster->numLights;++i){
-        memcpy(values, cluster->lights[i]->encodedIndex, 4);
-        values+=stride;
-    }
 }
 //endregion
 
@@ -524,11 +516,6 @@ public:
     }
     ~LightsManager(){
         delete[] lights;
-        if (clusters != NULL) {
-            for (int i = 0; i < totalClusters; ++i) {
-                delete[] clusters[i].lights;
-            }
-        }
         delete[] clusters;
         delete[] textureResourcePath;
         delete[] encodedClusterLights;
@@ -576,11 +563,6 @@ public:
         totalClusters = xSlice * ySlice * zSlice;
         clusters = new LightCluster[totalClusters];
 
-        for (int i = 0; i < totalClusters; ++i) {
-            LightCluster* cluster = &clusters[i];
-            cluster->lights = new Light*[maxLightsPerCluster];
-            cluster->numLights = 0;
-        }
         encodedClusterLights = new uint8_t[maxLightsPerCluster*4];
         uint8_t* encodedClusterLightsIterator = encodedClusterLights;
         for (int i = 0; i < maxLightsPerCluster; ++i) {
@@ -652,6 +634,21 @@ public:
             dmLogError("Failed to create lights texture buffer");
             return;
         }
+
+        uint8_t* values = 0x0;
+        uint32_t stride = 0;
+        dmBuffer::Result dataResult = dmBuffer::GetStream(textureBuffer, HASH_RGBA, (void**)&values, 0x0, 0x0, &stride);
+        if (dataResult != dmBuffer::RESULT_OK) {
+            luaL_error(L,"can't get stream for lights texture");
+        }
+
+        uint8_t* clusterValues = values + numLights * LIGHT_PIXELS * stride;
+        for (int i = 0; i < totalClusters; ++i) {
+            LightCluster* cluster = &clusters[i];
+            cluster->numLights = 0;
+            cluster->clusterStart = clusterValues;
+            clusterValues += pixelsPerCluster * stride;
+        }
     }
 private:
     LightsManager(const LightsManager&);
@@ -685,6 +682,7 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     //mark clusters empty
     for(int i=0;i<lightsManager->totalClusters;++i){
         lightsManager->clusters[i].numLights = 0;
+        lightsManager->clusters[i].currentLightStart = lightsManager->clusters[i].clusterStart+4;
     }
     lightsManager->debugVisibleLights = 0;
 
@@ -767,8 +765,9 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
                     LightCluster& cluster = lightsManager->clusters[id];
 
                     if (cluster.numLights < lightsManager->maxLightsPerCluster) {
-                        cluster.lights[cluster.numLights] = l;
+                        memcpy(cluster.currentLightStart, l->encodedIndex, 4);
                         cluster.numLights++;
+                        cluster.currentLightStart +=4;
                     } else {
                         dmLogWarning("Cluster %d already has the maximum number of lights", id);
                     }
@@ -795,12 +794,10 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         }
     }
 
-    values += lightsManager->numLights*LIGHT_PIXELS*stride;
-    int stridePerCluster = lightsManager->pixelsPerCluster*stride;
     for(int i=0;i<lightsManager->totalClusters;++i){
-        ClusterWriteToBuffer(&lightsManager->clusters[i],lightsManager->encodedClusterLights, values, stride);
-        values+=stridePerCluster;
-        //dmLogInfo("cluster:%d numLights:%d",i,lightsManager->clusters[i].numLights);
+        //write num lights of cluster
+        LightCluster& cluster = lightsManager->clusters[i];
+        memcpy(cluster.clusterStart, lightsManager->encodedClusterLights+cluster.numLights*4, 4);
     }
 
      dmBuffer::UpdateContentVersion(lightsManager->textureBuffer);
