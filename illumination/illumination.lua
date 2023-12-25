@@ -319,7 +319,9 @@ function Lights:draw_shadow_debug()
 
 end
 function Lights:draw_data_lights_debug()
+	render.enable_texture(0,illumination.lights_get_texture_handler(), render.BUFFER_COLOR_BIT)
 	render.draw(self.debug_data_lights_predicate)
+	render.disable_texture(0)
 end
 
 function Lights:draw_debug_planes()
@@ -337,12 +339,15 @@ function Lights:draw_begin()
 	if (self.shadow.rt) then
 		render.enable_texture(1, self.shadow.rt, render.BUFFER_COLOR_BIT) -- created in light_and_shadows.init
 	end
+	--print("texture", illumination.lights_get_texture_handler())
+	render.enable_texture(2,illumination.lights_get_texture_handler(), render.BUFFER_COLOR_BIT)
 end
 
 function Lights:draw_finish()
 	if (self.shadow.rt) then
 		render.disable_texture(1)
 	end
+	render.disable_texture(2)
 end
 
 function Lights:set_debug(debug)

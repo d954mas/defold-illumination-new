@@ -116,6 +116,7 @@ static const luaL_reg Module_methods[] = {
     {"lights_set_camera_far", LuaLightsManagerSetCameraFar},
     {"lights_set_camera_aspect", LuaLightsManagerSetCameraAspect},
     {"lights_get_texture_size", LuaLightsManagerGetTextureSize},
+    {"lights_get_texture_handler", LuaLightsManagerGetTextureHandler},
     {"lights_get_max_lights", LuaLightsManagerGetMaxLights},
     {"lights_get_max_radius", LuaLightsManagerGetMaxRadius},
     {"lights_get_borders_x", LuaLightsManagerGetBordersX},

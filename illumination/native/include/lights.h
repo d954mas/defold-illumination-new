@@ -508,6 +508,7 @@ public:
     int textureWidth, textureHeight;
     int textureParamsRef = LUA_NOREF;
     char * textureResourcePath = 0x0;
+    uint64_t textureResourceHandler = 0x0;
     dmhash_t texturePath = HASH_EMPTY;
 
 
@@ -649,6 +650,8 @@ public:
             cluster->clusterStart = clusterValues;
             clusterValues += pixelsPerCluster * stride;
         }
+
+
     }
 private:
     LightsManager(const LightsManager&);
@@ -824,6 +827,7 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         lua_pop(L, 1); // Pop error message
         luaL_error(L, "can't set light texture. %s",error_msg);
     }
+
 }
 
 inline void LightsManagerInitTexture(lua_State* L, LightsManager* lightsManager){
@@ -861,6 +865,20 @@ inline void LightsManagerInitTexture(lua_State* L, LightsManager* lightsManager)
         return;
     }
 
+    lua_getglobal(L, "resource");
+    lua_getfield(L, -1, "get_texture_info");
+    lua_remove(L, -2); // Remove 'resource' table from the stack
+    lua_pushstring(L, lightsManager->textureResourcePath);
+    if (lua_pcall(L, 1, 1, 0) != 0) {
+        const char* error_msg = lua_tostring(L, -1);
+        lua_pop(L, 1); // Pop error message
+        dmLogError("Failed to get texture info for texture: %s", error_msg);
+        return;
+    }
+    lua_getfield(L, -1, "handle");
+    dmLogInfo("handle:%d",luaL_checknumber(L,-1));
+    lightsManager->textureResourceHandler = luaL_checknumber(L,-1);
+    lua_pop(L,2);//remove texture info and handle
 
 
 }
@@ -952,7 +970,6 @@ static int LuaLightsManagerUpdateLights(lua_State* L){
     }
 
     LightsManagerUpdateLights(L,&g_lightsManager);
-
     return 0;
 }
 
@@ -1123,6 +1140,12 @@ static int LuaLightsManagerGetInWorldVisibleCount(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 1);
     check_arg_count(L, 0);
     lua_pushnumber(L,g_lightsManager.debugVisibleLights);
+    return 1;
+}
+static int LuaLightsManagerGetTextureHandler(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 1);
+    check_arg_count(L, 0);
+    lua_pushnumber(L,g_lightsManager.textureResourceHandler);
     return 1;
 }
 
