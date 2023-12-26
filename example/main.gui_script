@@ -47,7 +47,7 @@ function on_input(self, action_id, action)
 	if DIRTYLARRY.checkbox("checkbox_shadow", action_id, action,  self.update_checkbox_shadow).consumed then
 		return true
 	end
-	if DIRTYLARRY.checkbox("checkbox_lights", action_id, action,  self.update_checkbox_lights) then
+	if DIRTYLARRY.checkbox("checkbox_lights", action_id, action,  self.update_checkbox_lights).consumed then
 		return true
 	end
 end

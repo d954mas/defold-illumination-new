@@ -15,10 +15,10 @@ vec2 rand(vec2 co){
     fract(sin(dot(co.yx, vec2(12.9898, 78.233))) * 43758.5453)) * 0.00047;
 }
 
-float shadow_calculation_mobile(vec4 depth_data){
-    vec2 uv = depth_data.xy;
+float shadow_calculation_mobile(highp vec4 depth_data){
+    highp vec2 uv = depth_data.xy;
     // vec4 rgba = texture2D(SHADOW_TEXTURE, uv + rand(uv));
-    vec4 rgba = texture2D(SHADOW_TEXTURE, uv);
+    highp vec4 rgba = texture2D(SHADOW_TEXTURE, uv);
     float depth = rgba_to_float(rgba);
     //float depth = rgba.x;
     //float shadow = depth_data.z - shadow_params. > depth ? 1.0 : 0.0;
@@ -30,14 +30,14 @@ float shadow_calculation_mobile(vec4 depth_data){
     return shadow;
 }
 
-float shadow_calculation(vec4 depth_data){
+float shadow_calculation(highp vec4 depth_data){
     float shadow = 0.0;
     float texel_size = 1.0 / shadow_params.x;//textureSize(tex1, 0);
     for (int x = -1; x <= 1; ++x)
     {
         for (int y = -1; y <= 1; ++y)
         {
-            vec2 uv = depth_data.st + vec2(x,y) * texel_size;
+            highp vec2 uv = depth_data.st + vec2(x,y) * texel_size;
             //vec4 rgba = texture2D(SHADOW_TEXTURE, uv + rand(uv));
             vec4 rgba = texture2D(SHADOW_TEXTURE, uv);
             float depth = rgba_to_float(rgba);

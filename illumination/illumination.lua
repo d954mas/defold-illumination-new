@@ -247,9 +247,7 @@ function Lights:initialize()
 	self.shadow = {
 		-- Size of shadow map. Select value from: 1024/2048/4096. More is better quality.
 		BUFFER_RESOLUTION = 2048,
-		-- Projection resolution of shadow map to the game world. Smaller size is better shadow quality,
-		-- but shadows will cast only around the screen center (or a point that camera looks at).
-		-- This value also depends on camera zoom. Feel free to adjust it.
+		-- MIN AND MAX VALUE FOR PROJECTION
 		PROJECTION_X1 = -15,
 		PROJECTION_X2 = 15,
 		PROJECTION_Y1 = -15,
@@ -277,7 +275,7 @@ function Lights:initialize()
 	}
 
 	self.shadow_params.x = self.shadow.BUFFER_RESOLUTION
-	self.shadow_params.y = 0.0008
+	self.shadow_params.y = 0.008
 
 	---@class LightsData
 	self.lights = {
@@ -310,6 +308,18 @@ function Lights:init(shadow_texture_resource, data_texture_resource)
 	end
 
 	self.data_texture_resource = data_texture_resource
+	self.data_texture_empty_params = {
+		width = 1,
+		height = 1,
+		type = resource.TEXTURE_TYPE_2D,
+		format = resource.TEXTURE_FORMAT_RGBA,
+		num_mip_maps = 1
+	}
+	self.data_texture_empty_buffer = buffer.create(1, { { name = hash("rgba"), type = buffer.VALUE_TYPE_UINT8, count = 4 } })
+	local stream = buffer.get_stream(self.data_texture_empty_buffer, hash("rgba"))
+	stream[1], stream[2], stream[3], stream[4] = 0, 0, 0, 0
+
+
 	illumination.lights_set_texture_path(data_texture_resource)
 
 	self:set_enable_shadows(true)
@@ -337,7 +347,9 @@ function Lights:set_enable_lights(enable)
 end
 
 function Lights:update_lights_texture()
-
+	if not self.enable_lights then
+		resource.set_texture(self.data_texture_resource,self.data_texture_empty_params,self.data_texture_empty_buffer)
+	end
 end
 
 function Lights:draw_debug()
@@ -411,8 +423,7 @@ function Lights:set_render(render_obj)
 
 	self.shadow.light_projection_base = vmath.matrix4_orthographic(-100, 100,
 			-100, 100, self.shadow.NEAR, self.shadow.FAR)
-	self.shadow.light_projection = vmath.matrix4_orthographic(self.shadow.PROJECTION_X1, self.shadow.PROJECTION_X2,
-			self.shadow.PROJECTION_Y1, self.shadow.PROJECTION_Y2, self.shadow.NEAR, self.shadow.FAR)
+	self.shadow.light_projection = vmath.matrix4_orthographic(-100,100,-100,100, self.shadow.NEAR, self.shadow.FAR)
 
 	self.shadow.bias_matrix.c0 = vmath.vector4(0.5, 0.0, 0.0, 0.0)
 	self.shadow.bias_matrix.c1 = vmath.vector4(0.0, 0.5, 0.0, 0.0)
@@ -550,10 +561,15 @@ function Lights:set_camera(x, y, z)
 		if py < min_y then min_y = py end
 		if py > max_y then max_y = py end
 	end
-	min_x = -100 + min_x * 200
-	max_x = -100 + max_x * 200
-	min_y = -100 + min_y * 200
-	max_y = -100 + max_y * 200
+	min_x = math.max(-100 + min_x * 200,self.shadow.PROJECTION_X1)
+	max_x = math.min(-100 + max_x * 200, self.shadow.PROJECTION_X2)
+	min_y = math.min(-100 + min_y * 200, self.shadow.PROJECTION_Y1)
+	max_y = math.max(-100 + max_y * 200, self.shadow.PROJECTION_Y2)
+
+	--min_x = self.shadow.PROJECTION_X1
+	--max_x = self.shadow.PROJECTION_X2
+	--min_y = self.shadow.PROJECTION_Y1
+	--max_y = self.shadow.PROJECTION_Y2
 
 	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y
 
@@ -632,10 +648,16 @@ function Lights:remove_light(light)
 end
 
 function Lights:update_lights()
-	self.clusters_data.z = illumination.lights_get_z_slice_for_shader()
-	for _, constant in ipairs(self.constants) do
-		constant.clusters_data = self.clusters_data
+	if not self.enable_lights then return end
+
+	local new_z = illumination.lights_get_z_slice_for_shader()
+	if self.clusters_data.z ~= new_z then
+		self.clusters_data.z = new_z
+		for _, constant in ipairs(self.constants) do
+			constant.clusters_data = self.clusters_data
+		end
 	end
+
 	illumination.lights_update()
 end
 
