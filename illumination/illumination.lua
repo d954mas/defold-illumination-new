@@ -248,10 +248,7 @@ function Lights:initialize()
 		-- Size of shadow map. Select value from: 1024/2048/4096. More is better quality.
 		BUFFER_RESOLUTION = 2048,
 		-- MIN AND MAX VALUE FOR PROJECTION
-		PROJECTION_X1 = -15,
-		PROJECTION_X2 = 15,
-		PROJECTION_Y1 = -15,
-		PROJECTION_Y2 = 15,
+		SHADOW_MAX_DISTANCE = 10,
 		NEAR = 0.001,
 		FAR = 30,
 
@@ -319,7 +316,6 @@ function Lights:init(shadow_texture_resource, data_texture_resource)
 	local stream = buffer.get_stream(self.data_texture_empty_buffer, hash("rgba"))
 	stream[1], stream[2], stream[3], stream[4] = 0, 0, 0, 0
 
-
 	illumination.lights_set_texture_path(data_texture_resource)
 
 	self:set_enable_shadows(true)
@@ -348,7 +344,7 @@ end
 
 function Lights:update_lights_texture()
 	if not self.enable_lights then
-		resource.set_texture(self.data_texture_resource,self.data_texture_empty_params,self.data_texture_empty_buffer)
+		resource.set_texture(self.data_texture_resource, self.data_texture_empty_params, self.data_texture_empty_buffer)
 	end
 end
 
@@ -421,9 +417,9 @@ function Lights:set_render(render_obj)
 	-- all objects that have to cast shadows
 	self.shadow.pred = render.predicate({ "shadow" })
 
-	self.shadow.light_projection_base = vmath.matrix4_orthographic(-100, 100,
-			-100, 100, self.shadow.NEAR, self.shadow.FAR)
-	self.shadow.light_projection = vmath.matrix4_orthographic(-100,100,-100,100, self.shadow.NEAR, self.shadow.FAR)
+	self.shadow.light_projection_base = vmath.matrix4_orthographic(-1, 1,
+			-1, 1, self.shadow.NEAR, self.shadow.FAR)
+	self.shadow.light_projection = vmath.matrix4_orthographic(-1, 1, -1, 1, self.shadow.NEAR, self.shadow.FAR)
 
 	self.shadow.bias_matrix.c0 = vmath.vector4(0.5, 0.0, 0.0, 0.0)
 	self.shadow.bias_matrix.c1 = vmath.vector4(0.0, 0.5, 0.0, 0.0)
@@ -561,17 +557,20 @@ function Lights:set_camera(x, y, z)
 		if py < min_y then min_y = py end
 		if py > max_y then max_y = py end
 	end
-	min_x = math.max(-100 + min_x * 200,self.shadow.PROJECTION_X1)
-	max_x = math.min(-100 + max_x * 200, self.shadow.PROJECTION_X2)
-	min_y = math.min(-100 + min_y * 200, self.shadow.PROJECTION_Y1)
-	max_y = math.max(-100 + max_y * 200, self.shadow.PROJECTION_Y2)
+
+	min_x = -1 + min_x * 2
+	max_x = -1 + max_x * 2
+	min_y = -1 + min_y * 2
+	max_y = -1 + max_y * 2
+
+	print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
+
 
 	--min_x = self.shadow.PROJECTION_X1
 	--max_x = self.shadow.PROJECTION_X2
 	--min_y = self.shadow.PROJECTION_Y1
 	--max_y = self.shadow.PROJECTION_Y2
 
-	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" ..  max_x - min_x .. " h:" .. max_y - min_y
 
 	xmath.matrix4_orthographic(self.shadow.light_projection, min_x, max_x,
 			min_y, max_y, self.shadow.NEAR, self.shadow.FAR)
