@@ -557,6 +557,32 @@ function Lights:set_camera(x, y, z)
 	end
 
 
+	local frustumWidth = max_x - min_x
+	local frustumHeight = max_y - min_y
+
+	--https://learn.microsoft.com/en-us/windows/win32/dxtecharts/common-techniques-to-improve-shadow-depth-maps?redirectedfrom=MSDN
+	-- fCascadeBound could be the larger of the two dimensions
+	local fCascadeBound = math.max(frustumWidth, frustumHeight)
+	local cx = min_x + frustumWidth * 0.5
+	local cy = min_y + frustumWidth * 0.5
+
+	min_x = cx - fCascadeBound * 0.5
+	max_x = cx + fCascadeBound * 0.5
+
+	min_y = cy - fCascadeBound * 0.5
+	max_y = cy + fCascadeBound * 0.5
+
+	local fWorldUnitsPerTexel = fCascadeBound / self.shadow.BUFFER_RESOLUTION
+
+	--print("shadow uv1:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
+
+	--For directional lights, the solution to this problem is to round the minimum/maximum value in X and Y
+	--(that make up the orthographic projection bounds) to pixel size increments.
+	min_x = math.floor(min_x / fWorldUnitsPerTexel) * fWorldUnitsPerTexel
+	max_x = math.floor(max_x / fWorldUnitsPerTexel) * fWorldUnitsPerTexel
+	min_y = math.floor(min_y / fWorldUnitsPerTexel) * fWorldUnitsPerTexel
+	max_y = math.floor(max_y / fWorldUnitsPerTexel) * fWorldUnitsPerTexel
+
 
 	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
 
