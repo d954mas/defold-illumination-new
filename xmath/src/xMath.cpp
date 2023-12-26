@@ -483,6 +483,17 @@ static int xMath_matrix_inv(lua_State* L)
     return 0;
 }
 
+static int xMath_matrix_from_matrix(lua_State* L)
+{
+    if (dmScript::IsMatrix4(L, 1))
+    {
+        Vectormath::Aos::Matrix4 *out = dmScript::CheckMatrix4(L, 1);
+        Vectormath::Aos::Matrix4 *in = dmScript::CheckMatrix4(L, 2);
+        *out = *in;
+    }
+    return 0;
+}
+
 static int xMath_matrix_look_at(lua_State* L)
 {
     if (dmScript::IsMatrix4(L, 1))
@@ -633,6 +644,7 @@ static const luaL_reg xMathModule_methods[] =
     {"matrix_from_quat", xMath_matrix_from_quat},
     {"matrix_frustum", xMath_matrix_frustum},
     {"matrix_inv", xMath_matrix_inv},
+    {"matrix_from_matrix", xMath_matrix_from_matrix},
     {"matrix_look_at", xMath_matrix_look_at},
     {"matrix4_orthographic", xMath_matrix_orthographic},
     {"matrix_ortho_inv", xMath_matrix_ortho_inv},

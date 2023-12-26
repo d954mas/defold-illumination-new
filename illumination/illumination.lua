@@ -249,9 +249,15 @@ function Lights:initialize()
 		BUFFER_RESOLUTION = 2048,
 		NEAR = 0.001,
 		FAR = 30,
+		--add some value to project.Avoid light_matrix recreation.
+		--This is needed to avoid shadow artifacts when move camert
 
+		INCREASED_PROJECTION = 3,
 		pred = nil,
 		light_projection = nil,
+		--do not change light_projection every frame. Only change projection
+		--if new bounds is bigger than old bounds
+		light_projection_bounds = vmath.vector4(0, 0, 0, 0),
 		light_projection_base = nil,
 		bias_matrix = vmath.matrix4(),
 		light_matrix = vmath.matrix4(),
@@ -534,9 +540,12 @@ function Lights:set_camera(x, y, z)
 	xmath.cross(VIEW_UP, VIEW_RIGHT, VIEW_DIRECTION)
 	xmath.normalize(VIEW_UP, VIEW_UP)
 
-	xmath.matrix_look_at(self.shadow.light_transform, self.shadow.light_position, self.shadow.root_position, VIEW_UP)
+	local matrix_old = vmath.matrix4(self.shadow.light_matrix)
+
+	local transform = vmath.matrix4()
+	xmath.matrix_look_at(transform, self.shadow.light_position, self.shadow.root_position, VIEW_UP)
 	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.bias_matrix, self.shadow.light_projection_base)
-	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, self.shadow.light_transform)
+	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, transform)
 
 	for idx, point in ipairs(POINTS_CUBE) do
 		local result = POINTS_CUBE_RESULT[idx]
@@ -556,15 +565,24 @@ function Lights:set_camera(x, y, z)
 		if py > max_y then max_y = py end
 	end
 
+	if min_x < self.shadow.light_projection_bounds.x or max_x > self.shadow.light_projection_bounds.y
+			or min_y < self.shadow.light_projection_bounds.z or max_y > self.shadow.light_projection_bounds.w then
+		--print("old shadow uv:x[" .. self.shadow.light_projection_bounds.x .. " " .. self.shadow.light_projection_bounds.y .. "] y[" .. self.shadow.light_projection_bounds.z .. " " .. self.shadow.light_projection_bounds.w .. "] w:" .. self.shadow.light_projection_bounds.y - self.shadow.light_projection_bounds.x .. " h:" .. self.shadow.light_projection_bounds.w - self.shadow.light_projection_bounds.z)
+		--print("shadow uv new:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
+		xmath.matrix_from_matrix(self.shadow.light_transform, transform)
+	else
+		self.shadow.light_matrix = matrix_old
+		return
+	end
 
 	local frustumWidth = max_x - min_x
 	local frustumHeight = max_y - min_y
 
 	--https://learn.microsoft.com/en-us/windows/win32/dxtecharts/common-techniques-to-improve-shadow-depth-maps?redirectedfrom=MSDN
 	-- fCascadeBound could be the larger of the two dimensions
-	local fCascadeBound = math.max(frustumWidth, frustumHeight)
+	local fCascadeBound = math.max(frustumWidth, frustumHeight) + self.shadow.INCREASED_PROJECTION --create bigger shadow to avoid recreation
 	local cx = min_x + frustumWidth * 0.5
-	local cy = min_y + frustumWidth * 0.5
+	local cy = min_y + frustumHeight * 0.5
 
 	min_x = cx - fCascadeBound * 0.5
 	max_x = cx + fCascadeBound * 0.5
@@ -583,9 +601,12 @@ function Lights:set_camera(x, y, z)
 	min_y = math.floor(min_y / fWorldUnitsPerTexel) * fWorldUnitsPerTexel
 	max_y = math.floor(max_y / fWorldUnitsPerTexel) * fWorldUnitsPerTexel
 
+	self.shadow.light_projection_bounds.x = min_x
+	self.shadow.light_projection_bounds.y = max_x
+	self.shadow.light_projection_bounds.z = min_y
+	self.shadow.light_projection_bounds.w = max_y
 
-
-	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
+	--print("shadow uv increased:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
 
 
 	--min_x = -10
@@ -611,10 +632,10 @@ function Lights:set_camera(x, y, z)
 
 
 	-- Step 1: Transform a fixed world space point to texture space
-	local fixedPoint = vmath.vector4(0,0,0,1)  -- Example: using the origin
-	local shadow_point = self.shadow.light_matrix*fixedPoint
+	local fixedPoint = vmath.vector4(0, 0, 0, 1)  -- Example: using the origin
+	local shadow_point = self.shadow.light_matrix * fixedPoint
 	-- Step 2:  finding its offset from the center of a texel in shadow map space (where the texture sample round to)
-	local texelSize = 1/self.shadow.BUFFER_RESOLUTION
+	local texelSize = 1 / self.shadow.BUFFER_RESOLUTION
 
 	local shadow_point_x = shadow_point.x / shadow_point.w
 	local shadow_point_y = shadow_point.y / shadow_point.w
@@ -629,15 +650,15 @@ function Lights:set_camera(x, y, z)
 	local offsetY = nearestTexelCenterY - shadow_point_y
 
 	-- Step 3: add offset to matrix
-	self.shadow.light_matrix.m03=self.shadow.light_matrix.m03+offsetX
-	self.shadow.light_matrix.m13=self.shadow.light_matrix.m13+offsetY
+	self.shadow.light_matrix.m03 = self.shadow.light_matrix.m03 + offsetX
+	self.shadow.light_matrix.m13 = self.shadow.light_matrix.m13 + offsetY
 
 
 
 
 
 	-- The offsetX and offsetY represent how far the point is from the center of its texel
---]]
+	--]]
 
 
 	--local mtx_light = self.shadow.bias_matrix * self.shadow.light_projection * self.shadow.light_transform

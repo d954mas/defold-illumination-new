@@ -58,7 +58,7 @@ function init(self)
 			ambient_color = vmath.vector3(0.5, 0.5, 1.0),
 			ambient_level = 0.1,
 			fog_color = vmath.vector3(0, 0, 0.1),
-			duration = 10
+			duration = 10--, duration = math.huge
 		}, {
 			sunlight_direction = vmath.vector3(-70, 90, 0),
 			sunlight_color = vmath.vector3(1, 1, 1),
@@ -66,7 +66,7 @@ function init(self)
 			ambient_color = vmath.vector3(1, 1, 1),
 			ambient_level = 0.3,
 			fog_color = vmath.vector3(0.53, 0.8, 0.92),
-			duration = 15
+			duration = 15--, duration = math.huge
 		}, {
 			sunlight_direction = vmath.vector3(0, 20, 0),
 			sunlight_color = vmath.vector3(0.5, 0.2, 0),
@@ -74,7 +74,7 @@ function init(self)
 			ambient_color = vmath.vector3(0.5, 0.2, 0),
 			ambient_level = 0.1,
 			fog_color = vmath.vector3(0.3, 0.2, 0),
-			duration = 10
+			duration = 10, duration = math.huge
 		}, {
 			sunlight_direction = vmath.vector3(0, 20, 0),
 			sunlight_color = vmath.vector3(0.318, 0.261, 0.413),
