@@ -32,7 +32,10 @@ end
 -- Lifecycle
 
 function init(self)
-	illumination:init()
+	local data_url = msg.url("/illumination#illumination_textures")
+	local texture_shadow_path = go.get(data_url, "shadow_texture")
+	local texture_lights_path = go.get(data_url, "data_texture")
+	illumination:init(texture_shadow_path,texture_lights_path)
 
 	self.urls = {
 		go = msg.url('.'),

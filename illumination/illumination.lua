@@ -268,7 +268,9 @@ function Lights:initialize()
 	}
 end
 
-function Lights:init()
+function Lights:init(shadow_texture_resource, data_texture_resource)
+	assert(shadow_texture_resource)
+	assert(data_texture_resource)
 	self.light_texture_data.x, self.light_texture_data.y = illumination.lights_get_texture_size()
 
 	self.lights_data.x = illumination.lights_get_max_lights()
@@ -292,9 +294,7 @@ function Lights:init()
 	end
 
 
-	local data_url = msg.url("/illumination#data")
-	local texture_path = go.get(data_url, "texture0")
-	illumination.lights_set_texture_path(texture_path)
+	illumination.lights_set_texture_path(data_texture_resource)
 end
 
 function Lights:on_resize(w, h)

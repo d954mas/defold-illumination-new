@@ -1,0 +1,2 @@
+go.property("shadow_texture", resource.texture("/illumination/textures/shadow.png"))
+go.property("data_texture", resource.texture("/illumination/textures/data.png"))
