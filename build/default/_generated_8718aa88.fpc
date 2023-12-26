@@ -1,0 +1,1028 @@
+
+‹H◊H#version 140
+#ifndef GL_ES
+#define lowp
+#define mediump
+#define highp
+#endif
+
+
+out vec4 _DMENGINE_GENERATED_gl_FragColor_0;
+uniform lowp sampler2D DIFFUSE_TEXTURE;
+
+
+#ifndef shadow_fp
+#define shadow_fp
+
+#ifndef float_rgba_utils
+#define float_rgba_utils
+
+vec4 float_to_rgba(float v){
+    vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+    enc      = fract(enc);
+    enc     -= enc.yzww * vec4(1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0);
+    return enc;
+}
+
+highp float rgba_to_float(highp vec4 rgba){
+    return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+}
+
+#endif
+
+uniform lowp vec4 shadow_params; 
+uniform lowp vec4 shadow_color;
+uniform highp vec4 sun_position; 
+uniform highp sampler2D SHADOW_TEXTURE;
+
+in highp vec4 var_texcoord0_shadow;
+
+vec2 rand(vec2 co){
+    return vec2(fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453),
+    fract(sin(dot(co.yx, vec2(12.9898, 78.233))) * 43758.5453)) * 0.00047;
+}
+
+float shadow_calculation_mobile(highp vec4 depth_data){
+    highp vec2 uv = depth_data.xy;
+    
+    highp vec4 rgba = texture(SHADOW_TEXTURE, uv);
+    float depth = rgba_to_float(rgba);
+    
+    
+    
+    float shadow = 1.0 - step(depth_data.z-shadow_params.y,depth);
+
+    if (uv.x<0.0 || uv.x>1.0 || uv.y<0.0 || uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+float shadow_calculation(highp vec4 depth_data){
+    float shadow = 0.0;
+    float texel_size = 1.0 / shadow_params.x;
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            highp vec2 uv = depth_data.st + vec2(x,y) * texel_size;
+            
+            vec4 rgba = texture(SHADOW_TEXTURE, uv);
+            float depth = rgba_to_float(rgba);
+            
+            shadow += depth_data.z - shadow_params.y > depth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+
+    highp vec2 uv = depth_data.xy;
+    if (uv.x<0.0) shadow = 0.0;
+    if (uv.x>1.0) shadow = 0.0;
+    if (uv.y<0.0) shadow = 0.0;
+    if (uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+
+vec3 direct_light(vec3 light_color, vec3 light_position, vec3 position, vec3 vnormal, vec3 shadow_color){
+    vec3 dist = vec3(-5,10,0);
+    vec3 direction = normalize(dist);
+    float n = max(dot(vnormal, direction), 0.0);
+    vec3 diffuse = (light_color - shadow_color) * n;
+    return diffuse;
+}
+
+#endif
+#ifndef light_fp
+#define light_fp
+
+#define LIGHT_DATA_PIXELS 6
+
+
+
+
+
+
+
+
+
+
+
+
+
+uniform highp sampler2D DATA_TEXTURE;
+
+uniform lowp vec4 ambient_color;
+uniform lowp vec4 sunlight_color;
+uniform lowp vec4 fog_color;
+uniform highp vec4 fog;
+
+uniform highp vec4 light_texture_data;
+uniform highp vec4 lights_data; 
+uniform highp vec4 lights_data2; 
+uniform highp vec4 clusters_data; 
+uniform highp vec4 screen_size;
+
+highp vec4 getData(highp int index) {
+    
+    int x = index % int(light_texture_data.x);
+    int y = index / int(light_texture_data.x);
+
+    
+    vec2 normalizedCoords = (vec2(x, y) + 0.5) / light_texture_data.xy;
+
+    
+    return texture(DATA_TEXTURE, normalizedCoords);
+}
+
+const float phong_shininess = 16.0;
+
+vec3 point_light2(vec3 light_color, float power, vec3 light_position, vec3 position, vec3 vnormal, float specular, vec3 view_dir)
+{
+
+    vec3 dist = light_position - position;
+    vec3 direction = vec3(normalize(dist));
+    float d = length(dist);
+
+    vec3 reflect_dir = reflect(-direction, vnormal);
+    float spec_dot = max(dot(reflect_dir, view_dir), 0.0);
+
+    float irradiance = max(dot(vnormal, direction), 0.05);
+    float attenuation = (1.0/(1.0 + d*power + 2.0*d*d*power*power));
+    vec3 diffuse = light_color * irradiance * attenuation;
+
+    
+    diffuse += irradiance * attenuation * specular * pow(spec_dot, phong_shininess) * light_color; 
+    
+    return diffuse;
+}
+
+vec3 getSpecularColor(vec3 map_specular, float light_specular, vec3 light_color, vec3 light_direction, vec3 surface_normal, vec3 view_direction) {
+    if (light_specular == 0.0 || map_specular.x == 0.0) {
+        return vec3(0.0);
+    }
+
+    float lambertian = max(dot(light_direction, surface_normal), 0.0);
+
+    if (lambertian <= 0.0) {
+        return vec3(0.0);
+    }
+
+    float surface_shininess = 1.0;
+
+    vec3 reflection_direction = reflect(-light_direction, surface_normal);
+    float specular_value = pow(max(dot(view_direction, reflection_direction), 0.0), surface_shininess);
+
+    return light_color * light_specular * specular_value;
+}
+
+
+
+#endif
+
+
+in mediump vec2 var_texcoord0;
+in highp vec3 var_world_position;
+in mediump vec3 var_world_normal;
+in highp vec4 var_view_position;
+in highp vec3 var_camera_position;
+
+void main() {
+    vec4 texture_color = texture(DIFFUSE_TEXTURE, var_texcoord0);
+    vec3 color = texture_color.rgb;
+    
+    
+    
+    
+    
+
+    
+    vec3 illuminance_color = vec3(0);
+    vec3 specular_color = vec3(0);
+
+    vec3 surface_normal = var_world_normal;
+    vec3 view_direction = normalize(var_camera_position - var_world_position);
+
+    
+    vec3 ambient = ambient_color.rgb * ambient_color.w;
+    illuminance_color = illuminance_color + ambient;
+
+    float axis_x = lights_data.w-lights_data.z;
+    float axis_y = lights_data2.y-lights_data2.x;
+    float axis_z = lights_data2.w-lights_data2.z;
+
+
+    highp float xStride = screen_size.x/clusters_data.x;
+    highp float yStride = screen_size.y/clusters_data.y;
+    highp float zStride = clusters_data.z;
+
+
+    int clusterX_index = int(floor(gl_FragCoord.x/ xStride));
+    int clusterY_index = int(floor(gl_FragCoord.y/ yStride));
+    int clusterZ_index = int(floor(-var_view_position.z) / zStride);
+
+
+
+    float clusterID = round(float(clusterX_index) +
+    float(clusterY_index) * clusters_data.x +
+    float(clusterZ_index) * clusters_data.x * clusters_data.y);
+
+    highp int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
+    int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w));
+
+    for (int i = 0; i < num_lights; ++i) {
+        highp int light_tex_idx = cluster_tex_idx +1 + i;
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x));
+        
+       
+         
+       
+      
+        
+        
+       
+        
+          
+            
+        
+
+        highp int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
+        float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
+        float y = lights_data2.x + rgba_to_float(getData(lightIndex+1))*axis_y;
+        float z = lights_data2.z + rgba_to_float(getData(lightIndex+2))*axis_z;
+        
+        vec4 lightColorData = getData(lightIndex+4);
+        vec4 lightData = getData(lightIndex+5);
+
+        vec3 lightPosition = vec3(x, y, z);
+        float lightRadius = lightData.x*lights_data.y;
+        float lightSmoothness = lightData.y;
+        float lightSpecular = lightData.z;
+        float lightCutoff = lightData.w;
+
+
+        float lightDistance = length(lightPosition - var_world_position);
+        if (lightDistance > lightRadius) {
+            
+            continue;
+        }
+
+        vec3 lightColor = lightColorData.rgb* lightColorData.a;
+        vec3 lightDirection = normalize(lightPosition - var_world_position);
+        vec3 lightIlluminanceColor = point_light2(lightColor.rgb, lightSmoothness, lightPosition, var_world_position, var_world_normal
+        , lightSpecular, view_direction);
+
+
+
+        if (lightCutoff < 1.0) {
+            vec3 spotDirection = getData(lightIndex+3).xyz* 2.0 - vec3(1.0);
+            float spot_theta = dot(lightDirection, normalize(spotDirection));
+
+            float spot_cutoff = lightCutoff * 2.0 - 1.0;
+
+            if (spot_theta <= spot_cutoff) {
+                continue;
+            }
+
+            if (lightSmoothness > 0.0) {
+                float spot_cutoff_inner = (spot_cutoff + 1.0) * (1.0 - lightSmoothness) - 1.0;
+                float spot_epsilon = spot_cutoff_inner - spot_cutoff;
+                float spot_intensity = clamp((spot_cutoff - spot_theta) / spot_epsilon, 0.0, 1.0);
+
+                lightIlluminanceColor = lightIlluminanceColor * spot_intensity;;
+            }
+        }
+
+        illuminance_color = illuminance_color + lightIlluminanceColor;
+
+        
+    }
+
+
+    
+    
+    vec4 depth_proj = var_texcoord0_shadow / var_texcoord0_shadow.w;
+    float shadow = shadow_calculation(depth_proj.xyzw);
+    vec3 shadow_color = shadow_color.xyz*shadow_color.w*(sunlight_color.w) * shadow;
+
+    vec3 diff_light = vec3(0);
+    diff_light += max(direct_light(sunlight_color.rgb, sun_position.xyz, var_world_position.xyz, var_world_normal, shadow_color)*sunlight_color.w, 0.0);
+    diff_light += vec3(illuminance_color.xyz);
+
+    color.rgb = color.rgb * (min(diff_light, 1.0));
+
+    
+    float dist = abs(var_view_position.z);
+    float fog_max = fog.y;
+    float fog_min = fog.x;
+    float fog_factor = clamp((fog_max - dist) / (fog_max - fog_min) + fog_color.a, 0.0, 1.0);
+    color = mix(fog_color.rgb, color, fog_factor);
+
+
+    _DMENGINE_GENERATED_gl_FragColor_0 = vec4(color, texture_color.a);
+
+    
+  
+   
+    
+}
+
+±H¨H#version 300 es
+precision mediump float;
+
+out vec4 _DMENGINE_GENERATED_gl_FragColor_0;
+uniform lowp sampler2D DIFFUSE_TEXTURE;
+
+
+#ifndef shadow_fp
+#define shadow_fp
+
+#ifndef float_rgba_utils
+#define float_rgba_utils
+
+vec4 float_to_rgba(float v){
+    vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+    enc      = fract(enc);
+    enc     -= enc.yzww * vec4(1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0);
+    return enc;
+}
+
+highp float rgba_to_float(highp vec4 rgba){
+    return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+}
+
+#endif
+
+uniform lowp vec4 shadow_params; 
+uniform lowp vec4 shadow_color;
+uniform highp vec4 sun_position; 
+uniform highp sampler2D SHADOW_TEXTURE;
+
+in highp vec4 var_texcoord0_shadow;
+
+vec2 rand(vec2 co){
+    return vec2(fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453),
+    fract(sin(dot(co.yx, vec2(12.9898, 78.233))) * 43758.5453)) * 0.00047;
+}
+
+float shadow_calculation_mobile(highp vec4 depth_data){
+    highp vec2 uv = depth_data.xy;
+    
+    highp vec4 rgba = texture(SHADOW_TEXTURE, uv);
+    float depth = rgba_to_float(rgba);
+    
+    
+    
+    float shadow = 1.0 - step(depth_data.z-shadow_params.y,depth);
+
+    if (uv.x<0.0 || uv.x>1.0 || uv.y<0.0 || uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+float shadow_calculation(highp vec4 depth_data){
+    float shadow = 0.0;
+    float texel_size = 1.0 / shadow_params.x;
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            highp vec2 uv = depth_data.st + vec2(x,y) * texel_size;
+            
+            vec4 rgba = texture(SHADOW_TEXTURE, uv);
+            float depth = rgba_to_float(rgba);
+            
+            shadow += depth_data.z - shadow_params.y > depth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+
+    highp vec2 uv = depth_data.xy;
+    if (uv.x<0.0) shadow = 0.0;
+    if (uv.x>1.0) shadow = 0.0;
+    if (uv.y<0.0) shadow = 0.0;
+    if (uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+
+vec3 direct_light(vec3 light_color, vec3 light_position, vec3 position, vec3 vnormal, vec3 shadow_color){
+    vec3 dist = vec3(-5,10,0);
+    vec3 direction = normalize(dist);
+    float n = max(dot(vnormal, direction), 0.0);
+    vec3 diffuse = (light_color - shadow_color) * n;
+    return diffuse;
+}
+
+#endif
+#ifndef light_fp
+#define light_fp
+
+#define LIGHT_DATA_PIXELS 6
+
+
+
+
+
+
+
+
+
+
+
+
+
+uniform highp sampler2D DATA_TEXTURE;
+
+uniform lowp vec4 ambient_color;
+uniform lowp vec4 sunlight_color;
+uniform lowp vec4 fog_color;
+uniform highp vec4 fog;
+
+uniform highp vec4 light_texture_data;
+uniform highp vec4 lights_data; 
+uniform highp vec4 lights_data2; 
+uniform highp vec4 clusters_data; 
+uniform highp vec4 screen_size;
+
+highp vec4 getData(highp int index) {
+    
+    int x = index % int(light_texture_data.x);
+    int y = index / int(light_texture_data.x);
+
+    
+    vec2 normalizedCoords = (vec2(x, y) + 0.5) / light_texture_data.xy;
+
+    
+    return texture(DATA_TEXTURE, normalizedCoords);
+}
+
+const float phong_shininess = 16.0;
+
+vec3 point_light2(vec3 light_color, float power, vec3 light_position, vec3 position, vec3 vnormal, float specular, vec3 view_dir)
+{
+
+    vec3 dist = light_position - position;
+    vec3 direction = vec3(normalize(dist));
+    float d = length(dist);
+
+    vec3 reflect_dir = reflect(-direction, vnormal);
+    float spec_dot = max(dot(reflect_dir, view_dir), 0.0);
+
+    float irradiance = max(dot(vnormal, direction), 0.05);
+    float attenuation = (1.0/(1.0 + d*power + 2.0*d*d*power*power));
+    vec3 diffuse = light_color * irradiance * attenuation;
+
+    
+    diffuse += irradiance * attenuation * specular * pow(spec_dot, phong_shininess) * light_color; 
+    
+    return diffuse;
+}
+
+vec3 getSpecularColor(vec3 map_specular, float light_specular, vec3 light_color, vec3 light_direction, vec3 surface_normal, vec3 view_direction) {
+    if (light_specular == 0.0 || map_specular.x == 0.0) {
+        return vec3(0.0);
+    }
+
+    float lambertian = max(dot(light_direction, surface_normal), 0.0);
+
+    if (lambertian <= 0.0) {
+        return vec3(0.0);
+    }
+
+    float surface_shininess = 1.0;
+
+    vec3 reflection_direction = reflect(-light_direction, surface_normal);
+    float specular_value = pow(max(dot(view_direction, reflection_direction), 0.0), surface_shininess);
+
+    return light_color * light_specular * specular_value;
+}
+
+
+
+#endif
+
+
+in mediump vec2 var_texcoord0;
+in highp vec3 var_world_position;
+in mediump vec3 var_world_normal;
+in highp vec4 var_view_position;
+in highp vec3 var_camera_position;
+
+void main() {
+    vec4 texture_color = texture(DIFFUSE_TEXTURE, var_texcoord0);
+    vec3 color = texture_color.rgb;
+    
+    
+    
+    
+    
+
+    
+    vec3 illuminance_color = vec3(0);
+    vec3 specular_color = vec3(0);
+
+    vec3 surface_normal = var_world_normal;
+    vec3 view_direction = normalize(var_camera_position - var_world_position);
+
+    
+    vec3 ambient = ambient_color.rgb * ambient_color.w;
+    illuminance_color = illuminance_color + ambient;
+
+    float axis_x = lights_data.w-lights_data.z;
+    float axis_y = lights_data2.y-lights_data2.x;
+    float axis_z = lights_data2.w-lights_data2.z;
+
+
+    highp float xStride = screen_size.x/clusters_data.x;
+    highp float yStride = screen_size.y/clusters_data.y;
+    highp float zStride = clusters_data.z;
+
+
+    int clusterX_index = int(floor(gl_FragCoord.x/ xStride));
+    int clusterY_index = int(floor(gl_FragCoord.y/ yStride));
+    int clusterZ_index = int(floor(-var_view_position.z) / zStride);
+
+
+
+    float clusterID = round(float(clusterX_index) +
+    float(clusterY_index) * clusters_data.x +
+    float(clusterZ_index) * clusters_data.x * clusters_data.y);
+
+    highp int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
+    int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w));
+
+    for (int i = 0; i < num_lights; ++i) {
+        highp int light_tex_idx = cluster_tex_idx +1 + i;
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x));
+        
+       
+         
+       
+      
+        
+        
+       
+        
+          
+            
+        
+
+        highp int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
+        float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
+        float y = lights_data2.x + rgba_to_float(getData(lightIndex+1))*axis_y;
+        float z = lights_data2.z + rgba_to_float(getData(lightIndex+2))*axis_z;
+        
+        vec4 lightColorData = getData(lightIndex+4);
+        vec4 lightData = getData(lightIndex+5);
+
+        vec3 lightPosition = vec3(x, y, z);
+        float lightRadius = lightData.x*lights_data.y;
+        float lightSmoothness = lightData.y;
+        float lightSpecular = lightData.z;
+        float lightCutoff = lightData.w;
+
+
+        float lightDistance = length(lightPosition - var_world_position);
+        if (lightDistance > lightRadius) {
+            
+            continue;
+        }
+
+        vec3 lightColor = lightColorData.rgb* lightColorData.a;
+        vec3 lightDirection = normalize(lightPosition - var_world_position);
+        vec3 lightIlluminanceColor = point_light2(lightColor.rgb, lightSmoothness, lightPosition, var_world_position, var_world_normal
+        , lightSpecular, view_direction);
+
+
+
+        if (lightCutoff < 1.0) {
+            vec3 spotDirection = getData(lightIndex+3).xyz* 2.0 - vec3(1.0);
+            float spot_theta = dot(lightDirection, normalize(spotDirection));
+
+            float spot_cutoff = lightCutoff * 2.0 - 1.0;
+
+            if (spot_theta <= spot_cutoff) {
+                continue;
+            }
+
+            if (lightSmoothness > 0.0) {
+                float spot_cutoff_inner = (spot_cutoff + 1.0) * (1.0 - lightSmoothness) - 1.0;
+                float spot_epsilon = spot_cutoff_inner - spot_cutoff;
+                float spot_intensity = clamp((spot_cutoff - spot_theta) / spot_epsilon, 0.0, 1.0);
+
+                lightIlluminanceColor = lightIlluminanceColor * spot_intensity;;
+            }
+        }
+
+        illuminance_color = illuminance_color + lightIlluminanceColor;
+
+        
+    }
+
+
+    
+    
+    vec4 depth_proj = var_texcoord0_shadow / var_texcoord0_shadow.w;
+    float shadow = shadow_calculation(depth_proj.xyzw);
+    vec3 shadow_color = shadow_color.xyz*shadow_color.w*(sunlight_color.w) * shadow;
+
+    vec3 diff_light = vec3(0);
+    diff_light += max(direct_light(sunlight_color.rgb, sun_position.xyz, var_world_position.xyz, var_world_normal, shadow_color)*sunlight_color.w, 0.0);
+    diff_light += vec3(illuminance_color.xyz);
+
+    color.rgb = color.rgb * (min(diff_light, 1.0));
+
+    
+    float dist = abs(var_view_position.z);
+    float fog_max = fog.y;
+    float fog_min = fog.x;
+    float fog_factor = clamp((fog_max - dist) / (fog_max - fog_min) + fog_color.a, 0.0, 1.0);
+    color = mix(fog_color.rgb, color, fog_factor);
+
+
+    _DMENGINE_GENERATED_gl_FragColor_0 = vec4(color, texture_color.a);
+
+    
+  
+   
+    
+}
+
+≈S¿Sprecision mediump float;
+uniform lowp sampler2D DIFFUSE_TEXTURE;
+
+
+#ifndef shadow_fp
+#define shadow_fp
+
+#ifndef float_rgba_utils
+#define float_rgba_utils
+
+vec4 float_to_rgba(float v){
+    vec4 enc = vec4(1.0, 255.0, 65025.0, 16581375.0) * v;
+    enc      = fract(enc);
+    enc     -= enc.yzww * vec4(1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0);
+    return enc;
+}
+
+highp float rgba_to_float(highp vec4 rgba){
+    return dot(rgba, vec4(1.0, 1.0/255.0, 1.0/65025.0, 1.0/16581375.0));
+}
+
+#endif
+
+uniform lowp vec4 shadow_params; //x is texture size y depth_bias
+uniform lowp vec4 shadow_color;
+uniform highp vec4 sun_position; //sun light position
+uniform highp sampler2D SHADOW_TEXTURE;
+
+varying highp vec4 var_texcoord0_shadow;
+
+vec2 rand(vec2 co){
+    return vec2(fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453),
+    fract(sin(dot(co.yx, vec2(12.9898, 78.233))) * 43758.5453)) * 0.00047;
+}
+
+float shadow_calculation_mobile(highp vec4 depth_data){
+    highp vec2 uv = depth_data.xy;
+    // vec4 rgba = texture2D(SHADOW_TEXTURE, uv + rand(uv));
+    highp vec4 rgba = texture2D(SHADOW_TEXTURE, uv);
+    float depth = rgba_to_float(rgba);
+    //float depth = rgba.x;
+    //float shadow = depth_data.z - shadow_params. > depth ? 1.0 : 0.0;
+    //float shadow = step(depth,depth_data.z-shadow_params.);
+    float shadow = 1.0 - step(depth_data.z-shadow_params.y,depth);
+
+    if (uv.x<0.0 || uv.x>1.0 || uv.y<0.0 || uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+float shadow_calculation(highp vec4 depth_data){
+    float shadow = 0.0;
+    float texel_size = 1.0 / shadow_params.x;//textureSize(tex1, 0);
+    for (int x = -1; x <= 1; ++x)
+    {
+        for (int y = -1; y <= 1; ++y)
+        {
+            highp vec2 uv = depth_data.st + vec2(x,y) * texel_size;
+            //vec4 rgba = texture2D(SHADOW_TEXTURE, uv + rand(uv));
+            vec4 rgba = texture2D(SHADOW_TEXTURE, uv);
+            float depth = rgba_to_float(rgba);
+            
+            shadow += depth_data.z - shadow_params.y > depth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= 9.0;
+
+    highp vec2 uv = depth_data.xy;
+    if (uv.x<0.0) shadow = 0.0;
+    if (uv.x>1.0) shadow = 0.0;
+    if (uv.y<0.0) shadow = 0.0;
+    if (uv.y>1.0) shadow = 0.0;
+
+    return shadow;
+}
+
+// SUN! DIRECT LIGHT
+vec3 direct_light(vec3 light_color, vec3 light_position, vec3 position, vec3 vnormal, vec3 shadow_color){
+    vec3 dist = vec3(-5,10,0);
+    vec3 direction = normalize(dist);
+    float n = max(dot(vnormal, direction), 0.0);
+    vec3 diffuse = (light_color - shadow_color) * n;
+    return diffuse;
+}
+
+#endif
+#ifndef light_fp
+#define light_fp
+
+#define LIGHT_DATA_PIXELS 6
+/*
+LIGHT DATA 6 pixels
+position.x -> rgba
+position.y -> rgba
+position.z -> rgba
+
+direction.xyz -> rgb (a not used)
+color.xyzw -> rgba()
+
+radius, smoothnes, specular, cutoff -> rgba()
+
+*/
+
+uniform highp sampler2D DATA_TEXTURE;
+
+uniform lowp vec4 ambient_color;
+uniform lowp vec4 sunlight_color;
+uniform lowp vec4 fog_color;
+uniform highp vec4 fog;
+
+uniform highp vec4 light_texture_data;
+uniform highp vec4 lights_data; //lights count,radius_max,x_min,xmax
+uniform highp vec4 lights_data2; //y_min,y_max,z_min,z_max
+uniform highp vec4 clusters_data; //x_slice, y_slice, z_slice, max_lights_per_cluster
+uniform highp vec4 screen_size;
+
+highp vec4 getData(highp int index) {
+    // Convert linear index to 2D pixel coordinates
+    int x = index % int(light_texture_data.x);
+    int y = index / int(light_texture_data.x);
+
+    // Convert pixel coordinates to normalized coordinates
+    vec2 normalizedCoords = (vec2(x, y) + 0.5) / light_texture_data.xy;
+
+    // Sample the texture at the normalized coordinates
+    return texture2D(DATA_TEXTURE, normalizedCoords);
+}
+
+const float phong_shininess = 16.0;
+// const vec3 specular_color = vec3(1.0);
+vec3 point_light2(vec3 light_color, float power, vec3 light_position, vec3 position, vec3 vnormal, float specular, vec3 view_dir)
+{
+
+    vec3 dist = light_position - position;
+    vec3 direction = vec3(normalize(dist));
+    float d = length(dist);
+
+    vec3 reflect_dir = reflect(-direction, vnormal);
+    float spec_dot = max(dot(reflect_dir, view_dir), 0.0);
+
+    float irradiance = max(dot(vnormal, direction), 0.05);
+    float attenuation = (1.0/(1.0 + d*power + 2.0*d*d*power*power));
+    vec3 diffuse = light_color * irradiance * attenuation;
+
+    // if (irradiance > 0.0) {
+    diffuse += irradiance * attenuation * specular * pow(spec_dot, phong_shininess) * light_color; // *specular_color
+    // }
+    return diffuse;
+}
+
+vec3 getSpecularColor(vec3 map_specular, float light_specular, vec3 light_color, vec3 light_direction, vec3 surface_normal, vec3 view_direction) {
+    if (light_specular == 0.0 || map_specular.x == 0.0) {
+        return vec3(0.0);
+    }
+
+    float lambertian = max(dot(light_direction, surface_normal), 0.0);
+
+    if (lambertian <= 0.0) {
+        return vec3(0.0);
+    }
+
+    float surface_shininess = 1.0;
+
+    vec3 reflection_direction = reflect(-light_direction, surface_normal);
+    float specular_value = pow(max(dot(view_direction, reflection_direction), 0.0), surface_shininess);
+
+    return light_color * light_specular * specular_value;
+}
+
+
+
+#endif
+
+
+varying mediump vec2 var_texcoord0;
+varying highp vec3 var_world_position;
+varying mediump vec3 var_world_normal;
+varying highp vec4 var_view_position;
+varying highp vec3 var_camera_position;
+
+void main() {
+    vec4 texture_color = texture2D(DIFFUSE_TEXTURE, var_texcoord0);
+    vec3 color = texture_color.rgb;
+    // Defold Editor
+    // if (sun_position.xyz == vec3(0)) {
+    //gl_FragColor = vec4(color.rgb * vec3(0.8), 1.0);
+    //  return;
+    // }
+
+    //COLOR
+    vec3 illuminance_color = vec3(0);
+    vec3 specular_color = vec3(0);
+
+    vec3 surface_normal = var_world_normal;
+    vec3 view_direction = normalize(var_camera_position - var_world_position);
+
+    // Ambient
+    vec3 ambient = ambient_color.rgb * ambient_color.w;
+    illuminance_color = illuminance_color + ambient;
+
+    float axis_x = lights_data.w-lights_data.z;
+    float axis_y = lights_data2.y-lights_data2.x;
+    float axis_z = lights_data2.w-lights_data2.z;
+
+
+    highp float xStride = screen_size.x/clusters_data.x;
+    highp float yStride = screen_size.y/clusters_data.y;
+    highp float zStride = clusters_data.z;
+
+
+    int clusterX_index = int(floor(gl_FragCoord.x/ xStride));
+    int clusterY_index = int(floor(gl_FragCoord.y/ yStride));
+    int clusterZ_index = int(floor(-var_view_position.z) / zStride);
+
+
+
+    float clusterID = round(float(clusterX_index) +
+    float(clusterY_index) * clusters_data.x +
+    float(clusterZ_index) * clusters_data.x * clusters_data.y);
+
+    highp int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
+    int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w));
+
+    for (int i = 0; i < num_lights; ++i) {
+        highp int light_tex_idx = cluster_tex_idx +1 + i;
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x));
+        // lightIdx = i;
+       // if (num_lights!= int(lights_data.x)){
+         //   gl_FragColor = vec4(1.0,0.0,0.0, 1.0);
+       //     return;
+      //  }
+        //if (lightIdx != i){
+        //    break;
+       // }
+        //if (lightIdx>460){
+          //  gl_FragColor = vec4(1,0,0,1);
+            //return;
+        //}
+
+        highp int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
+        float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
+        float y = lights_data2.x + rgba_to_float(getData(lightIndex+1))*axis_y;
+        float z = lights_data2.z + rgba_to_float(getData(lightIndex+2))*axis_z;
+        // vec3 spotDirection = getData(lightIndex+3).xyz;
+        vec4 lightColorData = getData(lightIndex+4);
+        vec4 lightData = getData(lightIndex+5);
+
+        vec3 lightPosition = vec3(x, y, z);
+        float lightRadius = lightData.x*lights_data.y;
+        float lightSmoothness = lightData.y;
+        float lightSpecular = lightData.z;
+        float lightCutoff = lightData.w;
+
+
+        float lightDistance = length(lightPosition - var_world_position);
+        if (lightDistance > lightRadius) {
+            // Skip this light source because of distance
+            continue;
+        }
+
+        vec3 lightColor = lightColorData.rgb* lightColorData.a;
+        vec3 lightDirection = normalize(lightPosition - var_world_position);
+        vec3 lightIlluminanceColor = point_light2(lightColor.rgb, lightSmoothness, lightPosition, var_world_position, var_world_normal
+        , lightSpecular, view_direction);
+
+
+
+        if (lightCutoff < 1.0) {
+            vec3 spotDirection = getData(lightIndex+3).xyz* 2.0 - vec3(1.0);
+            float spot_theta = dot(lightDirection, normalize(spotDirection));
+
+            float spot_cutoff = lightCutoff * 2.0 - 1.0;
+
+            if (spot_theta <= spot_cutoff) {
+                continue;
+            }
+
+            if (lightSmoothness > 0.0) {
+                float spot_cutoff_inner = (spot_cutoff + 1.0) * (1.0 - lightSmoothness) - 1.0;
+                float spot_epsilon = spot_cutoff_inner - spot_cutoff;
+                float spot_intensity = clamp((spot_cutoff - spot_theta) / spot_epsilon, 0.0, 1.0);
+
+                lightIlluminanceColor = lightIlluminanceColor * spot_intensity;;
+            }
+        }
+
+        illuminance_color = illuminance_color + lightIlluminanceColor;
+
+        //
+    }
+
+
+    //REGION SHADOW -----------------
+    // shadow map
+    vec4 depth_proj = var_texcoord0_shadow / var_texcoord0_shadow.w;
+    float shadow = shadow_calculation(depth_proj.xyzw);
+    vec3 shadow_color = shadow_color.xyz*shadow_color.w*(sunlight_color.w) * shadow;
+
+    vec3 diff_light = vec3(0);
+    diff_light += max(direct_light(sunlight_color.rgb, sun_position.xyz, var_world_position.xyz, var_world_normal, shadow_color)*sunlight_color.w, 0.0);
+    diff_light += vec3(illuminance_color.xyz);
+
+    color.rgb = color.rgb * (min(diff_light, 1.0));
+
+    // Fog
+    float dist = abs(var_view_position.z);
+    float fog_max = fog.y;
+    float fog_min = fog.x;
+    float fog_factor = clamp((fog_max - dist) / (fog_max - fog_min) + fog_color.a, 0.0, 1.0);
+    color = mix(fog_color.rgb, color, fog_factor);
+
+
+    gl_FragColor = vec4(color, texture_color.a);
+
+    //float colorz = floor(-var_view_position.z-camNear)/clusters_data.z;
+  //  gl_FragColor = vec4(float(clusterX_index)/clusters_data.x,float(clusterY_index)/clusters_data.y,float(clusterZ_index)/1.0, texture_color.a);
+   // gl_FragColor = vec4(float(clusterZ_index)/5.0,float(clusterZ_index)/5.0,float(clusterZ_index)/5.0, texture_color.a);
+    //gl_FragColor = vec4(clusterZ_index/10.0,color.g,color.b, texture_color.a);
+}
+
+œ•Ùö#   
+  ﬂ                GLSL.std.450                     main      %  (  *  k  {  q  ◊               å    
+ GL_GOOGLE_cpp_style_line_directive    GL_GOOGLE_include_directive      main         rgba_to_float(vf4;    
+   rgba         shadow_calculation(vf4;      depth_data       direct_light(vf3;vf3;vf3;vf3;vf3;        light_color      light_position       position         vnormal      shadow_color         getData(i1;      index     )   point_light2(vf3;f1;vf3;vf3;vf3;f1;vf3;   "   light_color   #   power     $   light_position    %   position      &   vnormal   '   specular      (   view_dir      4   shadow    6   texel_size   	 7   _DMENGINE_GENERATED_UB_FS_0   7       shadow_params     9         A   x     L   y     V   uv    a   rgba      e   SHADOW_TEXTURE    i   depth     j   param     Ä   uv    ö   dist      û   direction     °   n     ¶   diffuse   Ø   x    	 ±   _DMENGINE_GENERATED_UB_FS_7   ±       light_texture_data    ≥         ∏   y     æ   normalizedCoords      Ã   DATA_TEXTURE      “   dist      ÷   direction     ›   d     ‡   reflect_dir   Â   spec_dot      Í   irradiance       attenuation      diffuse     texture_color       DIFFUSE_TEXTURE     var_texcoord0       color        illuminance_color     "  specular_color    #  surface_normal    %  var_world_normal      '  view_direction    (  var_camera_position   *  var_world_position    .  ambient  	 /  _DMENGINE_GENERATED_UB_FS_3   /      ambient_color     1        <  axis_x   	 =  _DMENGINE_GENERATED_UB_FS_8   =      lights_data   ?        E  axis_y   	 F  _DMENGINE_GENERATED_UB_FS_9   F      lights_data2      H        N  axis_z    T  xStride  
+ U  _DMENGINE_GENERATED_UB_FS_11      U      screen_size   W       
+ Z  _DMENGINE_GENERATED_UB_FS_10      Z      clusters_data     \        `  yStride   f  zStride   i  clusterX_index    k  gl_FragCoord      s  clusterY_index    z  clusterZ_index    {  var_view_position     É  clusterID     ñ  cluster_tex_idx   £  num_lights    §  param     ß  param     Æ  i     ∑  light_tex_idx     º  lightIdx      Ω  param     ¿  param     «  lightIndex    À  x     Œ  param     —  param     ÷  y     €  param     ›  param     ‚  z     Ë  param     Í  param     Ô  lightColorData    Û  param     ı  lightData     ˘  param     ˚  lightPosition        lightRadius     lightSmoothness   	  lightSpecular       lightCutoff     lightDistance       lightColor       lightDirection    %  lightIlluminanceColor     &  param     (  param     *  param     ,  param     .  param     0  param     2  param     9  spotDirection     =  param     C  spot_theta    H  spot_cutoff   V  spot_cutoff_inner     ]  spot_epsilon      a  spot_intensity    p  depth_proj    q  var_texcoord0_shadow      w  shadow    x  param     {  shadow_color     	 |  _DMENGINE_GENERATED_UB_FS_1   |      shadow_color      ~       	 Ö  _DMENGINE_GENERATED_UB_FS_4   Ö      sunlight_color    á        ç  diff_light   	 é  _DMENGINE_GENERATED_UB_FS_2   é      sun_position      ê        ë  param     ï  param     ô  param     õ  param     ù  param     ≥  dist      ∑  fog_max  	 ∏  _DMENGINE_GENERATED_UB_FS_6   ∏      fog   ∫        Ω  fog_min   ¿  fog_factor   	 »  _DMENGINE_GENERATED_UB_FS_5   »      fog_color              ◊  _DMENGINE_GENERATED_gl_FragColor_0  H  7           H  7       #       G  7      G  9   "      G  9   !      G  ?       G  @       G  e   "      G  e   !      G  r       H  ±       #       G  ±      G  ≥   "      G  ≥   !   
+   G  Ã   "      G  Ã   !      G        G    "      G    !       G        G        G          G        G        G  %      G  %        G  &      G  (        G  *        H  /          H  /      #       G  /     G  1  "      G  1  !      G  3      G  4      G  7      G  8      H  =      #       G  =     G  ?  "      G  ?  !      H  F      #       G  F     G  H  "      G  H  !      H  U      #       G  U     G  W  "      G  W  !      H  Z      #       G  Z     G  \  "      G  \  !      G  k        G  {        G  /      G  q         H  |          H  |      #       G  |     G  ~  "      G  ~  !      G  Ä      G  Å      G  É      G  Ñ      H  Ö          H  Ö      #       G  Ö     G  á  "      G  á  !      G  â      G  ä      H  é      #       G  é     G  ê  "      G  ê  !      G  ì      G  î      G  ú      G  °      H  ∏      #       G  ∏     G  ∫  "      G  ∫  !   	   H  »          H  »      #       G  »     G     "      G     !      G  Ã      G  –      G  —      G  ◊              !                                        !  	                                !                                               !                        ! 
+ !                             +     ,     Ä?+     -   ÅÄÄ;+     .   ÇÅ7+     /   ÉÅ3,     0   ,   -   .   /   +     5         7         8      7   ;  8   9      +     :         ;           +  ;   <          =         +     B   ˇˇˇˇ+     I        J     T            U      T    	 b                              c   b      d       c   ;  d   e       +  ;   m      +  ;   p      +     }     A+     õ     †¿+     ú      A,     ù   õ   ú   5     ±         ≤      ±   ;  ≤   ≥      +     ƒ      ?   «         ;  d   Ã       +     Ó   ÕÃL=+     ı      @+         ÄA;  d                 T   ;         ,     !  5   5   5      $        ;  $  %     ;  $  (     ;  $  *       /        0     /  ;  0  1     +  ;   5       =        >     =  ;  >  ?       F        G     F  ;  G  H       U        V     U  ;  V  W       Z        [     Z  ;  [  \        j        ;  j  k        l        ;  j  {     +     ô    ¿@+     …     +     Ê     +     Ò     +     ˜     +     ;     ,     A  ,   ,   ,   ;  j  q       |        }     |  ;  }  ~       Ö        Ü     Ö  ;  Ü  á       é        è     é  ;  è  ê       ∏        π     ∏  ;  π  ∫       »        …     »  ;  …           ÷        ;  ÷  ◊     6               ¯     ;          ;          ;           ;     "     ;     #     ;     '     ;     .     ;      <     ;      E     ;      N     ;      T     ;      `     ;      f     ;     i     ;     s     ;     z     ;      É     ;     ñ     ;     £     ;     §     ;     ß     ;     Æ     ;     ∑     ;     º     ;     Ω     ;     ¿     ;     «     ;      À     ;     Œ     ;     —     ;      ÷     ;     €     ;     ›     ;      ‚     ;     Ë     ;     Í     ;     Ô     ;     Û     ;     ı     ;     ˘     ;     ˚     ;            ;           ;      	     ;           ;           ;          ;           ;     %     ;     &     ;      (     ;     *     ;     ,     ;     .     ;      0     ;     2     ;     9     ;     =     ;      C     ;      H     ;      V     ;      ]     ;      a     ;     p     ;      w     ;     x     ;     {     ;     ç     ;     ë     ;     ï     ;     ô     ;     õ     ;     ù     ;      ≥     ;      ∑     ;      Ω     ;      ¿     =  c       =  T       W           >      =         O                     >      >     !  >  "  !  =     &  %  >  #  &  =     )  (  =     +  *  É     ,  )  +       -     E   ,  >  '  -  A  «   2  1  :   =     3  2  O     4  3  3            A  =   6  1  :   5  =     7  6  é     8  4  7  >  .  8  =     9     =     :  .  Å     ;  9  :  >     ;  A  =   @  ?  :   5  =     A  @  A  =   B  ?  :   m   =     C  B  É     D  A  C  >  <  D  A  =   I  H  :   p   =     J  I  A  =   K  H  :   <   =     L  K  É     M  J  L  >  E  M  A  =   O  H  :   5  =     P  O  A  =   Q  H  :   m   =     R  Q  É     S  P  R  >  N  S  A  =   X  W  :   <   =     Y  X  A  =   ]  \  :   <   =     ^  ]  à     _  Y  ^  >  T  _  A  =   a  W  :   p   =     b  a  A  =   c  \  :   p   =     d  c  à     e  b  d  >  `  e  A  =   g  \  :   m   =     h  g  >  f  h  A  l  m  k  <   =     n  m  =     o  T  à     p  n  o       q        p  n     r  q  >  i  r  A  l  t  k  p   =     u  t  =     v  `  à     w  u  v       x        w  n     y  x  >  s  y  A  l  |  {  m   =     }  |       ~  }               ~  =     Ä  f  à     Å    Ä  n     Ç  Å  >  z  Ç  =     Ñ  i  o     Ö  Ñ  =     Ü  s  o     á  Ü  A  =   à  \  :   <   =     â  à  Ö     ä  á  â  Å     ã  Ö  ä  =     å  z  o     ç  å  A  =   é  \  :   <   =     è  é  Ö     ê  ç  è  A  =   ë  \  :   p   =     í  ë  Ö     ì  ê  í  Å     î  ã  ì       ï        î  >  É  ï  A  =   ó  ?  :   <   =     ò  ó  Ö     ö  ò  ô  =     õ  É  A  =   ú  \  :   5  =     ù  ú  Å     û  ,   ù  Ö     ü  õ  û  Å     †  ö  ü       °        †  n     ¢  °  >  ñ  ¢  =     •  ñ  >  §  •  9     ¶     §  >  ß  ¶  9     ®     ß  A  =   ©  \  :   5  =     ™  ©  Ö     ´  ®  ™       ¨        ´  n     ≠  ¨  >  £  ≠  >  Æ  :   ˘  Ø  ¯  Ø  ˆ  ±  ≤      ˘  ≥  ¯  ≥  =     ¥  Æ  =     µ  £  ±  J   ∂  ¥  µ  ˙  ∂  ∞  ±  ¯  ∞  =     ∏  ñ  Ä     π  ∏  I   =     ∫  Æ  Ä     ª  π  ∫  >  ∑  ª  =     æ  ∑  >  Ω  æ  9     ø     Ω  >  ¿  ø  9     ¡     ¿  A  =   ¬  ?  :   <   =     √  ¬  Ö     ƒ  ¡  √       ≈        ƒ  n     ∆  ≈  >  º  ∆  =     »  º  Ñ        »  …  >  «     A  =   Ã  ?  :   m   =     Õ  Ã  =     œ  «  >  Œ  œ  9     –     Œ  >  —  –  9     “     —  =     ”  <  Ö     ‘  “  ”  Å     ’  Õ  ‘  >  À  ’  A  =   ◊  H  :   <   =     ÿ  ◊  =     Ÿ  «  Ä     ⁄  Ÿ  I   >  €  ⁄  9     ‹     €  >  ›  ‹  9     ﬁ     ›  =     ﬂ  E  Ö     ‡  ﬁ  ﬂ  Å     ·  ÿ  ‡  >  ÷  ·  A  =   „  H  :   m   =     ‰  „  =     Â  «  Ä     Á  Â  Ê  >  Ë  Á  9     È     Ë  >  Í  È  9     Î     Í  =     Ï  N  Ö     Ì  Î  Ï  Å     Ó  ‰  Ì  >  ‚  Ó  =       «  Ä     Ú    Ò  >  Û  Ú  9     Ù     Û  >  Ô  Ù  =     ˆ  «  Ä     ¯  ˆ  ˜  >  ˘  ¯  9     ˙     ˘  >  ı  ˙  =     ¸  À  =     ˝  ÷  =     ˛  ‚  P     ˇ  ¸  ˝  ˛  >  ˚  ˇ  A        ı  <   =         A  =     ?  :   p   =         Ö           >       A        ı  p   =         >      A      
+  ı  m   =       
+  >  	    A        ı  5  =         >      =       ˚  =       *  É                     B     >      =         =          ∫  J         ˜        ˙        ¯    ˘  ≤  ¯    =       Ô  O                     A        Ô  5  =         é           >      =     !  ˚  =     "  *  É     #  !  "       $     E   #  >     $  =     '    >  &  '  =     )    >  (  )  =     +  ˚  >  *  +  =     -  *  >  ,  -  =     /  %  >  .  /  =     1  	  >  0  1  =     3  '  >  2  3  9     4  )   &  (  *  ,  .  0  2  >  %  4  =     5    ∏  J   6  5  ,   ˜  8      ˙  6  7  8  ¯  7  =     :  «  Ä     <  :  ;  >  =  <  9     >     =  O     ?  >  >            é     @  ?  ı   É     B  @  A  >  9  B  =     D     =     E  9       F     E   E  î     G  D  F  >  C  G  =     I    Ö     J  I  ı   É     K  J  ,   >  H  K  =     L  C  =     M  H  º  J   N  L  M  ˜  P      ˙  N  O  P  ¯  O  ˘  ≤  ¯  P  =     R    ∫  J   S  R  5   ˜  U      ˙  S  T  U  ¯  T  =     W  H  Å     X  W  ,   =     Y    É     Z  ,   Y  Ö     [  X  Z  É     \  [  ,   >  V  \  =     ^  V  =     _  H  É     `  ^  _  >  ]  `  =     b  H  =     c  C  É     d  b  c  =     e  ]  à     f  d  e       g     +   f  5   ,   >  a  g  =     h  %  =     i  a  é     j  h  i  >  %  j  ˘  U  ¯  U  ˘  8  ¯  8  =     k     =     l  %  Å     m  k  l  >     m  ˘  ≤  ¯  ≤  =     n  Æ  Ä     o  n  I   >  Æ  o  ˘  Ø  ¯  ±  =     r  q  A  l  s  q  5  =     t  s  P     u  t  t  t  t  à     v  r  u  >  p  v  =     y  p  >  x  y  9     z     x  >  w  z  A  «     ~  :   =     Ä    O     Å  Ä  Ä            A  =   Ç  ~  :   5  =     É  Ç  é     Ñ  Å  É  A  =   à  á  :   5  =     â  à  é     ä  Ñ  â  =     ã  w  é     å  ä  ã  >  {  å  >  ç  !  A  «   í  á  :   =     ì  í  O     î  ì  ì            >  ë  î  A  «   ñ  ê  :   =     ó  ñ  O     ò  ó  ó            >  ï  ò  =     ö  *  >  ô  ö  =     ú  %  >  õ  ú  =     û  {  >  ù  û  9 	    ü     ë  ï  ô  õ  ù  A  =   †  á  :   5  =     °  †  é     ¢  ü  °  P     £  5   5   5        §     (   ¢  £  =     •  ç  Å     ¶  •  §  >  ç  ¶  =     ß     Q     ®  ß      Q     ©  ß     Q     ™  ß     P     ´  ®  ©  ™  =     ¨  ç  Å     ≠  ¨  ´  >  ç  ≠  =     Æ    =     Ø  ç  P     ∞  ,   ,   ,        ±     %   Ø  ∞  Ö     ≤  Æ  ±  >    ≤  A  l  ¥  {  m   =     µ  ¥       ∂        µ  >  ≥  ∂  A  =   ª  ∫  :   p   =     º  ª  >  ∑  º  A  =   æ  ∫  :   <   =     ø  æ  >  Ω  ø  =     ¡  ∑  =     ¬  ≥  É     √  ¡  ¬  =     ƒ  ∑  =     ≈  Ω  É     ∆  ƒ  ≈  à     «  √  ∆  A  =   À     :   5  =     Ã  À  Å     Õ  «  Ã       Œ     +   Õ  5   ,   >  ¿  Œ  A  «   œ     :   =     –  œ  O     —  –  –            =     “    =     ”  ¿  P     ‘  ”  ”  ”       ’     .   —  “  ‘  >    ’  =     ÿ    A      Ÿ    5  =     ⁄  Ÿ  Q     €  ÿ      Q     ‹  ÿ     Q     ›  ÿ     P     ﬁ  €  ‹  ›  ⁄  >  ◊  ﬁ  ˝  8  6            	   7     
+   ¯     =     +   
+   î     1   +   0   ˛  1   8  6            	   7        ¯     ;      4      ;      6      ;     A      ;     L      ;  U   V      ;     a      ;      i      ;     j      ;  U   Ä      >  4   5   A  =   >   9   :   <   =     ?   >   à     @   ,   ?   >  6   @   >  A   B   ˘  C   ¯  C   ˆ  E   F       ˘  G   ¯  G   =     H   A   ≥  J   K   H   I   ˙  K   D   E   ¯  D   >  L   B   ˘  M   ¯  M   ˆ  O   P       ˘  Q   ¯  Q   =     R   L   ≥  J   S   R   I   ˙  S   N   O   ¯  N   =     W      O  T   X   W   W          =     Y   A   o     Z   Y   =     [   L   o     \   [   P  T   ]   Z   \   =     ^   6   é  T   _   ]   ^   Å  T   `   X   _   >  V   `   =  c   f   e   =  T   g   V   W     h   f   g   >  a   h   =     k   a   >  j   k   9     l      j   >  i   l   A      n      m   =     o   n   A  =   q   9   :   p   =     r   q   É     s   o   r   =     t   i   ∫  J   u   s   t   ©     v   u   ,   5   =     w   4   Å     x   w   v   >  4   x   ˘  P   ¯  P   =     y   L   Ä     z   y   I   >  L   z   ˘  M   ¯  O   ˘  F   ¯  F   =     {   A   Ä     |   {   I   >  A   |   ˘  C   ¯  E   =     ~   4   à        ~   }   >  4      =     Å      O  T   Ç   Å   Å          >  Ä   Ç   A      É   Ä   <   =     Ñ   É   ∏  J   Ö   Ñ   5   ˜  á       ˙  Ö   Ü   á   ¯  Ü   >  4   5   ˘  á   ¯  á   A      à   Ä   <   =     â   à   ∫  J   ä   â   ,   ˜  å       ˙  ä   ã   å   ¯  ã   >  4   5   ˘  å   ¯  å   A      ç   Ä   p   =     é   ç   ∏  J   è   é   5   ˜  ë       ˙  è   ê   ë   ¯  ê   >  4   5   ˘  ë   ¯  ë   A      í   Ä   p   =     ì   í   ∫  J   î   ì   ,   ˜  ñ       ˙  î   ï   ñ   ¯  ï   >  4   5   ˘  ñ   ¯  ñ   =     ó   4   ˛  ó   8  6               7        7        7        7        7        ¯     ;     ö      ;     û      ;      °      ;     ¶      >  ö   ù   =     ü   ö        †      E   ü   >  û   †   =     ¢      =     £   û   î     §   ¢   £        •      (   §   5   >  °   •   =     ß      =     ®      É     ©   ß   ®   =     ™   °   é     ´   ©   ™   >  ¶   ´   =     ¨   ¶   ˛  ¨   8  6               7        ¯     ;     Ø      ;     ∏      ;  U   æ      =     ∞      A  =   ¥   ≥   :   <   =     µ   ¥   n     ∂   µ   ã     ∑   ∞   ∂   >  Ø   ∑   =     π      A  =   ∫   ≥   :   <   =     ª   ∫   n     º   ª   á     Ω   π   º   >  ∏   Ω   =     ø   Ø   o     ¿   ø   =     ¡   ∏   o     ¬   ¡   P  T   √   ¿   ¬   P  T   ≈   ƒ   ƒ   Å  T   ∆   √   ≈   A  «   »   ≥   :   =     …   »   O  T       …   …          à  T   À   ∆       >  æ   À   =  c   Õ   Ã   =  T   Œ   æ   W     œ   Õ   Œ   ˛  œ   8  6     )       !   7     "   7      #   7     $   7     %   7     &   7      '   7     (   ¯  *   ;     “      ;     ÷      ;      ›      ;     ‡      ;      Â      ;      Í      ;            ;           =     ”   $   =     ‘   %   É     ’   ”   ‘   >  “   ’   =     ◊   “        ÿ      E   ◊   Q     Ÿ   ÿ       Q     ⁄   ÿ      Q     €   ÿ      P     ‹   Ÿ   ⁄   €   >  ÷   ‹   =     ﬁ   “        ﬂ      B   ﬁ   >  ›   ﬂ   =     ·   ÷        ‚   ·   =     „   &        ‰      G   ‚   „   >  ‡   ‰   =     Ê   ‡   =     Á   (   î     Ë   Ê   Á        È      (   Ë   5   >  Â   È   =     Î   &   =     Ï   ÷   î     Ì   Î   Ï        Ô      (   Ì   Ó   >  Í   Ô   =     Ò   ›   =     Ú   #   Ö     Û   Ò   Ú   Å     Ù   ,   Û   =     ˆ   ›   Ö     ˜   ı   ˆ   =     ¯   ›   Ö     ˘   ˜   ¯   =     ˙   #   Ö     ˚   ˘   ˙   =     ¸   #   Ö     ˝   ˚   ¸   Å     ˛   Ù   ˝   à     ˇ   ,   ˛   >     ˇ   =       "   =       Í   é           =          é           >       =       Í   =          Ö           =     	  '   Ö     
+    	  =       Â                    Ö       
+    =       "   é           =          Å           >       =          ˛    8  "F
+DIFFUSE_TEXTUREïæ’ëÄ·á´Œ 
+DIFFUSE_TEXTUREïæ’ëÄ·á´Œ
+  
+( 08 "O
+_DMENGINE_GENERATED_UB_FS_0ÔÂÆè‹Á ªà
+shadow_params≠Ú‚©≠§ä+  ( 08"O
+_DMENGINE_GENERATED_UB_FS_1πüÄ∞˚ü»∑–
+shadow_color´≠Òä•®œ∏ˆ  ( 08"B
+SHADOW_TEXTUREÊÛÏÔÛñ¬~
+SHADOW_TEXTUREÊÛÏÔÛñ¬~
+  
+( 08"@
+DATA_TEXTUREäóŸõˆ§üáæ
+DATA_TEXTUREäóŸõˆ§üáæ
+  
+( 08"P
+_DMENGINE_GENERATED_UB_FS_3âÂﬂë„˘ˆﬂá
+ambient_color¬‘˜ÍÆÕ§ñø  ( 08"P
+_DMENGINE_GENERATED_UB_FS_4•ø∞Üñøı“*
+sunlight_colorˆ‚ˆÓ®˚‰⁄ë  ( 08"J
+_DMENGINE_GENERATED_UB_FS_5ß‚ùÍ¯ù∞*
+	fog_color√çÄïÖ∞Ú≥L  ( 08"F
+_DMENGINE_GENERATED_UB_FS_6Í·Åàùù±»˙
+fogƒµ™ùˆ…ÄÅ  ( 08	"S
+_DMENGINE_GENERATED_UB_FS_7¢¥À–ıÂ‡¸!"
+light_texture_dataÏ∞«ßüâæ–  ( 08
+"N
+_DMENGINE_GENERATED_UB_FS_8‡Œò≥Û≤êÓ´
+lights_dataìÎ’Ôõ ’»  ( 08"N
+_DMENGINE_GENERATED_UB_FS_9ì…† ™ƒ‰√
+lights_data2˘Ö§ö¨∞µô™  ( 08"O
+_DMENGINE_GENERATED_UB_FS_10œ¸ç Ωöàì
+clusters_data≥Æ–Ô÷∑¡˝O  ( 08"N
+_DMENGINE_GENERATED_UB_FS_11®¬êÈ∆ˆ…Û~
+screen_sizeå¯◊‘€È⁄ã¶  ( 08*&
+var_texcoord0_shadowäôí¥•ù◊Ö@( 0 *
+var_texcoord0Ò—Ò¢÷¿ò„( 0*%
+var_world_positionÅ√≥¯Ú¬áÊæ( 0*"
+var_world_normal˘•˜å∫µ¥ù8( 0*#
+var_view_positionÈ˛›¡¢Ó®é( 0*&
+var_camera_position”Ú÷Ñ˝≈‰˝ß( 024
+"_DMENGINE_GENERATED_gl_FragColor_0∞≠˘¯˛ÚÔÅr( 0  
