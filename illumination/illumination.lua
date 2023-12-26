@@ -588,10 +588,10 @@ function Lights:set_camera(x, y, z)
 	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
 
 
-	--min_x = self.shadow.PROJECTION_X1
-	--max_x = self.shadow.PROJECTION_X2
-	--min_y = self.shadow.PROJECTION_Y1
-	--max_y = self.shadow.PROJECTION_Y2
+	--min_x = -10
+	--max_x = 10
+	--min_y = -10
+	--max_y = 10
 
 
 	xmath.matrix4_orthographic(self.shadow.light_projection, min_x, max_x,
@@ -600,7 +600,8 @@ function Lights:set_camera(x, y, z)
 	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.bias_matrix, self.shadow.light_projection)
 	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, self.shadow.light_transform)
 
-	--[[
+
+	--https://youtu.be/uueB2kVvbHo?t=327
 	--Another fix you could try for the shadow shimmering on movement is to add
 	--a small offset to the projection matrix for the shadow map that ensures that
 	--all world coordinates will always “snap” to the same shadow map texels,
@@ -609,17 +610,15 @@ function Lights:set_camera(x, y, z)
 	--and using that, transformed back into shadow projection from shadow texture space, to offset the projection matrix.
 
 
-	-- Step 1: Transform a fixed world space point to shadow space
+	-- Step 1: Transform a fixed world space point to texture space
 	local fixedPoint = vmath.vector4(0,0,0,1)  -- Example: using the origin
 	local shadow_point = self.shadow.light_matrix*fixedPoint
 	-- Step 2:  finding its offset from the center of a texel in shadow map space (where the texture sample round to)
-	-- Assuming shadowSpacePoint is in shadow space and normalized (range [0, 1])
-
-	-- Calculate the size of one texel
-	local texelSize = 1.0 / self.shadow.BUFFER_RESOLUTION
+	local texelSize = 1/self.shadow.BUFFER_RESOLUTION
 
 	local shadow_point_x = shadow_point.x / shadow_point.w
-	local shadow_point_y =shadow_point.y / shadow_point.w
+	local shadow_point_y = shadow_point.y / shadow_point.w
+
 
 	-- Find the nearest texel center to the normalized point
 	local nearestTexelCenterX = math.floor(shadow_point_x / texelSize) * texelSize + texelSize / 2
@@ -629,19 +628,13 @@ function Lights:set_camera(x, y, z)
 	local offsetX = nearestTexelCenterX - shadow_point_x
 	local offsetY = nearestTexelCenterY - shadow_point_y
 
-	local pointOffset = vmath.vector4(offsetX, offsetY, 0,1)
-	local lights_inv = vmath.inv(self.shadow.light_matrix)
-	local offset = lights_inv * pointOffset
-	offset.x = offset.x / offset.w
-	offset.y = offset.y / offset.w
-	offset.z = offset.z / offset.w
-	offset.w = 1
+	-- Step 3: add offset to matrix
+	self.shadow.light_matrix.m03=self.shadow.light_matrix.m03+offsetX
+	self.shadow.light_matrix.m13=self.shadow.light_matrix.m13+offsetY
 
 
---	print("offsetX:%f, offsetY:%f", offsetX, offsetY)
 
-	local offset_matrix = vmath.matrix4_translation(offset)
-	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, offset_matrix)
+
 
 	-- The offsetX and offsetY represent how far the point is from the center of its texel
 --]]
