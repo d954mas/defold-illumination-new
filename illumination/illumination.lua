@@ -247,8 +247,6 @@ function Lights:initialize()
 	self.shadow = {
 		-- Size of shadow map. Select value from: 1024/2048/4096. More is better quality.
 		BUFFER_RESOLUTION = 2048,
-		-- MIN AND MAX VALUE FOR PROJECTION
-		SHADOW_MAX_DISTANCE = 10,
 		NEAR = 0.001,
 		FAR = 30,
 
@@ -558,12 +556,13 @@ function Lights:set_camera(x, y, z)
 		if py > max_y then max_y = py end
 	end
 
+
 	min_x = -1 + min_x * 2
 	max_x = -1 + max_x * 2
 	min_y = -1 + min_y * 2
 	max_y = -1 + max_y * 2
 
-	print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
+	--print("shadow uv:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
 
 
 	--min_x = self.shadow.PROJECTION_X1
