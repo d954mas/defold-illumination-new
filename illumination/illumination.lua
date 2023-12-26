@@ -205,6 +205,20 @@ local function create_depth_buffer(w, h)
 	return render.render_target("shadow_buffer", { [render.BUFFER_COLOR_BIT] = color_params, [render.BUFFER_DEPTH_BIT] = depth_params })
 end
 
+local function create_empty_shadow_buffer()
+	local color_params = {
+		-- format     = render.FORMAT_RGBA,
+		format = render.FORMAT_RGBA,
+		width = 1,
+		height = 1,
+		min_filter = render.FILTER_NEAREST,
+		mag_filter = render.FILTER_NEAREST,
+		u_wrap = render.WRAP_CLAMP_TO_EDGE,
+		v_wrap = render.WRAP_CLAMP_TO_EDGE }
+
+	return render.render_target("empty_shadow_buffer", { [render.BUFFER_COLOR_BIT] = color_params })
+end
+
 ---@class Lights
 local Lights = CLASS("lights")
 
@@ -227,8 +241,8 @@ function Lights:initialize()
 	self.screen_size = vmath.vector4()
 
 	self.debug = false
-	self.enable_lights = true
-	self.enable_shadow = true
+	self.enable_lights = false
+	self.enable_shadow = false
 
 	self.shadow = {
 		-- Size of shadow map. Select value from: 1024/2048/4096. More is better quality.
@@ -254,6 +268,9 @@ function Lights:initialize()
 		light_position = vmath.vector3(0), --root_position + sun_position
 		light_transform = vmath.matrix4(),
 		rt = nil,
+		rt_no_shadow = nil,
+		no_shadow_clear_color = { [render.BUFFER_COLOR_BIT] = vmath.vector4(1),
+								  [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0 },
 		draw_shadow_opts = { frustum = vmath.matrix4(), frustum_planes = render.FRUSTUM_PLANES_ALL },
 		draw_transient = { transient = { render.BUFFER_DEPTH_BIT } },
 		draw_clear = { [render.BUFFER_COLOR_BIT] = vmath.vector4(1, 1, 1, 1), [render.BUFFER_DEPTH_BIT] = 1 }
@@ -275,16 +292,15 @@ function Lights:init(shadow_texture_resource, data_texture_resource)
 
 	self.lights_data.x = illumination.lights_get_max_lights()
 	self.lights_data.y = illumination.lights_get_max_radius()
-	self.lights_data.z ,self.lights_data.w  = illumination.lights_get_borders_x()
+	self.lights_data.z, self.lights_data.w = illumination.lights_get_borders_x()
 
-	self.lights_data2.x ,self.lights_data2.y  = illumination.lights_get_borders_y()
-	self.lights_data2.z ,self.lights_data2.w  = illumination.lights_get_borders_z()
+	self.lights_data2.x, self.lights_data2.y = illumination.lights_get_borders_y()
+	self.lights_data2.z, self.lights_data2.w = illumination.lights_get_borders_z()
 
 	self.clusters_data.x = illumination.lights_get_x_slice()
 	self.clusters_data.y = illumination.lights_get_y_slice()
 	self.clusters_data.z = illumination.lights_get_z_slice_for_shader()
 	self.clusters_data.w = illumination.lights_get_lights_per_cluster()
-
 
 	for _, constant in ipairs(self.constants) do
 		constant.light_texture_data = self.light_texture_data
@@ -293,8 +309,11 @@ function Lights:init(shadow_texture_resource, data_texture_resource)
 		constant.clusters_data = self.clusters_data
 	end
 
-
+	self.data_texture_resource = data_texture_resource
 	illumination.lights_set_texture_path(data_texture_resource)
+
+	self:set_enable_shadows(true)
+	self:set_enable_lights(true)
 end
 
 function Lights:on_resize(w, h)
@@ -305,15 +324,20 @@ function Lights:on_resize(w, h)
 end
 
 function Lights:set_enable_shadows(enable)
-	if self.enable_shadow~=enable then
+	if self.enable_shadow ~= enable then
 		self.enable_shadow = enable
 	end
 end
 
 function Lights:set_enable_lights(enable)
-	if self.enable_lights~=enable then
+	if self.enable_lights ~= enable then
 		self.enable_lights = enable
+		self:update_lights_texture()
 	end
+end
+
+function Lights:update_lights_texture()
+
 end
 
 function Lights:draw_debug()
@@ -323,12 +347,9 @@ function Lights:draw_debug()
 end
 
 function Lights:draw_shadow_debug()
-	if self.shadow.rt then
-		render.enable_texture(0, self.shadow.rt, render.BUFFER_COLOR_BIT)
-		render.draw(self.debug_shadow_predicate)
-		render.disable_texture(0)
-	end
-
+	render.enable_texture(0, self.shadow.rt or self.shadow.rt_no_shadow, render.BUFFER_COLOR_BIT)
+	render.draw(self.debug_shadow_predicate)
+	render.disable_texture(0)
 end
 function Lights:draw_data_lights_debug()
 	render.draw(self.debug_data_lights_predicate)
@@ -346,15 +367,11 @@ function Lights:draw_debug_planes()
 end
 
 function Lights:draw_begin()
-	if (self.shadow.rt) then
-		render.enable_texture(1, self.shadow.rt, render.BUFFER_COLOR_BIT) -- created in light_and_shadows.init
-	end
+	render.enable_texture(1, self.shadow.rt or self.shadow.rt_no_shadow, render.BUFFER_COLOR_BIT)
 end
 
 function Lights:draw_finish()
-	if (self.shadow.rt) then
-		render.disable_texture(1)
-	end
+	render.disable_texture(1)
 end
 
 function Lights:set_debug(debug)
@@ -553,16 +570,29 @@ function Lights:set_camera(x, y, z)
 end
 
 function Lights:render_shadows()
-	local draw_shadows = true
-	if (draw_shadows and not self.shadow.rt) then
-		self.shadow.rt = create_depth_buffer(self.shadow.BUFFER_RESOLUTION, self.shadow.BUFFER_RESOLUTION)
+	if (self.enable_shadow) then
+		if not self.shadow.rt then
+			self.shadow.rt = create_depth_buffer(self.shadow.BUFFER_RESOLUTION, self.shadow.BUFFER_RESOLUTION)
+		end
+		if self.shadow.rt_no_shadow then
+			render.delete_render_target(self.shadow.rt_no_shadow)
+			self.shadow.rt_no_shadow = nil
+		end
+	else
+		if not self.shadow.rt_no_shadow then
+			self.shadow.rt_no_shadow = create_empty_shadow_buffer()
+			render.set_render_target(self.shadow.rt_no_shadow)
+			render.set_viewport(0, 0, 1, 1)
+			render.clear(self.shadow.no_shadow_clear_color)
+			render.set_render_target(render.RENDER_TARGET_DEFAULT)
+		end
+		if self.shadow.rt then
+			render.delete_render_target(self.shadow.rt)
+			self.shadow.rt = nil
+		end
 	end
-	if (not draw_shadows and self.shadow.rt) then
-		render.delete_render_target(self.shadow.rt)
-		self.shadow.rt = nil
-	end
-	if (not draw_shadows) then
-		return end
+
+	if (not self.enable_shadow) then return end
 
 	local light_projection = self.shadow.light_projection
 	render.set_projection(light_projection)
@@ -593,7 +623,7 @@ end
 
 function Lights:remove_light(light)
 	illumination.light_destroy(light)
-	for i=1,#self.lights.in_world do
+	for i = 1, #self.lights.in_world do
 		if self.lights.in_world[i] == light then
 			table.remove(self.lights.in_world, i)
 			break
