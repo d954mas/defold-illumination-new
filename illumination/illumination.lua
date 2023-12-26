@@ -227,6 +227,8 @@ function Lights:initialize()
 	self.screen_size = vmath.vector4()
 
 	self.debug = false
+	self.enable_lights = true
+	self.enable_shadow = true
 
 	self.shadow = {
 		-- Size of shadow map. Select value from: 1024/2048/4096. More is better quality.
@@ -299,6 +301,18 @@ function Lights:on_resize(w, h)
 	self.screen_size.x, self.screen_size.y = w, h
 	for _, constant in ipairs(self.constants) do
 		constant.screen_size = self.screen_size
+	end
+end
+
+function Lights:set_enable_shadows(enable)
+	if self.enable_shadow~=enable then
+		self.enable_shadow = enable
+	end
+end
+
+function Lights:set_enable_lights(enable)
+	if self.enable_lights~=enable then
+		self.enable_lights = enable
 	end
 end
 

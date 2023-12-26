@@ -1,5 +1,22 @@
+local DIRTYLARRY = require "gooey-dirtylarry.dirtylarry"
+local ILLUMINATION = require "illumination.illumination"
+
+
 function init(self)
 	self.lbl_lights = gui.get_node("text_lights")
+	local checkbox_shadow = DIRTYLARRY.checkbox("checkbox_shadow", nil, nil)
+	checkbox_shadow.set_checked(true)
+	local checkbox_lights = DIRTYLARRY.checkbox("checkbox_lights", nil, nil)
+	checkbox_lights.set_checked(true)
+
+	self.update_checkbox_shadow = function(checkbox)
+		ILLUMINATION:set_enable_shadows(checkbox.checked)
+	end
+
+	self.update_checkbox_lights = function(checkbox)
+		ILLUMINATION:set_enable_lights(checkbox.checked)
+	end
+	msg.post('.', hash 'acquire_input_focus')
 end
 
 function final(self)
@@ -27,15 +44,12 @@ function on_message(self, message_id, message, sender)
 end
 
 function on_input(self, action_id, action)
-	-- Add input-handling code here. The game object this script is attached to
-	-- must have acquired input focus:
-	--
-	--    msg.post(".", "acquire_input_focus")
-	--
-	-- All mapped input bindings will be received. Mouse and touch input will
-	-- be received regardless of where on the screen it happened.
-	-- Learn more: https://defold.com/manuals/input/
-	-- Remove this function if not needed
+	if DIRTYLARRY.checkbox("checkbox_shadow", action_id, action,  self.update_checkbox_shadow).consumed then
+		return true
+	end
+	if DIRTYLARRY.checkbox("checkbox_lights", action_id, action,  self.update_checkbox_lights) then
+		return true
+	end
 end
 
 function on_reload(self)
