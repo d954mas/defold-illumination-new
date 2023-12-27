@@ -649,6 +649,7 @@ public:
             LightCluster* cluster = &clusters[i];
             cluster->numLights = 0;
             cluster->clusterStart = clusterValues;
+            cluster->currentLightStart = clusterValues+4;
             clusterValues += pixelsPerCluster * stride;
         }
     }
@@ -668,10 +669,10 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     for (int i = 0; i < lightsManager->lightsInWorld.Size(); ++i) {
         Light* light = lightsManager->lightsInWorld[i];
         bool addToScene = LightIsAddLightToScene(light);
-        if (addToScene) {
-            addToScene = lightsManager->frustum.IsBoxVisible(dmVMath::Vector3(light->aabb[0], light->aabb[1], light->aabb[2]),
-                                                            dmVMath::Vector3(light->aabb[3], light->aabb[4], light->aabb[5]));
-        }
+        //if (addToScene) {
+          //  addToScene = lightsManager->frustum.IsBoxVisible(dmVMath::Vector3(light->aabb[0], light->aabb[1], light->aabb[2]),
+        //                                                    dmVMath::Vector3(light->aabb[3], light->aabb[4], light->aabb[5]));
+       // }
         if(addToScene){
             lightsManager->lightsVisibleInWorld.Push(light);
         }
@@ -679,10 +680,11 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
 
     //update clusters https://github.com/AmanSachan1/WebGL-Clustered-Deferred-Forward-Plus/blob/master/src/renderers/clustered.js
     //mark clusters empty
-    for(int i=0;i<lightsManager->totalClusters;++i){
-        lightsManager->clusters[i].numLights = 0;
-        lightsManager->clusters[i].currentLightStart = lightsManager->clusters[i].clusterStart+4;
-    }
+    //RESET cluster after at end of update. After write cluster in buffer
+   // for(int i=0;i<lightsManager->totalClusters;++i){
+     //   lightsManager->clusters[i].numLights = 0;
+       // lightsManager->clusters[i].currentLightStart = lightsManager->clusters[i].clusterStart+4;
+    //}
     lightsManager->debugVisibleLights = 0;
 
     //instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
@@ -797,6 +799,9 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         //write num lights of cluster
         LightCluster& cluster = lightsManager->clusters[i];
         memcpy(cluster.clusterStart, lightsManager->encodedClusterLights+cluster.numLights*4, 4);
+        //reset after write data
+        cluster.numLights = 0;
+        cluster.currentLightStart = cluster.clusterStart+4;
     }
 
      dmBuffer::UpdateContentVersion(lightsManager->textureBuffer);
