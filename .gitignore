@@ -22,4 +22,4 @@ log.txt
 # /trenchbroom
 **/autosave/*.map
 
-./.idea
+/.idea
