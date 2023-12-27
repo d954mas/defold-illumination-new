@@ -47,11 +47,11 @@ void main() {
 
 
 
-    float clusterID = round(float(clusterX_index) +
-    float(clusterY_index) * clusters_data.x +
-    float(clusterZ_index) * clusters_data.x * clusters_data.y);
+    int clusterID = clusterX_index +
+    clusterY_index * int(clusters_data.x) +
+    clusterZ_index * int(clusters_data.x) * int(clusters_data.y);
 
-    highp int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
+    highp int cluster_tex_idx = int(lights_data.x)*LIGHT_DATA_PIXELS + clusterID * (1+int(clusters_data.w));
     int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*(clusters_data.w+1.0)));
 
     for (int i = 0; i < num_lights; ++i) {
