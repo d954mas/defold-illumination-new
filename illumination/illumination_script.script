@@ -18,14 +18,6 @@ function init(self)
 end
 
 function update(self, dt)
-	local w,h = window.get_size()
-	local aspect = w/h
-
-	illumination.lights_set_camera_aspect(aspect)
-	illumination.lights_set_camera_fov(math.rad(75))
-	illumination.lights_set_camera_far(15)
-
-
 	ILLUMINATION:set_ambient_color(self.ambient_color.x,self.ambient_color.y,self.ambient_color.z)
 	ILLUMINATION:set_ambient_color_intensity(self.ambient_level)
 

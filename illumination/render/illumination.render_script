@@ -43,9 +43,15 @@ function update(self)
 	--print("w:" .. width .. "h:" .. height)
 
 	ILLUMINATION:set_view(self.scene.view)
+	local aspect = width/height
+	local fov = math.rad(75)
+
+	illumination.lights_set_camera_aspect(aspect)
+	illumination.lights_set_camera_fov(fov)
+	illumination.lights_set_camera_far(15)
 
 
-	local projection = vmath.matrix4_perspective(math.rad(75), width / height, 0.001, 8)
+	local projection = vmath.matrix4_perspective(fov, aspect, 0.001, 8)
 
 	ILLUMINATION:set_frustum(projection*self.scene.view)
 	ILLUMINATION:set_camera(self.scene.view.m03,self.scene.view.m13,self.scene.view.m23)
