@@ -1,6 +1,11 @@
 local CLASS = require "illumination.middleclass"
 
+--to fixed shadow shimmering
+local FIXED_POINT = vmath.vector4(0, 0, 0, 1)
+local SHADOW_POINT = vmath.vector4(0, 0, 0, 1)
 local V4 = vmath.vector4()
+local MATRIX_LIGHTS = vmath.matrix4()
+local MATRIX_TRANSFORM = vmath.matrix4()
 local VIEW_DIRECTION = vmath.vector3()
 local VIEW_RIGHT = vmath.vector3()
 local VIEW_UP = vmath.vector3()
@@ -540,12 +545,9 @@ function Lights:set_camera(x, y, z)
 	xmath.cross(VIEW_UP, VIEW_RIGHT, VIEW_DIRECTION)
 	xmath.normalize(VIEW_UP, VIEW_UP)
 
-	local matrix_old = vmath.matrix4(self.shadow.light_matrix)
-
-	local transform = vmath.matrix4()
-	xmath.matrix_look_at(transform, self.shadow.light_position, self.shadow.root_position, VIEW_UP)
-	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.bias_matrix, self.shadow.light_projection_base)
-	xmath.matrix_mul(self.shadow.light_matrix, self.shadow.light_matrix, transform)
+	xmath.matrix_look_at(MATRIX_TRANSFORM, self.shadow.light_position, self.shadow.root_position, VIEW_UP)
+	xmath.matrix_mul(MATRIX_LIGHTS, self.shadow.bias_matrix, self.shadow.light_projection_base)
+	xmath.matrix_mul(MATRIX_LIGHTS, MATRIX_LIGHTS, MATRIX_TRANSFORM)
 
 	for idx, point in ipairs(POINTS_CUBE) do
 		local result = POINTS_CUBE_RESULT[idx]
@@ -557,7 +559,7 @@ function Lights:set_camera(x, y, z)
 	local min_x, max_x = math.huge, -math.huge
 	local min_y, max_y = math.huge, -math.huge
 	for _, point in ipairs(POINTS_CUBE_RESULT) do
-		xmath.matrix_mul_v4(TEMP_V4, self.shadow.light_matrix, point)
+		xmath.matrix_mul_v4(TEMP_V4, MATRIX_LIGHTS, point)
 		local px, py = TEMP_V4.x / TEMP_V4.w, TEMP_V4.y / TEMP_V4.w
 		if px < min_x then min_x = px end
 		if px > max_x then max_x = px end
@@ -569,11 +571,11 @@ function Lights:set_camera(x, y, z)
 			or min_y < self.shadow.light_projection_bounds.z or max_y > self.shadow.light_projection_bounds.w then
 		--print("old shadow uv:x[" .. self.shadow.light_projection_bounds.x .. " " .. self.shadow.light_projection_bounds.y .. "] y[" .. self.shadow.light_projection_bounds.z .. " " .. self.shadow.light_projection_bounds.w .. "] w:" .. self.shadow.light_projection_bounds.y - self.shadow.light_projection_bounds.x .. " h:" .. self.shadow.light_projection_bounds.w - self.shadow.light_projection_bounds.z)
 		--print("shadow uv new:x[" .. min_x .. " " .. max_x .. "] y[" .. min_y .. " " .. max_y .. "] w:" .. max_x - min_x .. " h:" .. max_y - min_y)
-		xmath.matrix_from_matrix(self.shadow.light_transform, transform)
 	else
-		self.shadow.light_matrix = matrix_old
 		return
 	end
+	xmath.matrix_from_matrix(self.shadow.light_transform, MATRIX_TRANSFORM)
+	xmath.matrix_from_matrix(self.shadow.light_matrix, MATRIX_LIGHTS)
 
 	local frustumWidth = max_x - min_x
 	local frustumHeight = max_y - min_y
@@ -632,13 +634,13 @@ function Lights:set_camera(x, y, z)
 
 
 	-- Step 1: Transform a fixed world space point to texture space
-	local fixedPoint = vmath.vector4(0, 0, 0, 1)  -- Example: using the origin
-	local shadow_point = self.shadow.light_matrix * fixedPoint
+	  -- Example: using the origin
+	xmath.matrix_mul_v4(SHADOW_POINT,self.shadow.light_matrix,FIXED_POINT)
 	-- Step 2:  finding its offset from the center of a texel in shadow map space (where the texture sample round to)
 	local texelSize = 1 / self.shadow.BUFFER_RESOLUTION
 
-	local shadow_point_x = shadow_point.x / shadow_point.w
-	local shadow_point_y = shadow_point.y / shadow_point.w
+	local shadow_point_x = SHADOW_POINT.x / SHADOW_POINT.w
+	local shadow_point_y = SHADOW_POINT.y / SHADOW_POINT.w
 
 
 	-- Find the nearest texel center to the normalized point
