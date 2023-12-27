@@ -31,9 +31,9 @@ void main() {
     vec3 ambient = ambient_color.rgb * ambient_color.w;
     illuminance_color = illuminance_color + ambient;
 
-    float axis_x = lights_data.w-lights_data.z;
-    float axis_y = lights_data2.y-lights_data2.x;
-    float axis_z = lights_data2.w-lights_data2.z;
+    float axis_x = lights_data.w-lights_data.z+1.0;
+    float axis_y = lights_data2.y-lights_data2.x+1.0;
+    float axis_z = lights_data2.w-lights_data2.z+1.0;
 
 
     highp float xStride = screen_size.x/clusters_data.x;
@@ -52,11 +52,11 @@ void main() {
     float(clusterZ_index) * clusters_data.x * clusters_data.y);
 
     highp int cluster_tex_idx = int(round(lights_data.x*float(LIGHT_DATA_PIXELS) + clusterID * (1.0+clusters_data.w)));
-    int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*clusters_data.w));
+    int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*(clusters_data.w+1.0)));
 
     for (int i = 0; i < num_lights; ++i) {
         highp int light_tex_idx = cluster_tex_idx +1 + i;
-        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*lights_data.x));
+        int lightIdx = int(round(rgba_to_float(getData(light_tex_idx))*(lights_data.x+1.0)));
         // lightIdx = i;
        // if (num_lights!= int(lights_data.x)){
          //   gl_FragColor = vec4(1.0,0.0,0.0, 1.0);

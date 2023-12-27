@@ -70,15 +70,15 @@ inline float Fract(float f){
     return f - floor(f);
 }
 
+//encode from [0;1)
 inline dmVMath::Vector4 EncodeFloatRGBA(float v, float min, float max){
     //if (v<MIN_BORDER){MIN_BORDER = v;}
     //if (v>MAX_BORDER){MAX_BORDER = v;}
     assert(v>=min);
-    assert(v<=max);
+    assert(v<max);
     assert(max>min);
     v = (v- min)/(max-min);
-    assert(v>=0.0);
-    assert(v<=1.0);
+
     dmVMath::Vector4 enc = dmVMath::Vector4(1.0, 255.0, 65025.0, 16581375.0) * v;
     enc.setX(Fract(enc.getX()));
     enc.setY(Fract(enc.getY()));
@@ -233,17 +233,17 @@ inline bool LightIsAddLightToScene(Light* light) {
 }
 
 inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) {
-    dmVMath::Vector4 posX = EncodeFloatRGBA(light->position.getX(),LIGHT_MIN_POSITION_X,LIGHT_MAX_POSITION_X)*255;
+    dmVMath::Vector4 posX = EncodeFloatRGBA(light->position.getX(),LIGHT_MIN_POSITION_X,LIGHT_MAX_POSITION_X+1)*255;
     values[0] = posX.getX();values[1] = posX.getY();values[2] = posX.getZ();values[3] = posX.getW();
     values+=stride;
 
     //dmLogInfo("light:%d x:%f y:%f z:%f",light->index,light->position.getX(),light->position.getY(),light->position.getZ());
 
-    dmVMath::Vector4 posY = EncodeFloatRGBA(light->position.getY(),LIGHT_MIN_POSITION_Y,LIGHT_MAX_POSITION_Y)*255;
+    dmVMath::Vector4 posY = EncodeFloatRGBA(light->position.getY(),LIGHT_MIN_POSITION_Y,LIGHT_MAX_POSITION_Y+1)*255;
     values[0] = posY.getX();values[1] = posY.getY();values[2] = posY.getZ();values[3] = posY.getW();
     values+=stride;
 
-    dmVMath::Vector4 posZ = EncodeFloatRGBA(light->position.getZ(),LIGHT_MIN_POSITION_Z,LIGHT_MAX_POSITION_Z)*255;
+    dmVMath::Vector4 posZ = EncodeFloatRGBA(light->position.getZ(),LIGHT_MIN_POSITION_Z,LIGHT_MAX_POSITION_Z+1)*255;
     values[0] = posZ.getX();values[1] = posZ.getY();values[2] = posZ.getZ();values[3] = posZ.getW();
     values+=stride;
 
@@ -548,7 +548,7 @@ public:
             Light* light = &lights[i];
              // Initialize default values for each light
             light->index = numLights-1-i;
-            dmVMath::Vector4 encodedIndex = EncodeFloatRGBA(light->index,0,numLights)*255;
+            dmVMath::Vector4 encodedIndex = EncodeFloatRGBA(light->index,0,numLights+1)*255;
             light->encodedIndex[0] = encodedIndex.getX();
             light->encodedIndex[1] = encodedIndex.getY();
             light->encodedIndex[2] = encodedIndex.getZ();
@@ -564,7 +564,7 @@ public:
         encodedClusterLights = new uint8_t[maxLightsPerCluster*4];
         uint8_t* encodedClusterLightsIterator = encodedClusterLights;
         for (int i = 0; i < maxLightsPerCluster; ++i) {
-            dmVMath::Vector4 lights = EncodeFloatRGBA(i,0,maxLightsPerCluster)*255;
+            dmVMath::Vector4 lights = EncodeFloatRGBA(i,0,maxLightsPerCluster+1)*255;
             encodedClusterLightsIterator[0] = lights.getX();
             encodedClusterLightsIterator[1] = lights.getY();
             encodedClusterLightsIterator[2] = lights.getZ();
