@@ -669,10 +669,10 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     for (int i = 0; i < lightsManager->lightsInWorld.Size(); ++i) {
         Light* light = lightsManager->lightsInWorld[i];
         bool addToScene = LightIsAddLightToScene(light);
-        //if (addToScene) {
-          //  addToScene = lightsManager->frustum.IsBoxVisible(dmVMath::Vector3(light->aabb[0], light->aabb[1], light->aabb[2]),
-        //                                                    dmVMath::Vector3(light->aabb[3], light->aabb[4], light->aabb[5]));
-       // }
+        if (addToScene) {
+            addToScene = lightsManager->frustum.IsBoxVisible(dmVMath::Vector3(light->aabb[0], light->aabb[1], light->aabb[2]),
+                                                            dmVMath::Vector3(light->aabb[3], light->aabb[4], light->aabb[5]));
+        }
         if(addToScene){
             lightsManager->lightsVisibleInWorld.Push(light);
         }
@@ -687,55 +687,43 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     //}
     lightsManager->debugVisibleLights = 0;
 
-    //instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
-    float tan_Vertical_FoV_by_2 = tan(lightsManager->cameraFov * 0.5);
-    float zStride = (lightsManager->cameraFar-lightsManager->cameraNear) / lightsManager->zSlice;
+    float tanAlpha = tan(lightsManager->cameraFov);
+    float halfHeight = tanAlpha;
+    float halfWidth = halfHeight * lightsManager->cameraAspect;
+    float height = halfHeight * 2.0;
+    float width = halfWidth * 2.0;
+    dmLogInfo("halfHeight:%f halfWidth:%f",halfHeight,halfWidth);
+    float dz = (lightsManager->cameraFar - lightsManager->cameraNear) / lightsManager->zSlice;
 
-    for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
-         Light* l = lightsManager->lightsVisibleInWorld[i];
 
-         dmVMath::Vector4 pos = lightsManager->view * dmVMath::Vector4(l->position.getX(),l->position.getY(),
-            l->position.getZ(),1);
-         pos.setZ(-pos.getZ());
+   for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
+        Light* l = lightsManager->lightsVisibleInWorld[i];
+        float radius = l->radius;
+        dmVMath::Vector4 posMinView = lightsManager->view * dmVMath::Vector4(l->position.getX()-radius,l->position.getY()-radius,l->position.getZ()-radius,1);
+        dmVMath::Vector4 posMaxView = lightsManager->view * dmVMath::Vector4(l->position.getX()+radius,l->position.getY()+radius,l->position.getZ()+radius,1);
 
-        float x1 = pos.getX() - l->radius;
-        float y1 = pos.getY() - l->radius;
-        float z1 = pos.getZ() - l->radius;
-        float x2 = pos.getX() + l->radius;
-        float y2 = pos.getY() + l->radius;
-        float z2 = pos.getZ() + l->radius;
+        float x1 = posMinView.getX();
+        float y1 = posMinView.getY();
+        float z1 = posMinView.getZ();
 
-      //  dmLogInfo("x1:%f x2:%f y1:%f y2:%f z1:%f z2:%f",x1,x2,y1,y2,z1,z2);
+        float x2 = posMaxView.getX();
+        float y2 = posMaxView.getY();
+        float z2 = posMaxView.getZ();
 
-        float h_lightFrustum = abs(tan_Vertical_FoV_by_2 * pos.getZ() * 2);
-        float w_lightFrustum = abs(lightsManager->cameraAspect * h_lightFrustum);
+        x1 = (x1 + halfWidth) / width * lightsManager->xSlice;
+        y1 = (y1 + halfHeight) / height * lightsManager->ySlice;
+        z1 = z1 / dz;
 
-        //fixed bad values when xStride == 0
-        float xStride = fmax(w_lightFrustum / lightsManager->xSlice,0.000001);
-        float yStride = fmax(h_lightFrustum / lightsManager->ySlice,0.000001);
+        x2 = (x2 + halfWidth) / width * lightsManager->xSlice;
+        y2 = (y2 + halfHeight) / height * lightsManager->ySlice;
+        z2 = z2 / dz;
 
-        //Need to extend this by -1 and +1 to avoid edge cases where light
-        //technically could fall outside the bounds we make because the planes themeselves are tilted by some angle
-        // the effect is exaggerated the steeper the angle the plane makes is
-        int zStartIndex = floor(z1 / zStride)-1;
-        int zEndIndex = floor(z2 / zStride)+1;
-      //  dmLogInfo("zStride:%f zStartIndex:%d zEndIndex:%d",zStride,zStartIndex,zEndIndex);
-        int yStartIndex = floor((y1 + h_lightFrustum * 0.5) / yStride);
-        int yEndIndex = floor((y2 + h_lightFrustum * 0.5) / yStride);
-        int xStartIndex = floor((x1 + w_lightFrustum * 0.5) / xStride) - 1;
-        int xEndIndex = floor((x2 + w_lightFrustum * 0.5) / xStride) + 1;
-
-        if((zStartIndex < 0 && zEndIndex < 0) || (zStartIndex >= lightsManager->zSlice && zEndIndex >= lightsManager->zSlice)){
-            continue; //light wont fall into any cluster
-        }
-        if((yStartIndex < 0 && yEndIndex < 0) || (yStartIndex >= lightsManager->ySlice && yEndIndex >= lightsManager->ySlice)){
-            continue; //light wont fall into any cluster
-        }
-        if((xStartIndex < 0 && xEndIndex < 0) || (xStartIndex >= lightsManager->xSlice && xEndIndex >= lightsManager->xSlice)){
-            continue; //light wont fall into any cluster
-        }
-
-        lightsManager->debugVisibleLights++;
+        int xStartIndex = fmin(x1,x2);
+        int xEndIndex = fmax(x1,x2);
+        int yStartIndex = fmin(y1,y2);
+        int yEndIndex = fmax(y1,y2);
+        int zStartIndex = fmin(z1,z2);
+        int zEndIndex = fmax(z1,z2);
 
         zStartIndex = fmax(0, fmin(zStartIndex, lightsManager->zSlice - 1));
         zEndIndex = fmax(0, fmin(zEndIndex, lightsManager->zSlice - 1));
@@ -745,6 +733,11 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
 
         xStartIndex = fmax(0, fmin(xStartIndex, lightsManager->xSlice - 1));
         xEndIndex = fmax(0, fmin(xEndIndex, lightsManager->xSlice - 1));
+
+
+        lightsManager->debugVisibleLights++;
+
+
 
        // zStartIndex = 0;
        // zEndIndex = lightsManager->zSlice-1;
