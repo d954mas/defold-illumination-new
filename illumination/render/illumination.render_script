@@ -16,8 +16,6 @@ function init(self)
 		predicate = render.predicate({ 'text' })
 	}
 
-
-
 	self.draw_opts = {
 		constants = render.constant_buffer(),
 		frustum = nil,
@@ -43,39 +41,32 @@ function update(self)
 	--print("w:" .. width .. "h:" .. height)
 
 	ILLUMINATION:set_view(self.scene.view)
-	local aspect = width/height
+	local aspect = width / height
 	local fov = math.rad(75)
 
-	illumination.lights_set_camera_aspect(aspect)
-	illumination.lights_set_camera_fov(fov)
-	illumination.lights_set_camera_far(15)
-
+	ILLUMINATION:set_lights_camera_aspect(aspect)
+	ILLUMINATION:set_lights_camera_fov(fov)
+	ILLUMINATION:set_lights_camera_far(15)
+	ILLUMINATION:set_lights_camera_near(0.01)
 
 	local projection = vmath.matrix4_perspective(fov, aspect, 0.001, 8)
 
-	ILLUMINATION:set_frustum(projection*self.scene.view)
-	ILLUMINATION:set_camera(self.scene.view.m03,self.scene.view.m13,self.scene.view.m23)
+	ILLUMINATION:set_frustum(projection * self.scene.view)
+	ILLUMINATION:set_camera(self.scene.view.m03, self.scene.view.m13, self.scene.view.m23)
 
 	illumination.lights_set_view(self.scene.view)
-	illumination.lights_set_frustum(self.scene.projection*self.scene.view)
+	illumination.lights_set_frustum(self.scene.projection * self.scene.view)
 	local time = chronos.nanotime()
 	ILLUMINATION:update_lights()
 	--hotfix use global for gui debug info
-	update_clusters_time = chronos.nanotime()-time
-
+	update_clusters_time = chronos.nanotime() - time
 
 	ILLUMINATION:render_shadows()
 
 	render.set_viewport(0, 0, width, height)
 	render.clear(self.clear_options)
 
-
-
-
 	render.set_viewport(0, 0, width, height)
-
-
-
 
 	ILLUMINATION:draw_begin()
 	-- scene
@@ -104,7 +95,7 @@ function update(self)
 	render.draw(self.gui.predicate)
 	render.draw(self.text.predicate)
 
---	ILLUMINATION:draw_debug_planes()
+	--	ILLUMINATION:draw_debug_planes()
 	ILLUMINATION:draw_shadow_debug()
 	ILLUMINATION:draw_data_lights_debug()
 end

@@ -242,8 +242,16 @@ function Lights:initialize()
 	self.light_texture_data = vmath.vector4()
 	self.lights_data = vmath.vector4(0, 0, 0, 0)
 	self.lights_data2 = vmath.vector4()
+	self.lights_camera_data = vmath.vector4()--near, far
 	self.clusters_data = vmath.vector4() -- x_slices, y_slices, z_slices, max_lights_per_cluster
 	self.screen_size = vmath.vector4()
+
+	self.lights_camera = {
+		aspect = 1;
+		fov = 1;
+		near = 0.01;
+		far = 1;
+	}
 
 	self.debug = false
 	self.enable_lights = false
@@ -283,6 +291,9 @@ function Lights:initialize()
 	self.shadow_params.x = self.shadow.BUFFER_RESOLUTION
 	self.shadow_params.y = 0.008
 
+	self.lights_camera.x = self.lights_camera.near
+	self.lights_camera.y = self.lights_camera.far
+
 	---@class LightsData
 	self.lights = {
 		in_world = {},
@@ -303,7 +314,7 @@ function Lights:init(shadow_texture_resource, data_texture_resource)
 
 	self.clusters_data.x = illumination.lights_get_x_slice()
 	self.clusters_data.y = illumination.lights_get_y_slice()
-	self.clusters_data.z = illumination.lights_get_z_slice_for_shader()
+	self.clusters_data.z = illumination.lights_get_z_slice()
 	self.clusters_data.w = illumination.lights_get_lights_per_cluster()
 
 	for _, constant in ipairs(self.constants) do
@@ -311,6 +322,7 @@ function Lights:init(shadow_texture_resource, data_texture_resource)
 		constant.lights_data = self.lights_data
 		constant.lights_data2 = self.lights_data2
 		constant.clusters_data = self.clusters_data
+		constant.lights_camera_data = self.lights_camera_data
 	end
 
 	self.data_texture_resource = data_texture_resource
@@ -733,15 +745,6 @@ end
 
 function Lights:update_lights()
 	if not self.enable_lights then return end
-
-	local new_z = illumination.lights_get_z_slice_for_shader()
-	if self.clusters_data.z ~= new_z then
-		self.clusters_data.z = new_z
-		for _, constant in ipairs(self.constants) do
-			constant.clusters_data = self.clusters_data
-		end
-	end
-
 	illumination.lights_update()
 end
 
@@ -759,6 +762,42 @@ function Lights:dispose()
 		illumination.light_destroy(l)
 	end
 	self.lights.in_world = {}
+end
+
+function Lights:set_lights_camera_fov(fov)
+	if self.lights_camera.fov ~= fov then
+		self.lights_camera.fov = fov
+		illumination.lights_set_camera_fov(fov)
+	end
+end
+
+function Lights:set_lights_camera_far(far)
+	if self.lights_camera.far ~= far then
+		self.lights_camera.far = far
+		illumination.lights_set_camera_far(far)
+		self.lights_camera_data.y = self.lights_camera.far
+		for _, constant in ipairs(self.constants)do
+			constant.lights_camera_data = self.lights_camera_data
+		end
+	end
+end
+
+function Lights:set_lights_camera_near(near)
+	if self.lights_camera.near ~= near then
+		self.lights_camera.near = near
+		illumination.lights_set_camera_near(near)
+		self.lights_camera_data.x = self.lights_camera.near
+		for _, constant in ipairs(self.constants)do
+			constant.lights_camera_data = self.lights_camera_data
+		end
+	end
+end
+
+function Lights:set_lights_camera_aspect(aspect)
+	if self.lights_camera.aspect ~= aspect then
+		self.lights_camera.aspect = aspect
+		illumination.lights_set_camera_aspect(aspect)
+	end
 end
 
 --endregion

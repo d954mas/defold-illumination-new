@@ -502,7 +502,7 @@ public:
     int xSlice, ySlice, zSlice;
     int debugVisibleLights = 0;
 
-    float cameraAspect, cameraFov, cameraFar;
+    float cameraAspect, cameraFov, cameraFar, cameraNear;
 
     dmBuffer::HBuffer textureBuffer = 0x0;
     int textureWidth, textureHeight;
@@ -511,6 +511,10 @@ public:
 
 
     LightsManager(){
+        cameraAspect = 1;
+        cameraFov = 1;
+        cameraFar = 1;
+        cameraNear =0.01;
 
     }
     ~LightsManager(){
@@ -683,7 +687,7 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
 
     //instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
     float tan_Vertical_FoV_by_2 = tan(lightsManager->cameraFov * 0.5);
-    float zStride = (lightsManager->cameraFar) / lightsManager->zSlice;
+    float zStride = (lightsManager->cameraFar-lightsManager->cameraNear) / lightsManager->zSlice;
 
     for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
          Light* l = lightsManager->lightsVisibleInWorld[i];
@@ -990,6 +994,13 @@ static int LuaLightsManagerSetCameraFar(lua_State* L) {
     return 0;
 }
 
+static int LuaLightsManagerSetCameraNear(lua_State* L) {
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    g_lightsManager.cameraNear =  luaL_checknumber(L, 1);
+    return 0;
+}
+
 static int LuaLightsManagerGetMaxLights(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 1);
     check_arg_count(L, 0);
@@ -1043,13 +1054,6 @@ static int LuaLightsManagerGetZSlice(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 1);
     check_arg_count(L, 0);
     lua_pushnumber(L,g_lightsManager.zSlice);
-    return 1;
-}
-
-static int LuaLightsManagerGetZSliceForShader(lua_State* L) {
-    DM_LUA_STACK_CHECK(L, 1);
-    check_arg_count(L, 0);
-    lua_pushnumber(L,g_lightsManager.cameraFar/g_lightsManager.zSlice);
     return 1;
 }
 

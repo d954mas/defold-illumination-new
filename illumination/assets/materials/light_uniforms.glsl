@@ -25,6 +25,7 @@ uniform highp vec4 fog;
 uniform highp vec4 light_texture_data;
 uniform highp vec4 lights_data; //lights count,radius_max,x_min,xmax
 uniform highp vec4 lights_data2; //y_min,y_max,z_min,z_max
+uniform highp vec4 lights_camera_data; //near, far
 uniform highp vec4 clusters_data; //x_slice, y_slice, z_slice, max_lights_per_cluster
 uniform highp vec4 screen_size;
 

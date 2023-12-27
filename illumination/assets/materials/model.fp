@@ -38,7 +38,7 @@ void main() {
 
     highp float xStride = screen_size.x/clusters_data.x;
     highp float yStride = screen_size.y/clusters_data.y;
-    highp float zStride = clusters_data.z;
+    highp float zStride = (lights_camera_data.y-lights_camera_data.x)/clusters_data.z;
 
 
     int clusterX_index = int(floor(gl_FragCoord.x/ xStride));
@@ -146,7 +146,7 @@ void main() {
     gl_FragColor = vec4(color, texture_color.a);
 
     //float colorz = floor(-var_view_position.z-camNear)/clusters_data.z;
-   // gl_FragColor = vec4(float(clusterX_index)/clusters_data.x,float(clusterY_index)/clusters_data.y,float(clusterZ_index)/15.0, texture_color.a);
-   // gl_FragColor = vec4(float(clusterZ_index)/5.0,float(clusterZ_index)/5.0,float(clusterZ_index)/5.0, texture_color.a);
+    //gl_FragColor = vec4(float(clusterX_index)/clusters_data.x,float(clusterY_index)/clusters_data.y,float(clusterZ_index)/clusters_data.z, texture_color.a);
+    //gl_FragColor = vec4(float(clusterZ_index)/clusters_data.z,float(clusterZ_index)/clusters_data.z,float(clusterZ_index)/clusters_data.z, texture_color.a);
     //gl_FragColor = vec4(clusterZ_index/10.0,color.g,color.b, texture_color.a);
 }
