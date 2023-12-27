@@ -11,6 +11,8 @@ varying mediump vec3 var_world_normal;
 varying highp vec4 var_view_position;
 varying highp vec3 var_camera_position;
 
+uniform highp mat4 mtx_view;
+
 void main() {
     vec4 texture_color = texture2D(DIFFUSE_TEXTURE, var_texcoord0);
     vec3 color = texture_color.rgb;
@@ -43,13 +45,16 @@ void main() {
 
     int clusterX_index = int(floor(gl_FragCoord.x/ xStride));
     int clusterY_index = int(floor(gl_FragCoord.y/ yStride));
-    int clusterZ_index = int(floor(-var_view_position.z) / zStride);
+    //int clusterZ_index = int(floor(-var_view_position.z) / zStride);
 
-
+    int clusterZ_index = int(floor((-var_view_position.z-0.1) / (float(15-0.01) / float(1))));
+    //clusterZ_index = 0;
 
     int clusterID = clusterX_index +
-    clusterY_index * int(clusters_data.x) +
-    clusterZ_index * int(clusters_data.x) * int(clusters_data.y);
+        clusterY_index * int(clusters_data.x) +
+        clusterZ_index * int(clusters_data.x) * int(clusters_data.y);
+
+    clusterID = 0;
 
     highp int cluster_tex_idx = int(lights_data.x)*LIGHT_DATA_PIXELS + clusterID * (1+int(clusters_data.w));
     int num_lights = int(round(rgba_to_float(getData(cluster_tex_idx))*(clusters_data.w+1.0)));
@@ -146,7 +151,7 @@ void main() {
     gl_FragColor = vec4(color, texture_color.a);
 
     //float colorz = floor(-var_view_position.z-camNear)/clusters_data.z;
-   // gl_FragColor = vec4(float(clusterX_index)/clusters_data.x,float(clusterY_index)/clusters_data.y,float(clusterZ_index)/15.0, texture_color.a);
+   // gl_FragColor = vec4(float(clusterX_index)/clusters_data.x,float(clusterY_index)/clusters_data.y,float(clusterZ_index), texture_color.a);
    // gl_FragColor = vec4(float(clusterZ_index)/5.0,float(clusterZ_index)/5.0,float(clusterZ_index)/5.0, texture_color.a);
-    //gl_FragColor = vec4(clusterZ_index/10.0,color.g,color.b, texture_color.a);
+    //gl_FragColor = vec4(clusterZ_index/15.0,clusterZ_index/15.0,clusterZ_index/15.0, texture_color.a);
 }

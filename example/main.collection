@@ -39,12 +39,12 @@ collection_instances {
       id: "operator"
       properties {
         id: "camera_near_z"
-        value: "0.001"
+        value: "0.01"
         type: PROPERTY_TYPE_NUMBER
       }
       properties {
         id: "camera_far_z"
-        value: "15.0"
+        value: "7.0"
         type: PROPERTY_TYPE_NUMBER
       }
     }

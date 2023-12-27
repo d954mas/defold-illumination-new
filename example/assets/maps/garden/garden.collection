@@ -22,7 +22,7 @@ instances {
     }
     properties {
       id: "brightness"
-      value: "1.0"
+      value: "0.0"
       type: PROPERTY_TYPE_NUMBER
     }
     properties {
@@ -108,7 +108,7 @@ instances {
     }
     properties {
       id: "brightness"
-      value: "1.0"
+      value: "0.0"
       type: PROPERTY_TYPE_NUMBER
     }
     properties {
@@ -161,7 +161,7 @@ instances {
     }
     properties {
       id: "brightness"
-      value: "1.0"
+      value: "0.0"
       type: PROPERTY_TYPE_NUMBER
     }
     properties {
