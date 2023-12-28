@@ -111,6 +111,7 @@ static const luaL_reg Module_methods[] = {
     {"lights_set_texture_path", LuaLightsManagerSetTexturePath},
     {"lights_set_frustum", LuaLightsManagerSetFrustumMatrix},
     {"lights_set_view", LuaLightsManagerSetViewMatrix},
+    {"lights_set_projection", LuaLightsManagerSetVProjectionMatrix},
     {"lights_set_camera_fov", LuaLightsManagerSetCameraFov},
     {"lights_set_camera_far", LuaLightsManagerSetCameraFar},
     {"lights_set_camera_near", LuaLightsManagerSetCameraNear},

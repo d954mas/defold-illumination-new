@@ -66,6 +66,35 @@ void FindTextureDimensions(int totalPixels, int& width, int& height) {
 }
 //endregion
 
+inline dmVMath::Vector3 getSliceSpaceFromWorldSpace(
+    const dmVMath::Vector4& pos_worldSpace,
+    float cameraNear,
+    float inverseCameraFar,
+    const dmVMath::Matrix4& viewMatrix,
+    const dmVMath::Matrix4& projectionMatrix,
+    float dz,
+    int xSlices,
+    int ySlices
+) {
+    // Transform world space position to camera space
+    dmVMath::Vector4 pos_camSpace = viewMatrix * pos_worldSpace;
+
+    // Transform camera space position to screen space
+    dmVMath::Vector4 pos_screenSpace = projectionMatrix * pos_camSpace;
+
+    // Normalize screen space coordinates and calculate slice space position
+    dmVMath::Vector3 pos_sliceSpace = {
+        (pos_screenSpace.getX() + 1.0f) / 2.0f * xSlices,
+        (pos_screenSpace.getY() + 1.0f) / 2.0f * ySlices,
+        -(pos_camSpace.getZ() - cameraNear) / dz
+    };
+
+    dmLogInfo("pos_sliceSpace(%f,%f,%f)",pos_sliceSpace.getX(),pos_sliceSpace.getY(),pos_sliceSpace.getZ());
+    dmLogInfo("pos_camSpace %f %f %f",pos_camSpace.getX(), pos_camSpace.getY(), pos_camSpace.getZ());
+
+    return pos_sliceSpace;
+}
+
 inline float Fract(float f){
     return f - floor(f);
 }
@@ -491,7 +520,8 @@ public:
     Light* lights = NULL;
     LightCluster* clusters = NULL;
     Frustum frustum = Frustum(dmVMath::Matrix4());
-    dmVMath::Matrix4 view;
+    dmVMath::Matrix4 view, projection;
+
 
     dmArray<Light*> lightsPool;
     dmArray<Light*> lightsInWorld;
@@ -687,53 +717,50 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     //}
     lightsManager->debugVisibleLights = 0;
 
-    float tanAlpha = tan(lightsManager->cameraFov);
-    float halfHeight = tanAlpha;
-    float halfWidth = halfHeight * lightsManager->cameraAspect;
-    float height = halfHeight * 2.0;
-    float width = halfWidth * 2.0;
-    dmLogInfo("halfHeight:%f halfWidth:%f",halfHeight,halfWidth);
     float dz = (lightsManager->cameraFar - lightsManager->cameraNear) / lightsManager->zSlice;
-
+    float inverseCameraFar = 1.0 / lightsManager->cameraFar;
 
    for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
         Light* l = lightsManager->lightsVisibleInWorld[i];
         float radius = l->radius;
-        dmVMath::Vector4 posMinView = lightsManager->view * dmVMath::Vector4(l->position.getX()-radius,l->position.getY()-radius,l->position.getZ()-radius,1);
-        dmVMath::Vector4 posMaxView = lightsManager->view * dmVMath::Vector4(l->position.getX()+radius,l->position.getY()+radius,l->position.getZ()+radius,1);
 
-        float x1 = posMinView.getX();
-        float y1 = posMinView.getY();
-        float z1 = posMinView.getZ();
+        dmVMath::Vector4 posMinWorld = dmVMath::Vector4(l->position.getX()-radius,l->position.getY()-radius,l->position.getZ()-radius,1);
+        dmVMath::Vector4 posMaxWorld = dmVMath::Vector4(l->position.getX()+radius,l->position.getY()+radius,l->position.getZ()+radius,1);
+        //posMinWorld.setZ(-posMinWorld.getZ());
+        //posMaxWorld.setZ(-posMaxWorld.getZ());
+       dmVMath::Vector3 posMinSlice = getSliceSpaceFromWorldSpace(posMinWorld, lightsManager->cameraNear, inverseCameraFar, lightsManager->view,
+            lightsManager->projection, dz, lightsManager->xSlice, lightsManager->ySlice);
+       dmVMath::Vector3 posMaxSlice = getSliceSpaceFromWorldSpace(posMaxWorld, lightsManager->cameraNear, inverseCameraFar, lightsManager->view,
+            lightsManager->projection, dz, lightsManager->xSlice, lightsManager->ySlice);
 
-        float x2 = posMaxView.getX();
-        float y2 = posMaxView.getY();
-        float z2 = posMaxView.getZ();
+            dmLogInfo("posMinSlice(%f,%f,%f) posMaxSlice(%f,%f,%f)",posMinSlice.getX(),posMinSlice.getY(),posMinSlice.getZ(),posMaxSlice.getX(),posMaxSlice.getY(),posMaxSlice.getZ());
 
-        x1 = (x1 + halfWidth) / width * lightsManager->xSlice;
-        y1 = (y1 + halfHeight) / height * lightsManager->ySlice;
-        z1 = z1 / dz;
+        if(posMinSlice.getX()>posMaxSlice.getX()){
+            float (value) = posMinSlice.getX();
+            posMinSlice.setX(posMaxSlice.getX());
+            posMaxSlice.setX(value);
+        }
+        if(posMinSlice.getY()>posMaxSlice.getY()){
+            float (value) = posMinSlice.getY();
+            posMinSlice.setY(posMaxSlice.getY());
+            posMaxSlice.setY(value);
+        }
+        if(posMinSlice.getZ()>posMaxSlice.getZ()){
+            float (value) = posMinSlice.getZ();
+            posMinSlice.setZ(posMaxSlice.getZ());
+            posMaxSlice.setZ(value);
+        }
 
-        x2 = (x2 + halfWidth) / width * lightsManager->xSlice;
-        y2 = (y2 + halfHeight) / height * lightsManager->ySlice;
-        z2 = z2 / dz;
+        int xStartIndex = fmax(0, fmin(posMinSlice.getX(), lightsManager->xSlice - 1));
+        int xEndIndex = fmax(0, fmin(posMaxSlice.getX(), lightsManager->xSlice - 1));
 
-        int xStartIndex = fmin(x1,x2);
-        int xEndIndex = fmax(x1,x2);
-        int yStartIndex = fmin(y1,y2);
-        int yEndIndex = fmax(y1,y2);
-        int zStartIndex = fmin(z1,z2);
-        int zEndIndex = fmax(z1,z2);
+        int  yStartIndex = fmax(0, fmin(posMinSlice.getY(), lightsManager->ySlice - 1));
+        int yEndIndex = fmax(0, fmin(posMaxSlice.getY(), lightsManager->ySlice - 1));
 
-        zStartIndex = fmax(0, fmin(zStartIndex, lightsManager->zSlice - 1));
-        zEndIndex = fmax(0, fmin(zEndIndex, lightsManager->zSlice - 1));
+        int zStartIndex = fmax(0, fmin(posMinSlice.getZ(), lightsManager->zSlice - 1));
+        int zEndIndex = fmax(0, fmin(posMaxSlice.getZ(), lightsManager->zSlice - 1));
 
-        yStartIndex = fmax(0, fmin(yStartIndex, lightsManager->ySlice - 1));
-        yEndIndex = fmax(0, fmin(yEndIndex, lightsManager->ySlice - 1));
-
-        xStartIndex = fmax(0, fmin(xStartIndex, lightsManager->xSlice - 1));
-        xEndIndex = fmax(0, fmin(xEndIndex, lightsManager->xSlice - 1));
-
+        dmLogInfo("x[%d %d]y[%d %d]z[%d %d]",xStartIndex,xEndIndex,yStartIndex,yEndIndex,zStartIndex,zEndIndex);
 
         lightsManager->debugVisibleLights++;
 
@@ -968,6 +995,16 @@ static int LuaLightsManagerSetViewMatrix(lua_State* L){
         return DM_LUA_ERROR("LightsManager not inited");
     }
     g_lightsManager.view = *dmScript::CheckMatrix4(L,1);
+    return 0;
+}
+
+static int LuaLightsManagerSetVProjectionMatrix(lua_State* L){
+    DM_LUA_STACK_CHECK(L, 0);
+    check_arg_count(L, 1);
+    if(!g_lightsManager.inited){
+        return DM_LUA_ERROR("LightsManager not inited");
+    }
+    g_lightsManager.projection = *dmScript::CheckMatrix4(L,1);
     return 0;
 }
 

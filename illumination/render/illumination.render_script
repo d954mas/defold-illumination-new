@@ -55,6 +55,7 @@ function update(self)
 	ILLUMINATION:set_camera(self.scene.view.m03, self.scene.view.m13, self.scene.view.m23)
 
 	illumination.lights_set_view(self.scene.view)
+	illumination.lights_set_projection(self.scene.projection)
 	illumination.lights_set_frustum(self.scene.projection * self.scene.view)
 	local time = chronos.nanotime()
 	ILLUMINATION:update_lights()
