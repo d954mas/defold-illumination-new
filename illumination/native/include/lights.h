@@ -657,6 +657,13 @@ private:
     LightsManager(const LightsManager&);
 };
 
+inline dmVMath::Vector3 getNormalComponents(float angle){
+    float bigHypot = sqrt(1 + angle*angle);
+    float normSide1 = 1.0 / bigHypot;
+    float normSide2 = -angle*normSide1;
+    return dmVMath::Vector3(normSide1,normSide2,0);
+}
+
 inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager){
     assert(lightsManager->inited);
     if(lightsManager->texturePath==HASH_EMPTY){
@@ -669,99 +676,107 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
     for (int i = 0; i < lightsManager->lightsInWorld.Size(); ++i) {
         Light* light = lightsManager->lightsInWorld[i];
         bool addToScene = LightIsAddLightToScene(light);
-        //if (addToScene) {
-          //  addToScene = lightsManager->frustum.IsBoxVisible(dmVMath::Vector3(light->aabb[0], light->aabb[1], light->aabb[2]),
-        //                                                    dmVMath::Vector3(light->aabb[3], light->aabb[4], light->aabb[5]));
-       // }
+        if (addToScene) {
+            addToScene = lightsManager->frustum.IsBoxVisible(dmVMath::Vector3(light->aabb[0], light->aabb[1], light->aabb[2]),
+                                                            dmVMath::Vector3(light->aabb[3], light->aabb[4], light->aabb[5]));
+        }
         if(addToScene){
             lightsManager->lightsVisibleInWorld.Push(light);
         }
     }
 
-    //update clusters https://github.com/AmanSachan1/WebGL-Clustered-Deferred-Forward-Plus/blob/master/src/renderers/clustered.js
-    //mark clusters empty
-    //RESET cluster after at end of update. After write cluster in buffer
-   // for(int i=0;i<lightsManager->totalClusters;++i){
-     //   lightsManager->clusters[i].numLights = 0;
-       // lightsManager->clusters[i].currentLightStart = lightsManager->clusters[i].clusterStart+4;
-    //}
+    //https://github.com/LanLou123/WebGL-Clustered-Deferred-Forward-Plus-Rendering/blob/master/src/renderers/base.js
     lightsManager->debugVisibleLights = 0;
 
-    //instead of using the farclip plane as the arbitrary plane to base all our calculations and division splitting off of
-    float tan_Vertical_FoV_by_2 = tan(lightsManager->cameraFov * 0.5);
-    float zStride = (lightsManager->cameraFar-lightsManager->cameraNear) / lightsManager->zSlice;
+    float halfY = tan(lightsManager->cameraFov * 0.5);
+    // dmLogInfo("w:%f h:%f",halfY*2,halfY*2 * lightsManager->cameraAspect)
+    float ylengthPerCluster = (halfY * 2.0 / lightsManager->ySlice);
+    float xlengthPerCluster = (halfY * 2.0 / lightsManager->xSlice) * lightsManager->cameraAspect;
+    float zlengthPerCluster = (lightsManager->cameraFar - lightsManager->cameraNear) / lightsManager->zSlice;
+    float ystart = -halfY;
+    float xstart = -halfY * lightsManager->cameraAspect;
 
     for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
-         Light* l = lightsManager->lightsVisibleInWorld[i];
+        Light* l = lightsManager->lightsVisibleInWorld[i];
 
-         dmVMath::Vector4 pos = lightsManager->view * dmVMath::Vector4(l->position.getX(),l->position.getY(),
-            l->position.getZ(),1);
-         pos.setZ(-pos.getZ());
+        float lightRadius = l->radius;
+        dmVMath::Vector4 viewPos  = lightsManager->view * dmVMath::Vector4(l->position.getX(),l->position.getY(),
+           l->position.getZ(),1);
+        //viewPos /= viewPos.getW();
 
-        float x1 = pos.getX() - l->radius;
-        float y1 = pos.getY() - l->radius;
-        float z1 = pos.getZ() - l->radius;
-        float x2 = pos.getX() + l->radius;
-        float y2 = pos.getY() + l->radius;
-        float z2 = pos.getZ() + l->radius;
+        dmVMath::Vector3 lightPos = dmVMath::Vector3(viewPos.getX(),viewPos.getY(),-viewPos.getZ());
 
-      //  dmLogInfo("x1:%f x2:%f y1:%f y2:%f z1:%f z2:%f",x1,x2,y1,y2,z1,z2);
+        int xminidx = lightsManager->xSlice;
+        int xmaxidx = lightsManager->xSlice;
+        int yminidx = lightsManager->ySlice;
+        int ymaxidx = lightsManager->ySlice;
+        float minposz = lightPos.getZ() - lightsManager->cameraNear - lightRadius;
+        float maxposz = lightPos.getZ() - lightsManager->cameraNear + lightRadius;
+        int zminidx  = floor(minposz / zlengthPerCluster);
+        int zmaxidx   = floor(maxposz  / zlengthPerCluster)+1;
 
-        float h_lightFrustum = abs(tan_Vertical_FoV_by_2 * pos.getZ() * 2);
-        float w_lightFrustum = abs(lightsManager->cameraAspect * h_lightFrustum);
-
-        //fixed bad values when xStride == 0
-        float xStride = fmax(w_lightFrustum / lightsManager->xSlice,0.000001);
-        float yStride = fmax(h_lightFrustum / lightsManager->ySlice,0.000001);
-
-        //Need to extend this by -1 and +1 to avoid edge cases where light
-        //technically could fall outside the bounds we make because the planes themeselves are tilted by some angle
-        // the effect is exaggerated the steeper the angle the plane makes is
-        int zStartIndex = floor(z1 / zStride)-1;
-        int zEndIndex = floor(z2 / zStride)+1;
-      //  dmLogInfo("zStride:%f zStartIndex:%d zEndIndex:%d",zStride,zStartIndex,zEndIndex);
-        int yStartIndex = floor((y1 + h_lightFrustum * 0.5) / yStride);
-        int yEndIndex = floor((y2 + h_lightFrustum * 0.5) / yStride);
-        int xStartIndex = floor((x1 + w_lightFrustum * 0.5) / xStride) - 1;
-        int xEndIndex = floor((x2 + w_lightFrustum * 0.5) / xStride) + 1;
-
-        if((zStartIndex < 0 && zEndIndex < 0) || (zStartIndex >= lightsManager->zSlice && zEndIndex >= lightsManager->zSlice)){
-            continue; //light wont fall into any cluster
+        if(zminidx >  lightsManager->zSlice-1 || zmaxidx < 0) {
+            continue;
         }
-        if((yStartIndex < 0 && yEndIndex < 0) || (yStartIndex >= lightsManager->ySlice && yEndIndex >= lightsManager->ySlice)){
-            continue; //light wont fall into any cluster
-        }
-        if((xStartIndex < 0 && xEndIndex < 0) || (xStartIndex >= lightsManager->xSlice && xEndIndex >= lightsManager->xSlice)){
-            continue; //light wont fall into any cluster
+        zminidx = fmax(0, zminidx);
+        zmaxidx = fmin(lightsManager->zSlice, zmaxidx);
+
+
+        for(int j = 0; j <= lightsManager->xSlice; ++j) {
+            dmVMath::Vector3 norm2 = getNormalComponents(xstart + xlengthPerCluster * j);
+            dmVMath::Vector3 norm3 = dmVMath::Vector3(norm2.getX(), 0, norm2.getY());
+            if (dmVMath::Dot(lightPos, norm3) < lightRadius) {
+                xminidx = j - 1;
+                break;
+            }
         }
 
+        for(int j = xminidx + 2; j <= lightsManager->xSlice; ++j) {
+            dmVMath::Vector3 norm2 = getNormalComponents(xstart + xlengthPerCluster * j);
+            dmVMath::Vector3 norm3 = dmVMath::Vector3(norm2.getX(), 0, norm2.getY());
+            if (dmVMath::Dot(lightPos, norm3) < -lightRadius) {
+                xmaxidx = j;
+                break;
+            }
+        }
+
+        for(int j = 0; j <= lightsManager->ySlice; ++j) {
+            dmVMath::Vector3 norm2 = getNormalComponents(ystart + ylengthPerCluster * j);
+            dmVMath::Vector3 norm3 = dmVMath::Vector3(0, norm2.getX(), norm2.getY());
+            if (dmVMath::Dot(lightPos, norm3) < lightRadius) {
+                yminidx =  j - 1;
+                break;
+            }
+        }
+
+        for(int j = yminidx + 2; j <= lightsManager->ySlice; ++j) {
+            dmVMath::Vector3 norm2 = getNormalComponents(ystart + ylengthPerCluster * j);
+            dmVMath::Vector3 norm3 = dmVMath::Vector3(0, norm2.getX(), norm2.getY());
+            if (dmVMath::Dot(lightPos, norm3) < -lightRadius) {
+                ymaxidx = j;
+                break;
+            }
+        }
+
+       // dmLogInfo("x[%d %d] y[%d %d] z[%d %d]",xminidx,xmaxidx,yminidx,ymaxidx,zminidx,zmaxidx);
+
+
+        xminidx = fmax(0,xminidx);
+        xmaxidx = fmin(xmaxidx,lightsManager->xSlice);
+        yminidx = fmax(0,yminidx);
+        ymaxidx = fmin(ymaxidx,lightsManager->ySlice);
+
+        if(xminidx==xmaxidx || yminidx==ymaxidx){
+            continue;
+        }
         lightsManager->debugVisibleLights++;
 
-        zStartIndex = fmax(0, fmin(zStartIndex, lightsManager->zSlice - 1));
-        zEndIndex = fmax(0, fmin(zEndIndex, lightsManager->zSlice - 1));
-
-        yStartIndex = fmax(0, fmin(yStartIndex, lightsManager->ySlice - 1));
-        yEndIndex = fmax(0, fmin(yEndIndex, lightsManager->ySlice - 1));
-
-        xStartIndex = fmax(0, fmin(xStartIndex, lightsManager->xSlice - 1));
-        xEndIndex = fmax(0, fmin(xEndIndex, lightsManager->xSlice - 1));
-
-       // zStartIndex = 0;
-       // zEndIndex = lightsManager->zSlice-1;
-
-       // yStartIndex = 0;
-       // yEndIndex = lightsManager->ySlice-1;
-
-       // xStartIndex = 0;
-       // xEndIndex = lightsManager->xSlice-1;
-
-
-        for (int z = zStartIndex; z <= zEndIndex; ++z) {
+        for (int z = zminidx; z < zmaxidx; ++z) {
             int zOffset = z * lightsManager->xSlice * lightsManager->ySlice;
-            for (int y = yStartIndex; y <= yEndIndex; ++y) {
+            for (int y = yminidx; y < ymaxidx; ++y) {
                 int yOffset = y * lightsManager->xSlice;
                 int zyOffset = zOffset + yOffset;
-                for (int x = xStartIndex; x <= xEndIndex; ++x) {
+                for (int x = xminidx; x < xmaxidx; ++x) {
                     int id = zyOffset + x;
                     LightCluster& cluster = lightsManager->clusters[id];
 
@@ -775,6 +790,8 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
                 }
             }
         }
+
+
     }
 
 
