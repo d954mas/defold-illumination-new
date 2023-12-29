@@ -502,6 +502,10 @@ public:
     int xSlice, ySlice, zSlice;
     int debugVisibleLights = 0;
 
+    float halfY,ylengthPerCluster,xlengthPerCluster,zlengthPerCluster;
+    dmVMath::Vector3* normalXClusters = NULL;
+    dmVMath::Vector3* normalYClusters = NULL;
+
     float cameraAspect, cameraFov, cameraFar, cameraNear;
 
     dmBuffer::HBuffer textureBuffer = 0x0;
@@ -520,7 +524,8 @@ public:
     ~LightsManager(){
         delete[] lights;
         delete[] clusters;
-        delete[] encodedClusterLights;
+        delete[] normalXClusters;
+        delete[] normalYClusters;
         //need L to unref
         //luaL_unref(L, LUA_REGISTRYINDEX, textureParamsRef);
         //for some reasons engine crash when destroy texture buffer. Maybe it destroy in other place when app is closed.
@@ -687,14 +692,8 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
 
     //https://github.com/LanLou123/WebGL-Clustered-Deferred-Forward-Plus-Rendering/blob/master/src/renderers/base.js
     lightsManager->debugVisibleLights = 0;
-
-    float halfY = tan(lightsManager->cameraFov * 0.5);
-    // dmLogInfo("w:%f h:%f",halfY*2,halfY*2 * lightsManager->cameraAspect)
-    float ylengthPerCluster = (halfY * 2.0 / lightsManager->ySlice);
-    float xlengthPerCluster = (halfY * 2.0 / lightsManager->xSlice) * lightsManager->cameraAspect;
-    float zlengthPerCluster = (lightsManager->cameraFar - lightsManager->cameraNear) / lightsManager->zSlice;
-    float ystart = -halfY;
-    float xstart = -halfY * lightsManager->cameraAspect;
+    float ystart = -lightsManager->halfY;
+    float xstart = -lightsManager->halfY * lightsManager->cameraAspect;
 
     for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
         Light* l = lightsManager->lightsVisibleInWorld[i];
@@ -712,8 +711,8 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         int ymaxidx = lightsManager->ySlice;
         float minposz = lightPos.getZ() - lightsManager->cameraNear - lightRadius;
         float maxposz = lightPos.getZ() - lightsManager->cameraNear + lightRadius;
-        int zminidx  = floor(minposz / zlengthPerCluster);
-        int zmaxidx   = floor(maxposz  / zlengthPerCluster)+1;
+        int zminidx  = floor(minposz / lightsManager->zlengthPerCluster);
+        int zmaxidx   = floor(maxposz  / lightsManager->zlengthPerCluster)+1;
 
         if(zminidx >  lightsManager->zSlice-1 || zmaxidx < 0) {
             continue;
@@ -723,36 +722,28 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
 
 
         for(int j = 0; j <= lightsManager->xSlice; ++j) {
-            dmVMath::Vector3 norm2 = getNormalComponents(xstart + xlengthPerCluster * j);
-            dmVMath::Vector3 norm3 = dmVMath::Vector3(norm2.getX(), 0, norm2.getY());
-            if (dmVMath::Dot(lightPos, norm3) < lightRadius) {
+            if (dmVMath::Dot(lightPos, lightsManager->normalXClusters[j]) < lightRadius) {
                 xminidx = j - 1;
                 break;
             }
         }
 
         for(int j = xminidx + 2; j <= lightsManager->xSlice; ++j) {
-            dmVMath::Vector3 norm2 = getNormalComponents(xstart + xlengthPerCluster * j);
-            dmVMath::Vector3 norm3 = dmVMath::Vector3(norm2.getX(), 0, norm2.getY());
-            if (dmVMath::Dot(lightPos, norm3) < -lightRadius) {
+            if (dmVMath::Dot(lightPos, lightsManager->normalXClusters[j]) < -lightRadius) {
                 xmaxidx = j;
                 break;
             }
         }
 
         for(int j = 0; j <= lightsManager->ySlice; ++j) {
-            dmVMath::Vector3 norm2 = getNormalComponents(ystart + ylengthPerCluster * j);
-            dmVMath::Vector3 norm3 = dmVMath::Vector3(0, norm2.getX(), norm2.getY());
-            if (dmVMath::Dot(lightPos, norm3) < lightRadius) {
+            if (dmVMath::Dot(lightPos, lightsManager->normalYClusters[j]) < lightRadius) {
                 yminidx =  j - 1;
                 break;
             }
         }
 
         for(int j = yminidx + 2; j <= lightsManager->ySlice; ++j) {
-            dmVMath::Vector3 norm2 = getNormalComponents(ystart + ylengthPerCluster * j);
-            dmVMath::Vector3 norm3 = dmVMath::Vector3(0, norm2.getX(), norm2.getY());
-            if (dmVMath::Dot(lightPos, norm3) < -lightRadius) {
+            if (dmVMath::Dot(lightPos, lightsManager->normalYClusters[j]) < -lightRadius) {
                 ymaxidx = j;
                 break;
             }
@@ -844,6 +835,64 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
         const char* error_msg = lua_tostring(L, -1);
         lua_pop(L, 1); // Pop error message
         luaL_error(L, "can't set light texture. %s",error_msg);
+    }
+}
+
+inline void LightsManagerCalculateClusters(LightsManager* lightsManager){
+    lightsManager->halfY  = tan(lightsManager->cameraFov * 0.5);
+    lightsManager->ylengthPerCluster  =  lightsManager->halfY*2.0 / lightsManager->ySlice;
+    lightsManager->xlengthPerCluster  =  lightsManager->halfY*2.0 / lightsManager->ySlice * lightsManager->cameraAspect;
+    lightsManager->zlengthPerCluster  =  (lightsManager->cameraFar - lightsManager->cameraNear) / lightsManager->zSlice;
+
+    delete[] lightsManager->normalXClusters;
+    delete[] lightsManager->normalYClusters;
+    lightsManager->normalXClusters = new dmVMath::Vector3[lightsManager->xSlice+1];
+    lightsManager->normalYClusters = new dmVMath::Vector3[lightsManager->ySlice+1];
+
+    float ystart = -lightsManager->halfY;
+    float xstart = -lightsManager->halfY * lightsManager->cameraAspect;
+
+    for(int i = 0; i <= lightsManager->xSlice; ++i) {
+        dmVMath::Vector3 norm2 = getNormalComponents(xstart + lightsManager->xlengthPerCluster * i);
+        lightsManager->normalXClusters[i] = dmVMath::Vector3(norm2.getX(), 0, norm2.getY());
+    }
+
+    for(int i = 0; i <= lightsManager->ySlice; ++i) {
+        dmVMath::Vector3 norm2 = getNormalComponents(ystart + lightsManager->ylengthPerCluster * i);
+        lightsManager->normalYClusters[i] = dmVMath::Vector3(0, norm2.getX(), norm2.getY());
+    }
+
+}
+
+inline void LightsManagerSetCameraFov(LightsManager* lightsManager,float cameraFov){
+    assert(lightsManager->inited);
+    if(lightsManager->cameraFov!=cameraFov){
+        lightsManager->cameraFov =  cameraFov;
+        LightsManagerCalculateClusters(lightsManager);
+    }
+}
+
+inline void LightsManagerSetCameraAspect(LightsManager* lightsManager,float cameraAspect){
+    assert(lightsManager->inited);
+    if(lightsManager->cameraAspect!=cameraAspect){
+        lightsManager->cameraAspect =  cameraAspect;
+        LightsManagerCalculateClusters(lightsManager);
+    }
+}
+
+inline void LightsManagerSetCameraNear(LightsManager* lightsManager,float cameraNear){
+    assert(lightsManager->inited);
+    if(lightsManager->cameraNear!=cameraNear){
+        lightsManager->cameraNear =  cameraNear;
+        LightsManagerCalculateClusters(lightsManager);
+    }
+}
+
+inline void LightsManagerSetCameraFar(LightsManager* lightsManager,float cameraFar){
+    assert(lightsManager->inited);
+    if(lightsManager->cameraFar!=cameraFar){
+        lightsManager->cameraFar =  cameraFar;
+        LightsManagerCalculateClusters(lightsManager);
     }
 }
 
@@ -998,28 +1047,28 @@ static int LuaLightsManagerSetViewMatrix(lua_State* L){
 static int LuaLightsManagerSetCameraAspect(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 0);
     check_arg_count(L, 1);
-    g_lightsManager.cameraAspect =  luaL_checknumber(L, 1);
+    LightsManagerSetCameraAspect(&g_lightsManager,luaL_checknumber(L, 1));
     return 0;
 }
 
 static int LuaLightsManagerSetCameraFov(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 0);
     check_arg_count(L, 1);
-    g_lightsManager.cameraFov =  luaL_checknumber(L, 1);
+    LightsManagerSetCameraFov(&g_lightsManager,luaL_checknumber(L, 1));
     return 0;
 }
 
 static int LuaLightsManagerSetCameraFar(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 0);
     check_arg_count(L, 1);
-    g_lightsManager.cameraFar =  luaL_checknumber(L, 1);
+    LightsManagerSetCameraFar(&g_lightsManager,luaL_checknumber(L, 1));
     return 0;
 }
 
 static int LuaLightsManagerSetCameraNear(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 0);
     check_arg_count(L, 1);
-    g_lightsManager.cameraNear =  luaL_checknumber(L, 1);
+    LightsManagerSetCameraNear(&g_lightsManager,luaL_checknumber(L, 1));
     return 0;
 }
 
