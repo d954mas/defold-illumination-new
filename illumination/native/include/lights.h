@@ -150,17 +150,17 @@ inline void LightReset(Light* light){
 //region Light
 inline void LightSetPosition(Light* light, float x, float y, float z) {
     if (x < LIGHT_MIN_POSITION_X || x > LIGHT_MAX_POSITION_X) {
-      dmLogWarning("Light X position out of bounds. Clamping to [%f, %f].", LIGHT_MIN_POSITION_X, LIGHT_MAX_POSITION_X);
+      dmLogWarning("Light X position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION_X, LIGHT_MAX_POSITION_X);
       x = fmax(LIGHT_MIN_POSITION_X, fmin(x, LIGHT_MAX_POSITION_X));
     }
 
     if (y < LIGHT_MIN_POSITION_Y || y > LIGHT_MAX_POSITION_Y) {
-      dmLogWarning("Light Y position out of bounds. Clamping to [%f, %f].", LIGHT_MIN_POSITION_Y, LIGHT_MAX_POSITION_Y);
+      dmLogWarning("Light Y position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION_Y, LIGHT_MAX_POSITION_Y);
       y = fmax(LIGHT_MIN_POSITION_Y, fmin(y, LIGHT_MAX_POSITION_Y));
     }
 
     if (z < LIGHT_MIN_POSITION_Z || z > LIGHT_MAX_POSITION_Z) {
-      dmLogWarning("Light Z position out of bounds. Clamping to [%f, %f].", LIGHT_MIN_POSITION_Z, LIGHT_MAX_POSITION_Z);
+      dmLogWarning("Light Z position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION_Z, LIGHT_MAX_POSITION_Z);
       z = fmax(LIGHT_MIN_POSITION_Z, fmin(z, LIGHT_MAX_POSITION_Z));
     }
 
@@ -189,7 +189,7 @@ inline void LightSetColor(Light* light, float r, float g, float b, float brightn
 
 inline void LightSetRadius(Light* light, float newRadius) {
     if (newRadius < 0.0f || newRadius > LIGHT_RADIUS_MAX) {
-        dmLogWarning("Light radius out of bounds. Clamping to [0, %d].", LIGHT_RADIUS_MAX);
+        dmLogWarning("Light radius out of bounds. Clamping to [0, %f].", LIGHT_RADIUS_MAX);
         newRadius = fmax(0.0f, fmin(newRadius, (float)LIGHT_RADIUS_MAX));
     }
 
