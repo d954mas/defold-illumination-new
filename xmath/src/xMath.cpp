@@ -672,7 +672,7 @@ static void xMathLuaInit(lua_State* L)
 static dmExtension::Result xMathInitialize(dmExtension::Params* params)
 {
     xMathLuaInit(params->m_L);
-    dmLogError("Registered %s Extension\n", MODULE_NAME);
+    dmLogInfo("Registered %s Extension\n", MODULE_NAME);
     return dmExtension::RESULT_OK;
 }
 
