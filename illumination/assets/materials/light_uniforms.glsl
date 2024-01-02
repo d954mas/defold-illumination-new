@@ -41,10 +41,10 @@ highp vec4 getData(highp int index) {
 }
 
 highp float DecodeRGBAToFloatPosition(highp vec4 encoded) {
-    encoded.rgb *= 255.0;//
-    highp float intPart = round(encoded.r * 256.0 * 256.0) + round(encoded.g * 256.0) + round(encoded.b);
+    encoded.rgb *= 63.0;//
+    highp float intPart = round(encoded.r) * 64.0 * 64.0 + round(encoded.g) * 64.0 + round(encoded.b);
     highp float fracPart = encoded.a;
-    return intPart - 8388608.0 + fracPart;
+    return intPart - 131072.0 + fracPart;
     return fracPart;
 }
 

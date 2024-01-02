@@ -92,25 +92,30 @@ inline void EncodeIntToRGBA(int value, uint8_t* output) {
 }
 
 inline void EncodeFloatPositionToRGBA(float value, uint8_t* output) {
-    // Ensure the value is within the 24-bit integer range
-    assert(value >= -8388608.0f && value <= 8388607.0f);
+     assert(value >= -131072.0f && value <= 131071.0f);
+
     // Extract the integer and fractional parts of the float
     int intValue = static_cast<int>(value);
     float fractionalPart = value - intValue;
-    uint32_t uintValue=intValue+8388608;//make integer part always [0,16777215]
 
-    //encode negative value.
-    if (fractionalPart<0.0f){
-        uintValue-=1;
-        fractionalPart+=1.0f;
+    // Adjust for negative values
+    if (fractionalPart < 0.0f) {
+        intValue -= 1;
+        fractionalPart += 1.0f;
     }
 
-    // Encode the integer part into the RGB channels
-    output[0] = static_cast<uint8_t>((uintValue >> 16) & 0xFF); // Red channel
-    output[1] = static_cast<uint8_t>((uintValue >> 8) & 0xFF);  // Green channel
-    output[2] = static_cast<uint8_t>(uintValue & 0xFF);         // Blue channel
+    // Shift the integer part to ensure it is positive and fits within 18 bits
+    uint32_t uintValue = static_cast<uint32_t>(intValue + 131072); // 262144 = 2^18 / 2
 
-    // Encode the fractional part into the Alpha channel
+    // Ensure the integer part fits within 18 bits (6 bits per channel)
+    assert(uintValue <= 262143); // 262143 = 2^18 - 1
+
+    // Encode the integer part into the RGB channels (6 bits per channel)
+    output[0] = round((uintValue >> 12) & 0x3F)/63.0*255; // Red channel (bits 17-12)
+    output[1] = round((uintValue >> 6) & 0x3F)/63.0*255;  // Green channel (bits 11-6)
+    output[2] = round(uintValue & 0x3F)/63.0*255;         // Blue channel (bits 5-0)
+
+    // Encode the fractional part into the Alpha channel (8 bits)
     output[3] = static_cast<uint8_t>(round(fractionalPart * 255.0f));
 }
 
