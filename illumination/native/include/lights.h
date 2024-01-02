@@ -12,10 +12,10 @@
 
 #define LIGHT_META "IlluminationLights.Light"
 #define LIGHT_PIXELS 6 // pixels per light
-#define LIGHT_RADIUS_MAX 255.0 // stored as integer and fractal part in different pixels
+#define LIGHT_RADIUS_MAX 64.0 // stored as integer and fractal part in different pixels
 
-#define LIGHT_MIN_POSITION -8388608.0f
-#define LIGHT_MAX_POSITION 8388607.0f
+#define LIGHT_MIN_POSITION -131072.0f
+#define LIGHT_MAX_POSITION 131071.0f
 
 #define M_PI  3.14159265358979323846  /* pi */
 
@@ -284,7 +284,7 @@ inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) 
     values+=stride;
 
 
-    values[0] = light->radius;/// LIGHT_RADIUS_MAX * 255; already from 0 to 255
+    values[0] = light->radius/ LIGHT_RADIUS_MAX * 255;
     values[1] = light->smoothness * 255;
     values[2] = light->specular * 255;
     values[3] = light->cutoff < 1 ? (cos(light->cutoff * M_PI) + 1) / 2 * 255 : 255;

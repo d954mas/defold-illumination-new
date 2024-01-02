@@ -76,7 +76,7 @@ void main() {
 
 
         vec3 lightPosition = vec3(x, y, z);
-        float lightRadius = round(lightData.x*255.0)+spotDirectionData.w;//fractional and integer part in different pixels
+        float lightRadius = round(lightData.x*LIGHT_RADIUS_MAX)+spotDirectionData.w;//fractional and integer part in different pixels
         float lightSmoothness = lightData.y;
         float lightSpecular = lightData.z;
         float lightCutoff = lightData.w;
