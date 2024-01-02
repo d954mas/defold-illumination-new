@@ -23,8 +23,7 @@ uniform lowp vec4 fog_color;
 uniform highp vec4 fog;
 
 uniform highp vec4 light_texture_data;
-uniform highp vec4 lights_data; //lights count,radius_max,x_min,xmax
-uniform highp vec4 lights_data2; //y_min,y_max,z_min,z_max
+uniform highp vec4 lights_data; //lights count
 uniform highp vec4 lights_camera_data; //near, far
 uniform highp vec4 clusters_data; //x_slice, y_slice, z_slice, max_lights_per_cluster
 uniform highp vec4 screen_size;
@@ -39,6 +38,14 @@ highp vec4 getData(highp int index) {
 
     // Sample the texture at the normalized coordinates
     return texture2D(DATA_TEXTURE, normalizedCoords);
+}
+
+highp float DecodeRGBAToFloatPosition(highp vec4 encoded) {
+    encoded.rgb *= 255.0;//
+    highp float intPart = round(encoded.r * 256.0 * 256.0) + round(encoded.g * 256.0) + round(encoded.b);
+    highp float fracPart = encoded.a;
+    return intPart - 8388608.0 + fracPart;
+    return fracPart;
 }
 
 const float phong_shininess = 16.0;

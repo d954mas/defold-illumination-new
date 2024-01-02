@@ -31,10 +31,6 @@ void main() {
     vec3 ambient = ambient_color.rgb * ambient_color.w;
     illuminance_color = illuminance_color + ambient;
 
-    float axis_x = lights_data.w-lights_data.z+1.0;
-    float axis_y = lights_data2.y-lights_data2.x+1.0;
-    float axis_z = lights_data2.w-lights_data2.z+1.0;
-
 
     highp float xStride = screen_size.x/clusters_data.x;
     highp float yStride = screen_size.y/clusters_data.y;
@@ -71,15 +67,16 @@ void main() {
         //}
 
         highp int lightIndex = lightIdx * LIGHT_DATA_PIXELS;
-        float x = lights_data.z + rgba_to_float(getData(lightIndex))*axis_x;
-        float y = lights_data2.x + rgba_to_float(getData(lightIndex+1))*axis_y;
-        float z = lights_data2.z + rgba_to_float(getData(lightIndex+2))*axis_z;
-        // vec3 spotDirection = getData(lightIndex+3).xyz;
+        float x = DecodeRGBAToFloatPosition(getData(lightIndex));
+        float y = DecodeRGBAToFloatPosition(getData(lightIndex+1));
+        float z = DecodeRGBAToFloatPosition(getData(lightIndex+2));
+        vec4 spotDirectionData = getData(lightIndex+3);
         vec4 lightColorData = getData(lightIndex+4);
         vec4 lightData = getData(lightIndex+5);
 
+
         vec3 lightPosition = vec3(x, y, z);
-        float lightRadius = lightData.x*lights_data.y;
+        float lightRadius = round(lightData.x*255.0)+spotDirectionData.w;//fractional and integer part in different pixels
         float lightSmoothness = lightData.y;
         float lightSpecular = lightData.z;
         float lightCutoff = lightData.w;
@@ -99,7 +96,7 @@ void main() {
 
 
         if (lightCutoff < 1.0) {
-            vec3 spotDirection = getData(lightIndex+3).xyz* 2.0 - vec3(1.0);
+            vec3 spotDirection = spotDirectionData.xyz* 2.0 - vec3(1.0);
             float spot_theta = dot(lightDirection, normalize(spotDirection));
 
             float spot_cutoff = lightCutoff * 2.0 - 1.0;

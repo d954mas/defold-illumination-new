@@ -241,7 +241,6 @@ function Lights:initialize()
 
 	self.light_texture_data = vmath.vector4()
 	self.lights_data = vmath.vector4(0, 0, 0, 0)
-	self.lights_data2 = vmath.vector4()
 	self.lights_camera_data = vmath.vector4()--near, far
 	self.clusters_data = vmath.vector4() -- x_slices, y_slices, z_slices, max_lights_per_cluster
 	self.screen_size = vmath.vector4()
@@ -306,11 +305,6 @@ function Lights:init(shadow_texture_resource, data_texture_resource)
 	self.light_texture_data.x, self.light_texture_data.y = illumination.lights_get_texture_size()
 
 	self.lights_data.x = illumination.lights_get_max_lights()
-	self.lights_data.y = illumination.lights_get_max_radius()
-	self.lights_data.z, self.lights_data.w = illumination.lights_get_borders_x()
-
-	self.lights_data2.x, self.lights_data2.y = illumination.lights_get_borders_y()
-	self.lights_data2.z, self.lights_data2.w = illumination.lights_get_borders_z()
 
 	self.clusters_data.x = illumination.lights_get_x_slice()
 	self.clusters_data.y = illumination.lights_get_y_slice()
@@ -320,7 +314,6 @@ function Lights:init(shadow_texture_resource, data_texture_resource)
 	for _, constant in ipairs(self.constants) do
 		constant.light_texture_data = self.light_texture_data
 		constant.lights_data = self.lights_data
-		constant.lights_data2 = self.lights_data2
 		constant.clusters_data = self.clusters_data
 		constant.lights_camera_data = self.lights_camera_data
 	end
@@ -417,7 +410,6 @@ function Lights:add_constants(constant)
 	constant.fog_color = self.fog_color
 	constant.shadow_params = self.shadow_params
 	constant.lights_data = self.lights_data
-	constant.lights_data2 = self.lights_data2
 	constant.clusters_data = self.clusters_data
 	constant.light_texture_data = self.light_texture_data
 	constant.screen_size = self.screen_size

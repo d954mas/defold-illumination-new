@@ -12,15 +12,11 @@
 
 #define LIGHT_META "IlluminationLights.Light"
 #define LIGHT_PIXELS 6 // pixels per light
-#define LIGHT_RADIUS_MAX 64.0 // store in r value of pixel. Mb store as rgba value for better precision?
+#define LIGHT_RADIUS_MAX 255.0 // stored as integer and fractal part in different pixels
 
-#define LIGHT_MIN_POSITION_X -511
-#define LIGHT_MAX_POSITION_X 512
-#define LIGHT_MIN_POSITION_Y -511
-#define LIGHT_MAX_POSITION_Y 512
-#define LIGHT_MIN_POSITION_Z -511
-#define LIGHT_MAX_POSITION_Z 512
-#define LIGHT_AXIS_CAPACITY 1024 //[-511 512]
+#define LIGHT_MIN_POSITION -8388608.0f
+#define LIGHT_MAX_POSITION 8388607.0f
+
 #define M_PI  3.14159265358979323846  /* pi */
 
 
@@ -88,6 +84,35 @@ inline dmVMath::Vector4 EncodeFloatRGBA(float v, float min, float max){
     return enc;
 }
 
+inline void EncodeIntToRGBA(int value, uint8_t* output) {
+    output[0] = static_cast<uint8_t>((value >> 24) & 0xFF); // Red
+    output[1] = static_cast<uint8_t>((value >> 16) & 0xFF); // Green
+    output[2] = static_cast<uint8_t>((value >> 8) & 0xFF);  // Blue
+    output[3] = static_cast<uint8_t>(value & 0xFF);         // Alpha
+}
+
+inline void EncodeFloatPositionToRGBA(float value, uint8_t* output) {
+    // Ensure the value is within the 24-bit integer range
+    assert(value >= -8388608.0f && value <= 8388607.0f);
+    // Extract the integer and fractional parts of the float
+    int intValue = static_cast<int>(value);
+    float fractionalPart = value - intValue;
+    uint32_t uintValue=intValue+8388608;//make integer part always [0,16777215]
+
+    //encode negative value.
+    if (fractionalPart<0.0f){
+        uintValue-=1;
+        fractionalPart+=1.0f;
+    }
+
+    // Encode the integer part into the RGB channels
+    output[0] = static_cast<uint8_t>((uintValue >> 16) & 0xFF); // Red channel
+    output[1] = static_cast<uint8_t>((uintValue >> 8) & 0xFF);  // Green channel
+    output[2] = static_cast<uint8_t>(uintValue & 0xFF);         // Blue channel
+
+    // Encode the fractional part into the Alpha channel
+    output[3] = static_cast<uint8_t>(round(fractionalPart * 255.0f));
+}
 
 
 struct Light {
@@ -149,19 +174,19 @@ inline void LightReset(Light* light){
 
 //region Light
 inline void LightSetPosition(Light* light, float x, float y, float z) {
-    if (x < LIGHT_MIN_POSITION_X || x > LIGHT_MAX_POSITION_X) {
-      dmLogWarning("Light X position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION_X, LIGHT_MAX_POSITION_X);
-      x = fmax(LIGHT_MIN_POSITION_X, fmin(x, LIGHT_MAX_POSITION_X));
+    if (x < LIGHT_MIN_POSITION || x > LIGHT_MAX_POSITION) {
+      dmLogWarning("Light X position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
+      x = fmax(LIGHT_MIN_POSITION, fmin(x, LIGHT_MAX_POSITION));
     }
 
-    if (y < LIGHT_MIN_POSITION_Y || y > LIGHT_MAX_POSITION_Y) {
-      dmLogWarning("Light Y position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION_Y, LIGHT_MAX_POSITION_Y);
-      y = fmax(LIGHT_MIN_POSITION_Y, fmin(y, LIGHT_MAX_POSITION_Y));
+    if (y < LIGHT_MIN_POSITION || y > LIGHT_MAX_POSITION) {
+      dmLogWarning("Light Y position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
+      y = fmax(LIGHT_MIN_POSITION, fmin(y, LIGHT_MAX_POSITION));
     }
 
-    if (z < LIGHT_MIN_POSITION_Z || z > LIGHT_MAX_POSITION_Z) {
-      dmLogWarning("Light Z position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION_Z, LIGHT_MAX_POSITION_Z);
-      z = fmax(LIGHT_MIN_POSITION_Z, fmin(z, LIGHT_MAX_POSITION_Z));
+    if (z < LIGHT_MIN_POSITION || z > LIGHT_MAX_POSITION) {
+      dmLogWarning("Light Z position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
+      z = fmax(LIGHT_MIN_POSITION, fmin(z, LIGHT_MAX_POSITION));
     }
 
 
@@ -233,24 +258,18 @@ inline bool LightIsAddLightToScene(Light* light) {
 }
 
 inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) {
-    dmVMath::Vector4 posX = EncodeFloatRGBA(light->position.getX(),LIGHT_MIN_POSITION_X,LIGHT_MAX_POSITION_X+1)*255;
-    values[0] = posX.getX();values[1] = posX.getY();values[2] = posX.getZ();values[3] = posX.getW();
+    EncodeFloatPositionToRGBA(light->position.getX(), values);
     values+=stride;
-
-    //dmLogInfo("light:%d x:%f y:%f z:%f",light->index,light->position.getX(),light->position.getY(),light->position.getZ());
-
-    dmVMath::Vector4 posY = EncodeFloatRGBA(light->position.getY(),LIGHT_MIN_POSITION_Y,LIGHT_MAX_POSITION_Y+1)*255;
-    values[0] = posY.getX();values[1] = posY.getY();values[2] = posY.getZ();values[3] = posY.getW();
+    EncodeFloatPositionToRGBA(light->position.getY(), values);
     values+=stride;
-
-    dmVMath::Vector4 posZ = EncodeFloatRGBA(light->position.getZ(),LIGHT_MIN_POSITION_Z,LIGHT_MAX_POSITION_Z+1)*255;
-    values[0] = posZ.getX();values[1] = posZ.getY();values[2] = posZ.getZ();values[3] = posZ.getW();
+    EncodeFloatPositionToRGBA(light->position.getZ(), values);
     values+=stride;
 
     values[0] = (light->direction.getX() + 1)/2*255;
     values[1] = (light->direction.getY() + 1)/2*255;
     values[2] = (light->direction.getZ() + 1)/2*255;
-    // values[3] = 0 //empty field
+    // values[3] = 0 //empty field use it to handle radius fractional part
+    values[3] = (light->radius - static_cast<int>(light->radius))*255;
     values+=stride;
 
     values[0] = light->color.getX()*255;
@@ -260,7 +279,7 @@ inline void LightWriteToBuffer(Light* light, uint8_t* values,  uint32_t stride) 
     values+=stride;
 
 
-    values[0] = light->radius / LIGHT_RADIUS_MAX * 255;
+    values[0] = light->radius;/// LIGHT_RADIUS_MAX * 255; already from 0 to 255
     values[1] = light->smoothness * 255;
     values[2] = light->specular * 255;
     values[3] = light->cutoff < 1 ? (cos(light->cutoff * M_PI) + 1) / 2 * 255 : 255;
@@ -1087,23 +1106,23 @@ static int LuaLightsManagerGetMaxRadius(lua_State* L) {
 static int LuaLightsManagerGetBordersX(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 2);
     check_arg_count(L, 0);
-    lua_pushnumber(L,LIGHT_MIN_POSITION_X);
-    lua_pushnumber(L,LIGHT_MAX_POSITION_X);
+    lua_pushnumber(L,LIGHT_MIN_POSITION);
+    lua_pushnumber(L,LIGHT_MAX_POSITION);
     return 2;
 }
 static int LuaLightsManagerGetBordersY(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 2);
     check_arg_count(L, 0);
-    lua_pushnumber(L,LIGHT_MIN_POSITION_Y);
-    lua_pushnumber(L,LIGHT_MAX_POSITION_Y);
+    lua_pushnumber(L,LIGHT_MIN_POSITION);
+    lua_pushnumber(L,LIGHT_MAX_POSITION);
     return 2;
 }
 
 static int LuaLightsManagerGetBordersZ(lua_State* L) {
     DM_LUA_STACK_CHECK(L, 2);
     check_arg_count(L, 0);
-    lua_pushnumber(L,LIGHT_MIN_POSITION_Z);
-    lua_pushnumber(L,LIGHT_MAX_POSITION_Z);
+    lua_pushnumber(L,LIGHT_MIN_POSITION);
+    lua_pushnumber(L,LIGHT_MAX_POSITION);
     return 2;
 }
 
