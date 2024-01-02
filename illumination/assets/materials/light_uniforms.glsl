@@ -2,7 +2,7 @@
 #define light_fp
 
 #define LIGHT_DATA_PIXELS 6
-#define LIGHT_RADIUS_MAX 64.0
+#define LIGHT_RADIUS_MAX 63.0
 /*
 LIGHT DATA 6 pixels
 position.x -> rgba

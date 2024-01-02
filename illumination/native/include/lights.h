@@ -12,7 +12,7 @@
 
 #define LIGHT_META "IlluminationLights.Light"
 #define LIGHT_PIXELS 6 // pixels per light
-#define LIGHT_RADIUS_MAX 64.0 // stored as integer and fractal part in different pixels
+#define LIGHT_RADIUS_MAX 63.0 // stored as integer and fractal part in different pixels
 
 #define LIGHT_MIN_POSITION -131072.0f
 #define LIGHT_MAX_POSITION 131071.0f
