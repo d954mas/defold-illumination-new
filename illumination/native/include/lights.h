@@ -180,17 +180,17 @@ inline void LightReset(Light* light){
 //region Light
 inline void LightSetPosition(Light* light, float x, float y, float z) {
     if (x < LIGHT_MIN_POSITION || x > LIGHT_MAX_POSITION) {
-      dmLogWarning("Light X position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
+      dmLogWarning("Light X position out of bounds. Clamping to [%f, %f].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
       x = fmax(LIGHT_MIN_POSITION, fmin(x, LIGHT_MAX_POSITION));
     }
 
     if (y < LIGHT_MIN_POSITION || y > LIGHT_MAX_POSITION) {
-      dmLogWarning("Light Y position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
+      dmLogWarning("Light Y position out of bounds. Clamping to [%f, %f].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
       y = fmax(LIGHT_MIN_POSITION, fmin(y, LIGHT_MAX_POSITION));
     }
 
     if (z < LIGHT_MIN_POSITION || z > LIGHT_MAX_POSITION) {
-      dmLogWarning("Light Z position out of bounds. Clamping to [%d, %d].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
+      dmLogWarning("Light Z position out of bounds. Clamping to [%f, %f].", LIGHT_MIN_POSITION, LIGHT_MAX_POSITION);
       z = fmax(LIGHT_MIN_POSITION, fmin(z, LIGHT_MAX_POSITION));
     }
 
@@ -716,8 +716,6 @@ inline void LightsManagerUpdateLights(lua_State* L,LightsManager* lightsManager)
 
     //https://github.com/LanLou123/WebGL-Clustered-Deferred-Forward-Plus-Rendering/blob/master/src/renderers/base.js
     lightsManager->debugVisibleLights = 0;
-    float ystart = -lightsManager->halfY;
-    float xstart = -lightsManager->halfY * lightsManager->cameraAspect;
 
     for (int i = 0; i < lightsManager->lightsVisibleInWorld.Size(); ++i) {
         Light* l = lightsManager->lightsVisibleInWorld[i];
