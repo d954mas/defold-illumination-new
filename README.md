@@ -1,4 +1,4 @@
-![logo](https://user-images.githubusercontent.com/4752473/185670169-8b27dcab-a6a9-4a9d-b1a7-ab4b136fdd65.jpg)
+[<img src="/images/logo.png">]
 
 # Illumination
 

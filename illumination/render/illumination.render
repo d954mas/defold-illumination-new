@@ -3,3 +3,7 @@ materials {
   name: "shadow"
   material: "/illumination/assets/materials/shadow/shadow.material"
 }
+materials {
+  name: "debug_clusters"
+  material: "/illumination/assets/materials/debug_clusters.material"
+}

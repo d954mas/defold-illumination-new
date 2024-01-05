@@ -80,7 +80,9 @@ function update(self)
 	render.draw(self.scene.predicate, self.draw_opts)
 	ILLUMINATION:draw_finish()
 
-	ILLUMINATION:draw_debug()
+	if not ILLUMINATION.debug_clusters then
+		ILLUMINATION:draw_debug()
+	end
 
 
 	-- debug

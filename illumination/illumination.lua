@@ -253,6 +253,7 @@ function Lights:initialize()
 	}
 
 	self.debug = false
+	self.debug_clusters = false
 	self.enable_lights = false
 	self.enable_shadow = false
 
@@ -389,15 +390,27 @@ function Lights:draw_debug_planes()
 end
 
 function Lights:draw_begin()
+	if self.debug_clusters then
+		render.enable_material("debug_clusters")
+		return
+	end
 	render.enable_texture(1, self.shadow.rt or self.shadow.rt_no_shadow, render.BUFFER_COLOR_BIT)
 end
 
 function Lights:draw_finish()
+	if self.debug_clusters then
+		render.disable_material()
+		return
+	end
 	render.disable_texture(1)
 end
 
 function Lights:set_debug(debug)
 	self.debug = debug
+end
+
+function Lights:set_debug_clusters(debug)
+	self.debug_clusters = debug
 end
 
 function Lights:add_constants(constant)
