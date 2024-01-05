@@ -1,0 +1,30 @@
+clang++ -DDLIB_LOG_DOMAIN="ILLUMINATION" -DDDF_EXPOSE_DESCRIPTORS -DDM_PLATFORM_LINUX -D__STDC_LIMIT_MACROS -DDM_RELEASE  -g -O2 -D__STDC_LIMIT_MACROS -Wall -Werror=format -fno-exceptions -fPIC -fvisibility=hidden  -Iupload/illumination/native/include/ -Ibuild/native/ -Iupload/  -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//sdk/include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//ext/include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//include/x86_64-linux  upload/illumination/native/src/extension.cpp -c -o build/extension.cpp_0.o
+
+llvm-ar rcs /tmp/job16174472900838177549/build/libIllumination_1.a build/extension.cpp_0.o 
+
+clang++ -DDLIB_LOG_DOMAIN="CHRONOS" -DDDF_EXPOSE_DESCRIPTORS -DDM_PLATFORM_LINUX -D__STDC_LIMIT_MACROS -DDM_RELEASE  -g -O2 -D__STDC_LIMIT_MACROS -Wall -Werror=format -fno-exceptions -fPIC -fvisibility=hidden  -Ibuild/chronos/ -Iupload/ -Iupload/illumination/native/include/  -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//sdk/include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//ext/include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//include/x86_64-linux  upload/chronos/src/extension.cpp -c -o build/extension.cpp_2.o
+
+llvm-ar rcs /tmp/job16174472900838177549/build/libchronos_3.a build/extension.cpp_2.o 
+
+clang++ -DDLIB_LOG_DOMAIN="XMATH" -DDDF_EXPOSE_DESCRIPTORS -DDM_PLATFORM_LINUX -D__STDC_LIMIT_MACROS -DDM_RELEASE  -g -O2 -D__STDC_LIMIT_MACROS -Wall -Werror=format -fno-exceptions -fPIC -fvisibility=hidden  -Ibuild/xmath/ -Iupload/ -Iupload/illumination/native/include/  -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//sdk/include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//ext/include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//include/x86_64-linux  upload/xmath/src/xMath.cpp -c -o build/xMath.cpp_4.o
+upload/xmath/src/xMath.cpp:3:9: warning: 'DLIB_LOG_DOMAIN' macro redefined [-Wmacro-redefined]
+    3 | #define DLIB_LOG_DOMAIN "xMath"
+      |         ^
+<command line>:1:9: note: previous definition is here
+    1 | #define DLIB_LOG_DOMAIN "XMATH"
+      |         ^
+upload/xmath/src/xMath.cpp:300:15: warning: variable 'out' set but not used [-Wunused-but-set-variable]
+  300 |         float out = luaL_checknumber(L, 1);
+      |               ^
+2 warnings generated.
+
+llvm-ar rcs /tmp/job16174472900838177549/build/libxMath_5.a build/xMath.cpp_4.o 
+
+clang++ -DDLIB_LOG_DOMAIN="UNKNOWN" -DDDF_EXPOSE_DESCRIPTORS -DDM_PLATFORM_LINUX -D__STDC_LIMIT_MACROS -DDM_RELEASE  -g -O2 -D__STDC_LIMIT_MACROS -Wall -Werror=format -fno-exceptions -fPIC -fvisibility=hidden   -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//sdk/include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//ext/include -I/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//include/x86_64-linux  build/main.cpp -c -o build/main_tmp6.o
+
+clang++ build/main_tmp6.o  -o build/dmengine -g -O2  -L/tmp/job16174472900838177549/build  -L/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//lib/x86_64-linux -L/var/extender/sdk/4e156b7cf37a380122aada30dacbf2b590ead76b/defoldsdk//ext/lib/x86_64-linux  -Wl,-Bstatic -Wl,--start-group -lmbedtls -lzip -lwebviewext -lfacebookext -liapext -lpushext -liacext -lgameobject -lddf -lresource -lgamesys -lgraphics -lgraphics_transcoder_basisu -lbasis_transcoder -lphysics -lBulletDynamics -lBulletCollision -lLinearMath -lBox2D -lrender -lscript -lluajit-5.1 -lextension -lhid -linput -lparticle -lrig -ldlib -ldmglfw -lgui -lcrashext -lliveupdate -lsound -ltremolo  -lengine_release -lengine_service_null -lprofile_null -lremotery_null -lprofilerext_null -lrecord_null  -lxMath_5 -lchronos_3 -lIllumination_1  -Wl,--end-group -Wl,-Bdynamic -Wl,-rpath=$ORIGIN,--enable-new-dtags  -lopenal -lXext -lX11 -lXi -lGL -lGLU -lpthread -lm -ldl 
+
+cp build/dmengine build/dmengine_unstripped
+
+strip build/dmengine
+

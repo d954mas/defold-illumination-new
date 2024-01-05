@@ -6,7 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="d3c0949d-87f0-480e-bb31-9484ef16be7c" name="Changes" comment="native clusters">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/main.gui" beforeDir="false" afterPath="$PROJECT_DIR$/example/main.gui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/illumination.lua" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/illumination.lua" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/native/include/lights.h" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/include/lights.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/native/src/extension.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/native/src/extension.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/illumination/render/illumination.render_script" beforeDir="false" afterPath="$PROJECT_DIR$/illumination/render/illumination.render_script" afterDir="false" />
     </list>
     <list id="32e5cb44-c00a-42d9-8100-60d4880106b6" name="New changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,7 +21,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="another_clusters" />
+        <entry key="$PROJECT_DIR$" value="a23fd832b7b2fdbbdbff380bd6ae5e9bb3c67028" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -51,38 +55,6 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="JetRunConfigurationType">
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
-      <option name="filePath" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="illumination.lua" type="lua.app" factoryName="Lua Application" temporary="true">
       <option name="program" value="lua.exe" />
       <option name="file" value="illumination/illumination.lua" />
@@ -95,8 +67,6 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Lua Application.illumination.lua" />
-        <item itemvalue="Lua Application.illumination.lua" />
         <item itemvalue="Lua Application.illumination.lua" />
       </list>
     </recent_temporary>
@@ -114,6 +84,9 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
+    <MESSAGE value="add axis capacity" />
+    <MESSAGE value="add light data to texture" />
+    <MESSAGE value="light data" />
     <MESSAGE value="fixed html" />
     <MESSAGE value="reduce texture size" />
     <MESSAGE value="increase mesh max_count" />
@@ -132,13 +105,10 @@
     <MESSAGE value="native light manager" />
     <MESSAGE value="write lights in texture" />
     <MESSAGE value="add ligths in clusters" />
+    <MESSAGE value="native clusters" />
     <MESSAGE value="remove texture" />
     <MESSAGE value="remove old logic" />
     <MESSAGE value="fixed" />
-    <MESSAGE value="wip" />
-    <MESSAGE value="native clusters" />
-    <MESSAGE value="fixed clusters" />
-    <MESSAGE value="optimize clusters" />
-    <option name="LAST_COMMIT_MESSAGE" value="optimize clusters" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed" />
   </component>
 </project>
