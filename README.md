@@ -1,6 +1,6 @@
-[<img src="/images/logo.png">]
-
 # Illumination
+
+<img src="/images/logo.png" width='720'>
 
 ## Overview
 
@@ -8,6 +8,8 @@ Mix of [defold-illumination](https://github.com/astrochili/defold-illumination) 
 This example contains ready-to-use forward shading lighting mixed with realtime shadow from one source (the sun)
 
 🎮 [Play HTML5 demo](https://d954mas.github.io/defold-illumination-new/) with 🔦 on the `E` key.
+
+ <img src="/images/base.png" width='480'> <img src="/images/clusters.png" width='480'>
 
 **Pros:**
 
